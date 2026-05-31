@@ -1,11 +1,12 @@
 {
-  "name": "BOYSIT",
+  "name": "boysit",
   "private": true,
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,prisma}\"",
+    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,prisma}\"",
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
@@ -13,12 +14,26 @@
     "turbo": "^2.9.16",
     "typescript": "5.9.2"
   },
+  "packageManager": "pnpm@9.0.0",
   "engines": {
     "node": ">=18"
   },
-  "packageManager": "npm@11.9.0",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+  "version": "1.0.0",
+  "description": "This Turborepo starter is maintained by the Turborepo core team.",
+  "main": "index.js",
+  "dependencies": {
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-only-warn": "^1.1.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-turbo": "^2.7.1",
+    "eslint-scope": "^8.4.0",
+    "eslint-visitor-keys": "^4.2.1",
+    "typescript-eslint": "^8.50.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
 }
