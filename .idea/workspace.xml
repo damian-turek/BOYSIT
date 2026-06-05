@@ -5,12 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d45295e9-da65-4635-868e-a85a79a0640c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/apps/api/app.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/apps/api/config/prisma.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/api/index.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/apps/api/tsconfig.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/app.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/app.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/apps/api/config/prisma.ts" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/config/prisma.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apps/api/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/apps/api/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/packages/database/prisma.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/packages/database/prisma.config.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pnpm-lock.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pnpm-lock.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -75,6 +75,20 @@
   &quot;fromUser&quot;: false
 }</component>
   <component name="ProjectId" id="3EVRlHXkT457KmKXSanH2E8JBGC" />
+  <component name="ProjectSessionTemplates">
+    <option name="inlineTemplate">
+      <template>
+        <option name="modeId" value="Ask" />
+        <option name="model">
+          <model>
+            <option name="modelType" value="builtin_family" />
+            <option name="modelValue" value="auto" />
+          </model>
+        </option>
+        <option name="targetType" value="LOCAL" />
+      </template>
+    </option>
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -88,7 +102,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "feat/backend-setup",
     "javascript.preferred.runtime.type.id": "node",
     "junie.onboarding.icon.badge.shown": "true",
     "last_opened_file_path": "/Users/damian/WebstormProjects/BOYSIT/packages/database",
@@ -132,7 +146,7 @@
       <workItem from="1780261900429" duration="4564000" />
       <workItem from="1780418307255" duration="67000" />
       <workItem from="1780431509094" duration="3626000" />
-      <workItem from="1780607663520" duration="7679000" />
+      <workItem from="1780607663520" duration="11148000" />
     </task>
     <servers />
   </component>

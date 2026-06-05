@@ -1,20 +1,18 @@
-const express = require("express");
-const cors = require("cors");
-
-const port = process.env.PORT || 5000;
+import express, { Request, Response } from "express";
+import cors from "cors";
+import helmet from "helmet";
 
 const app = express();
+
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-app.get("/health", (req, res) => {
+app.get("/health", (_req: Request, res: Response) => {
   res.json({
     status: "working",
-    message: "Serwer Express działa idealnie!",
+    message: "Serwer Express działa z app.ts!",
   });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Serwer wystartował na porcie: http://localhost:${PORT}`);
-});
+export default app;
