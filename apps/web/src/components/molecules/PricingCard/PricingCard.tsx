@@ -38,7 +38,7 @@ export const PricingCard = ({
   return (
     <div
       className={cn(
-        'p-6 md:p-8 w-full max-w-125 rounded-xl',
+        'p-6 md:p-8 w-full md:max-w-125 rounded-xl',
         label ? 'bg-primary' : 'bg-gray-05 border border-gray-100/8',
       )}
     >
