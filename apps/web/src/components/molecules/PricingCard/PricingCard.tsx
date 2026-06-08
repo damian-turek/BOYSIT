@@ -123,7 +123,7 @@ export const PricingCard = ({
         href={button.link}
         className={cn(
           'w-full',
-          label ? 'bg-white text-primary shadow-lg shadow-gray-100/30 hover:bg-[#F7F8F0]' : '',
+          label ? 'bg-white text-primary shadow-lg shadow-gray-100/30 hover:bg-gray-10' : '',
         )}
       >
         {button.label}
