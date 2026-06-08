@@ -10,11 +10,11 @@ export const getLayoutData = () => {
       },
       {
         label: 'How it works',
-        link: '#',
+        link: '#how-it-works-section',
       },
       {
         label: 'Pricing',
-        link: '#',
+        link: '#pricing-section',
       },
     ],
   } satisfies HeaderProps
