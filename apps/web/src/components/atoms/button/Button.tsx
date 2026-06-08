@@ -26,7 +26,7 @@ const buttonVariants = cva(
     compoundVariants: [
       { size: 'md', iconOnly: true, class: 'px-1.5 rounded-[12px]!' },
       { size: 'lg', iconOnly: true, class: 'px-[14px]' },
-      { size: 'lg', iconOnly: false, variant: 'primary', class: 'shadow-lg shadow-primary/50 ' },
+      { size: 'lg', iconOnly: false, variant: 'primary', class: 'shadow-lg shadow-primary/50' },
     ],
     defaultVariants: {
       variant: 'primary',

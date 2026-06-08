@@ -2,7 +2,7 @@
 
 import { StaticImageData } from 'next/image'
 import { motion, Variants } from 'motion/react'
-import { Button } from '@/components/shared/atoms/button'
+import { Button } from '@/components/atoms/button'
 import { ReactSVG } from 'react-svg'
 
 export type HowItWorksProps = {

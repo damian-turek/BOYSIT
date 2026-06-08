@@ -1,4 +1,4 @@
-import { HeaderProps } from '@/components/HomePage/organisms/Nav/Header'
+import { HeaderProps } from '@/components/organisms/Nav/Header'
 
 export const getLayoutData = () => {
   const HEADER_DATA = {
