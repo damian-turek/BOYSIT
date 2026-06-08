@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { motion } from 'motion/react'
 import { Button } from '@/components/shared/atoms/button'
 import NightIcon from '@/assets/icons/night.svg'
+import SunIcon from '@/assets/icons/sun.svg'
 import Logo from '@/assets/icons/logo.svg'
 import { useTranslations } from 'next-intl'
 
@@ -24,8 +25,17 @@ export const Header = ({ name, nav }: HeaderProps) => {
   const t = useTranslations('Header')
 
   useEffect(() => {
-    const isDarkTheme = document.documentElement.classList.contains('dark')
-    setIsDark(isDarkTheme)
+    const savedTheme = localStorage.getItem('theme')
+
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      document.documentElement.classList.add('dark')
+      setIsDark(true)
+    } else {
+      document.documentElement.classList.remove('dark')
+      setIsDark(false)
+    }
   }, [])
 
   useEffect(() => {
@@ -107,10 +117,10 @@ export const Header = ({ name, nav }: HeaderProps) => {
         <div className="hidden md:flex gap-2 items-center">
           <Button
             variant="text"
-            icon={NightIcon}
+            icon={isDark ? SunIcon : NightIcon}
             iconOnly
             onClick={toggleTheme}
-            className="hover:[&_svg_path]:stroke-primary!"
+            className={`hover:[&_svg_path]:stroke-primary! ${isDark ? '[&_svg_path]:stroke-primary' : ''}`}
           />
           <Button variant="text" className="hover:text-primary!">
             {t('login')}
@@ -120,10 +130,10 @@ export const Header = ({ name, nav }: HeaderProps) => {
         <div className="md:hidden flex gap-2 items-center">
           <Button
             variant="text"
-            icon={NightIcon}
+            icon={isDark ? SunIcon : NightIcon}
             iconOnly
             onClick={toggleTheme}
-            className="hover:[&_svg_path]:stroke-primary!"
+            className={`hover:[&_svg_path]:stroke-primary! ${isDark ? '[&_svg_path]:stroke-primary' : ''}`}
           />
           <Button
             variant="text"
