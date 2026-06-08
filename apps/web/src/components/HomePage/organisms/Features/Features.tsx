@@ -37,7 +37,7 @@ const itemVariants: Variants = {
 
 export const Features = ({ label, tiles, description, title }: FeaturesProps) => {
   return (
-    <section id="features-section" className="bg-background/30 py-20 md:py-28overflow-hidden">
+    <section id="features-section" className="bg-background/30">
       <div className="section-container flex flex-col items-center">
         <motion.p
           initial={{ opacity: 0, y: 10 }}
