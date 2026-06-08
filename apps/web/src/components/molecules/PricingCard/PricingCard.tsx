@@ -38,10 +38,21 @@ export const PricingCard = ({
   return (
     <div
       className={cn(
-        'p-6 md:p-8 w-full md:max-w-125 rounded-xl',
+        'relative p-6 md:p-8 w-full md:max-w-125 rounded-xl',
         label ? 'bg-primary' : 'bg-gray-05 border border-gray-100/8',
       )}
     >
+      {label && (
+        <label className="flex gap-1 items-center px-4 py-1.5 rounded-xl bg-white absolute shadow-md -top-4 transform -translate-x-1/2 left-1/2">
+          <ReactSVG
+            src={label.icon.src}
+            beforeInjection={(svg) => {
+              svg.setAttribute('class', 'w-3 h-3 [&_path]:stroke-primary')
+            }}
+          />
+          <p className="label-font text-primary" dangerouslySetInnerHTML={{ __html: label.text }} />
+        </label>
+      )}
       <div className="mb-8">
         <div className="flex gap-3 mb-4">
           <div className={cn('p-4 h-fit rounded-xl', label ? 'bg-white/20' : 'bg-gray-60/5')}>
@@ -121,10 +132,7 @@ export const PricingCard = ({
         variant={label ? 'primary' : 'secondary'}
         as="link"
         href={button.link}
-        className={cn(
-          'w-full',
-          label ? 'bg-white text-primary shadow-lg shadow-gray-100/30 hover:bg-gray-10' : '',
-        )}
+        className={cn('w-full', label ? 'bg-white text-primary shadow-lg hover:bg-gray-10' : '')}
       >
         {button.label}
       </Button>

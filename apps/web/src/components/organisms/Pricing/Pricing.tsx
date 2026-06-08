@@ -70,7 +70,7 @@ export const Pricing = ({ label, tiles, description, title }: PricingProps) => {
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: '-100px' }}
         transition={{ duration: 0.7, delay: 0.1 }}
-        className="flex flex-col md:flex-row items-center md:items-start gap-6"
+        className="flex flex-col w-full md:flex-row items-center md:items-start gap-6"
       >
         {tiles.map((tile) => (
           <PricingCard key={tile.name} {...tile} />
