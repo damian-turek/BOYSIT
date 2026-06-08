@@ -1,0 +1,10 @@
+{
+  "Header": {
+    "login": "Zaloguj się",
+    "getStarted": "Rozpocznij"
+  },
+  "Homepage": {
+    "title": "Witamy w aplikacji Web",
+    "description": "To jest główna strona aplikacji."
+  }
+}
