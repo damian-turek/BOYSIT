@@ -6,7 +6,7 @@ export const getLayoutData = () => {
     nav: [
       {
         label: 'Features',
-        link: '#',
+        link: '#features',
       },
       {
         label: 'How it works',

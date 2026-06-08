@@ -3,6 +3,7 @@
     --color-gray-60: #64748B;
     --color-primary: #2563EB;
     --color-background: #F1F3F8;
+    --color-white: #FFFFFF;
 
     --color-success-100: #116942;
     --color-success-50: #1ba769;
@@ -13,10 +14,11 @@
 }
 
 .dark {
-    --color-background: #0C0C14;
-    --color-gray-100: #F1F3F8;
+    --color-background: #0C0C10;
+    --color-gray-100: #F5F4EF;
     --color-gray-60: #94A3B8;
-    --color-primary: #3B82F6;
+    --color-primary: #F97316;
+    --color-white: #0C0C10;
 }
 
 @theme inline {

@@ -11,7 +11,7 @@ interface AppProvidersProps {
 
 export function AppProviders({ children, locale, messages }: AppProvidersProps) {
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider timeZone="Europe/Warsaw" locale={locale} messages={messages}>
       <div>{children}</div>
     </NextIntlClientProvider>
   )

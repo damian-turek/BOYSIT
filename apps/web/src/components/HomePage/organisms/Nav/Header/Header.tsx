@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter, usePathname } from 'next/navigation' // <-- Importy do obsługi routingu
 import { motion } from 'motion/react'
 import { Button } from '@/components/shared/atoms/button'
 import NightIcon from '@/assets/icons/night.svg'
+import SunIcon from '@/assets/icons/sun.svg'
 import Logo from '@/assets/icons/logo.svg'
 import { useTranslations } from 'next-intl'
 
@@ -23,9 +25,20 @@ export const Header = ({ name, nav }: HeaderProps) => {
   const [lastScrollY, setLastScrollY] = useState(0)
   const t = useTranslations('Header')
 
+  const router = useRouter()
+  const pathname = usePathname()
+
   useEffect(() => {
-    const isDarkTheme = document.documentElement.classList.contains('dark')
-    setIsDark(isDarkTheme)
+    const savedTheme = localStorage.getItem('theme')
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+
+    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+      document.documentElement.classList.add('dark')
+      setIsDark(true)
+    } else {
+      document.documentElement.classList.remove('dark')
+      setIsDark(false)
+    }
   }, [])
 
   useEffect(() => {
@@ -74,6 +87,32 @@ export const Header = ({ name, nav }: HeaderProps) => {
     }
   }
 
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
+    if (link.startsWith('#')) {
+      e.preventDefault()
+      setIsOpen(false)
+
+      const isHomepage = pathname === '/' || pathname === '/pl' || pathname === '/en'
+
+      if (isHomepage) {
+        const targetId = link === '#features' ? 'features-section' : link.replace('#', '')
+        const element = document.getElementById(targetId)
+
+        if (element) {
+          const elementPosition = element.getBoundingClientRect().top
+          const offsetPosition = elementPosition + window.scrollY
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: 'smooth',
+          })
+        }
+      } else {
+        router.push(`/${link}`)
+      }
+    }
+  }
+
   return (
     <motion.header
       animate={{ y: isVisible ? 0 : '-100%' }}
@@ -93,12 +132,14 @@ export const Header = ({ name, nav }: HeaderProps) => {
           />
         </Link>
 
+        {/* DESKTOP NAV */}
         <nav className="hidden md:flex gap-6 items-center">
           {nav.map((e) => (
             <Link
-              className="body-medium text-gray-60 hover:text-gray-100/90 transition-colors duration-200 ease-in-out"
+              className="body-medium text-gray-60 hover:text-gray-100/90 transition-colors duration-200 ease-in-out cursor-pointer"
               href={e.link}
               key={e.label}
+              onClick={(event) => handleNavClick(event, e.link)} // Obługa kliknięcia
               dangerouslySetInnerHTML={{ __html: e.label }}
             />
           ))}
@@ -107,23 +148,24 @@ export const Header = ({ name, nav }: HeaderProps) => {
         <div className="hidden md:flex gap-2 items-center">
           <Button
             variant="text"
-            icon={NightIcon}
+            icon={isDark ? SunIcon : NightIcon}
             iconOnly
             onClick={toggleTheme}
-            className="hover:[&_svg_path]:stroke-primary!"
+            className={`hover:[&_svg_path]:stroke-primary! ${isDark ? '[&_svg_path]:stroke-primary' : ''}`}
           />
           <Button variant="text" className="hover:text-primary!">
             {t('login')}
           </Button>
           <Button>{t('getStarted')} →</Button>
         </div>
+
         <div className="md:hidden flex gap-2 items-center">
           <Button
             variant="text"
-            icon={NightIcon}
+            icon={isDark ? SunIcon : NightIcon}
             iconOnly
             onClick={toggleTheme}
-            className="hover:[&_svg_path]:stroke-primary!"
+            className={`hover:[&_svg_path]:stroke-primary! ${isDark ? '[&_svg_path]:stroke-primary' : ''}`}
           />
           <Button
             variant="text"
@@ -134,11 +176,9 @@ export const Header = ({ name, nav }: HeaderProps) => {
             <span
               className={`w-4 h-[1.5px] bg-gray-100 transition-all duration-300 rounded-full ${isOpen ? 'rotate-45 translate-y-1.25' : ''}`}
             />
-
             <span
               className={`w-4 h-[1.5px] bg-gray-100 transition-all duration-300 rounded-full ${isOpen ? 'opacity-0' : ''}`}
             />
-
             <span
               className={`w-4 h-[1.5px] bg-gray-100 transition-all duration-300 rounded-full ${isOpen ? '-rotate-45 -translate-y-1.25' : ''}`}
             />
@@ -146,6 +186,7 @@ export const Header = ({ name, nav }: HeaderProps) => {
         </div>
       </div>
 
+      {/* MOBILE NAV */}
       <div
         className={`absolute top-16 left-0 w-full h-[calc(100vh-64px)] bg-white dark:bg-[#141420] border-t border-gray-60/10 px-4 pt-6 pb-10 flex flex-col justify-between transition-all duration-300 md:hidden z-40 ${
           isOpen ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-4 invisible'
@@ -154,10 +195,10 @@ export const Header = ({ name, nav }: HeaderProps) => {
         <nav className="flex flex-col items-center gap-4">
           {nav.map((e) => (
             <Link
-              className="font-medium text-gray-100 hover:text-primary transition-colors duration-200"
+              className="font-medium text-gray-100 hover:text-primary transition-colors duration-200 cursor-pointer"
               href={e.link}
               key={e.label}
-              onClick={() => setIsOpen(false)}
+              onClick={(event) => handleNavClick(event, e.link)} // Obsługa kliknięcia (zamknie menu automatycznie)
               dangerouslySetInnerHTML={{ __html: e.label }}
             />
           ))}

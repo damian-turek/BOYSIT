@@ -19,6 +19,7 @@
     "next-intl": "^4.13.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-svg": "^17.2.4",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.0"
   },

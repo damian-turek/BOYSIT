@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, Variants } from 'motion/react' // <-- Importujemy Variants dla TS
+import { motion, Variants } from 'motion/react'
 import { Button } from '@/components/shared/atoms/button'
 
 export type HeroProps = {
@@ -117,15 +117,14 @@ export const Hero = ({
 
         <motion.div variants={itemVariants} className="flex flex-col gap-4 items-center px-2">
           <p
-            className="label-font uppercase text-gray-60 tracking-[1.2px]"
-            generous-html={{ __html: questionsCategories.label }}
+            className="label-font-spaced uppercase text-gray-60 "
             dangerouslySetInnerHTML={{ __html: questionsCategories.label }}
           />
           <div className="flex flex-wrap gap-2 md:gap-3 justify-center max-w-270">
             {questionsCategories.categories.map((category) => (
               <div
                 key={category}
-                className="label-font px-3 py-2 rounded-lg border border-gray-60/20 bg-gray-60/5 backdrop-blur-xs text-gray-100"
+                className="label-font px-3 py-2 rounded-lg border border-gray-60/20 bg-gray-60/5 backdrop-blur-sm text-gray-100"
               >
                 {category}
               </div>
