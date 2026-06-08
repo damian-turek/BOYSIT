@@ -1,15 +1,17 @@
-import { Hero } from '@/components/HomePage/organisms/Hero'
+import { Hero } from '@/components/organisms/Hero'
+import { Features } from '@/components/organisms/Features'
+import { HowItWorks } from '@/components/organisms/HowItWorks'
 import { getHomePageData } from '@/parsers/HomePage/getHomePageData'
-import { Features } from '@/components/HomePage/organisms/Features'
-import { HowItWorks } from '@/components/HomePage/organisms/HowItWorks'
+import { Pricing } from '@/components/organisms/Pricing'
 
 export default function Home() {
-  const { HERO_DATA, FEATURES_DATA, HOW_IT_WORKS_DATA } = getHomePageData()
+  const { HERO_DATA, FEATURES_DATA, HOW_IT_WORKS_DATA, PRICING_DATA } = getHomePageData()
   return (
     <main>
       <Hero {...HERO_DATA} />
       <Features {...FEATURES_DATA} />
       <HowItWorks {...HOW_IT_WORKS_DATA} />
+      <Pricing {...PRICING_DATA} />
     </main>
   )
 }

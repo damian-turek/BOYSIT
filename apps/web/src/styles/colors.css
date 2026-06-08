@@ -1,6 +1,8 @@
 :root {
     --color-gray-100: #0C0C14;
     --color-gray-60: #64748B;
+    --color-gray-10: #E2E8F0;
+    --color-gray-05: #F7F8FC;
     --color-primary: #2563EB;
     --color-background: #F1F3F8;
     --color-white: #FFFFFF;
@@ -17,6 +19,8 @@
     --color-background: #0C0C10;
     --color-gray-100: #F5F4EF;
     --color-gray-60: #94A3B8;
+    --color-gray-05: #1E293B;
+    --color-gray-10: #334155;
     --color-primary: #F97316;
     --color-white: #0C0C10;
 }

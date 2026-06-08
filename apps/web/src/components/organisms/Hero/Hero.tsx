@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, Variants } from 'motion/react'
-import { Button } from '@/components/shared/atoms/button'
+import { Button } from '@/components/atoms/button'
 
 export type HeroProps = {
   title: string

@@ -1,5 +1,5 @@
-import { HeroProps } from '@/components/HomePage/organisms/Hero'
-import { FeaturesProps } from '@/components/HomePage/organisms/Features'
+import { HeroProps } from '@/components/organisms/Hero'
+import { FeaturesProps } from '@/components/organisms/Features'
 import CommunityIcon from '@/assets/icons/community.svg'
 import ExpertIcon from '@/assets/icons/expert.svg'
 import InterviewIcon from '@/assets/icons/interview.svg'
@@ -7,7 +7,10 @@ import BookIcon from '@/assets/icons/book.svg'
 import PowerIcon from '@/assets/icons/power.svg'
 import StatsIcon from '@/assets/icons/stats.svg'
 import FilterIcon from '@/assets/icons/filter.svg'
-import { HowItWorksProps } from '@/components/HomePage/organisms/HowItWorks'
+import StarIcon from '@/assets/icons/star.svg'
+import CrownIcon from '@/assets/icons/crown.svg'
+import { HowItWorksProps } from '@/components/organisms/HowItWorks'
+import { PricingProps } from '@/components/organisms/Pricing'
 
 export const getHomePageData = () => {
   const HERO_DATA = {
@@ -124,5 +127,102 @@ export const getHomePageData = () => {
     },
   } satisfies HowItWorksProps
 
-  return { HERO_DATA, FEATURES_DATA, HOW_IT_WORKS_DATA }
+  const PRICING_DATA = {
+    label: 'Pricing',
+    title: 'Choose Your Plan',
+    description: "Start for free and upgrade when you're ready to unlock your full potential",
+    tiles: [
+      {
+        name: 'Free',
+        icon: BookIcon,
+        price: '€0<span>/forever</span>',
+        text: 'Perfect for getting started with interview prep',
+        services: [
+          {
+            contains: true,
+            label: '<span>50 questions per month</span>',
+          },
+          {
+            contains: true,
+            label: 'Basic filters (stack, difficulty)',
+          },
+          {
+            contains: true,
+            label: 'Access to <span>3 specialties</span>',
+          },
+          {
+            contains: true,
+            label: 'Junior-level question answers',
+          },
+          {
+            label: 'Senior-level questions locked',
+          },
+          {
+            label: 'No community access',
+          },
+          {
+            label: 'Mock interview simulator',
+          },
+          {
+            label: 'Priority support',
+          },
+        ],
+        button: {
+          label: 'Get Started Free',
+          link: '#',
+        },
+      },
+      {
+        name: 'Pro',
+        icon: CrownIcon,
+        price: '€12<span>/month</span>',
+        text: 'Unlock everything you need to ace your interviews',
+        label: {
+          icon: StarIcon,
+          text: 'Most Popular',
+        },
+        info: 'Cancel anytime. No credit card required for trial.',
+        services: [
+          {
+            contains: true,
+            label: '<span>Unlimited questions</span>',
+          },
+          {
+            contains: true,
+            label: 'All filters & advanced sorting',
+          },
+          {
+            contains: true,
+            label: '<span>All specialties</span> unlocked',
+          },
+          {
+            contains: true,
+            label: 'Full expert answers for <span>all levels</span>',
+          },
+          {
+            contains: true,
+            label: 'Senior-level questions locked',
+          },
+          {
+            contains: true,
+            label: 'Discord & Telegram community',
+          },
+          {
+            contains: true,
+            label: 'Mock interview simulator',
+          },
+          {
+            contains: true,
+            label: 'Priority support',
+          },
+        ],
+        button: {
+          label: 'Try Free for 7 Days →',
+          link: '#',
+        },
+      },
+    ],
+  } satisfies PricingProps
+
+  return { HERO_DATA, FEATURES_DATA, HOW_IT_WORKS_DATA, PRICING_DATA }
 }

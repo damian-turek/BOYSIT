@@ -3,7 +3,7 @@ import React from 'react'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { AppProviders } from '@/providers'
-import { Header } from '@/components/HomePage/organisms/Nav/Header'
+import { Header } from '@/components/organisms/Nav/Header'
 import { getLayoutData } from '@/parsers/HomePage/getLayoutData'
 
 export default async function LocaleLayout({

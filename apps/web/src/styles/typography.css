@@ -6,6 +6,10 @@
     @apply text-[24px] font-bold leading-6 md:text-[36px] md:leading-10
 }
 
+@utility tiles-title-font {
+    @apply text-[24px] font-bold leading-8
+}
+
 @utility body-font {
     @apply text-[16px] font-normal leading-6.5 md:text-[18px] md:leading-7
 }

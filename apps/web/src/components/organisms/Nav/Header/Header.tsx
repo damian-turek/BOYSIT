@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter, usePathname } from 'next/navigation' // <-- Importy do obsługi routingu
+import { useRouter, usePathname } from 'next/navigation'
 import { motion } from 'motion/react'
-import { Button } from '@/components/shared/atoms/button'
+import { Button } from '@/components/atoms/button'
 import NightIcon from '@/assets/icons/night.svg'
 import SunIcon from '@/assets/icons/sun.svg'
 import Logo from '@/assets/icons/logo.svg'
@@ -132,7 +132,6 @@ export const Header = ({ name, nav }: HeaderProps) => {
           />
         </Link>
 
-        {/* DESKTOP NAV */}
         <nav className="hidden md:flex gap-6 items-center">
           {nav.map((e) => (
             <Link
@@ -186,7 +185,6 @@ export const Header = ({ name, nav }: HeaderProps) => {
         </div>
       </div>
 
-      {/* MOBILE NAV */}
       <div
         className={`absolute top-16 left-0 w-full h-[calc(100vh-64px)] bg-white dark:bg-[#141420] border-t border-gray-60/10 px-4 pt-6 pb-10 flex flex-col justify-between transition-all duration-300 md:hidden z-40 ${
           isOpen ? 'opacity-100 translate-y-0 visible' : 'opacity-0 -translate-y-4 invisible'
