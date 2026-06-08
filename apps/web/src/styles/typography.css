@@ -1,0 +1,35 @@
+@utility hero-text {
+    @apply text-[30px] font-bold leading-[37.5px] tracking-[-0.75px] md:text-[60px] md:leading-18.75 md:tracking-[-1.5px]
+}
+
+@utility title-font {
+    @apply text-[24px] font-bold leading-6 md:text-[36px] md:leading-10
+}
+
+@utility body-font {
+    @apply text-[16px] font-normal leading-6.5 md:text-[18px] md:leading-[28px]
+}
+
+@utility button-font {
+    @apply text-[16px] font-semibold leading-6
+}
+
+@utility body-large {
+    @apply text-[18px] font-semibold leading-7 tracking-[-0.45px]
+}
+
+@utility body-medium {
+    @apply text-[14px] font-normal leading-[22.75px]
+}
+
+@utility body-small {
+    @apply text-[12px] font-normal leading-[19.5px]
+}
+
+@utility label-font {
+    @apply text-[12px] font-normal leading-4 font-mono
+}
+
+@utility label-font-spaced {
+    @apply text-[12px] font-normal leading-4 font-mono tracking-[1.2px]
+}
