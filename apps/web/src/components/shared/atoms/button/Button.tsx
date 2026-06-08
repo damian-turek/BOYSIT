@@ -1,7 +1,8 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/utils/cn'
-import { ComponentProps } from 'react'
+import { ComponentPropsWithoutRef, ElementType } from 'react'
 import Image, { type StaticImageData } from 'next/image'
+import Link from 'next/link'
 
 const buttonVariants = cva(
   'w-fit inline-flex items-center justify-center rounded-xl transition-colors focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
@@ -25,6 +26,7 @@ const buttonVariants = cva(
     compoundVariants: [
       { size: 'md', iconOnly: true, class: 'px-1.5 rounded-[12px]!' },
       { size: 'lg', iconOnly: true, class: 'px-[14px]' },
+      { size: 'lg', iconOnly: false, variant: 'primary', class: 'shadow-lg shadow-primary/50 ' },
     ],
     defaultVariants: {
       variant: 'primary',
@@ -34,40 +36,49 @@ const buttonVariants = cva(
   },
 )
 
-export type ButtonProps = ComponentProps<'button'> &
-  VariantProps<typeof buttonVariants> & {
-    className?: string
-    icon?: string | StaticImageData
-    iconOnly?: boolean
-  }
+export type ButtonAsElement = 'button' | 'link'
 
-export const Button = ({
+export type ButtonProps<T extends ButtonAsElement = 'button'> = VariantProps<
+  typeof buttonVariants
+> & {
+  as?: T
+  className?: string
+  icon?: string | StaticImageData
+  iconOnly?: boolean
+} & (T extends 'link' ? ComponentPropsWithoutRef<typeof Link> : ComponentPropsWithoutRef<'button'>)
+
+export const Button = <T extends ButtonAsElement = 'button'>({
+  as,
   className,
   variant,
   size,
   children,
   icon,
   iconOnly,
-  type = 'button',
+  type,
   ...props
-}: ButtonProps) => {
+}: ButtonProps<T>) => {
+  const Component = as === 'link' ? Link : 'button'
+
+  const componentProps = {
+    className: cn(buttonVariants({ variant, size, className, iconOnly }), className),
+    'data-slot': 'button',
+    ...(as !== 'link' ? { type: type || 'button' } : {}),
+    ...props,
+  } as any
+
   return (
-    <button
-      data-slot="button"
-      type={type}
-      className={cn(buttonVariants({ variant, size, className, iconOnly }), className)}
-      {...props}
-    >
+    <Component {...componentProps}>
       {icon && (
         <Image
           src={icon}
           alt="button icon"
           width={16}
           height={16}
-          className={cn(variant === 'primary' && !iconOnly ? 'invert' : '')} // opcjonalne odwrócenie kolorów dla spójności
+          className={cn(variant === 'primary' && !iconOnly ? 'invert' : '')}
         />
       )}
       {children}
-    </button>
+    </Component>
   )
 }

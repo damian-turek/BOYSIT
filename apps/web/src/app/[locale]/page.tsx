@@ -1,11 +1,11 @@
-import { Button } from '@/components/atoms/button'
+import { Hero } from '@/components/HomePage/organisms/Hero'
+import { getHomePageData } from '@/parsers/HomePage/getHomePageData'
 
 export default function Home() {
+  const { HERO_DATA } = getHomePageData()
   return (
     <main>
-      <Button variant="secondary">xf</Button>
-      <h1>Welcome to the Web App</h1>
-      <p>This is the main page of the web application.</p>
+      <Hero {...HERO_DATA} />
     </main>
   )
 }

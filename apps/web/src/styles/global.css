@@ -45,9 +45,13 @@ html {
 }
 
 body {
-    @apply bg-background overscroll-none overflow-x-hidden min-h-screen max-w-svw;
+    @apply bg-white overscroll-none overflow-x-hidden min-h-screen max-w-svw;
 }
 
 main {
-    @apply flex flex-col gap-12 md:gap-24 max-w-360 mx-auto w-full mt-16;
+    @apply mt-16;
+}
+
+@utility section-container {
+    @apply px-4 py-12 lg:px-8 lg:py-24 max-w-360 mx-auto;
 }

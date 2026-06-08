@@ -1,5 +1,5 @@
 @utility hero-text {
-    @apply text-[30px] font-bold leading-[37.5px] tracking-[-0.75px] md:text-[60px] md:leading-18.75 md:tracking-[1.5px]
+    @apply text-[30px] font-bold leading-[37.5px] tracking-[-0.75px] md:text-[60px] md:leading-18.75 md:tracking-[-1.5px]
 }
 
 @utility body-font {
@@ -23,5 +23,5 @@
 }
 
 @utility label-font {
-    @apply text-[12px] font-normal leading-[19.5px] font-mono
+    @apply text-[12px] font-normal leading-4 font-mono
 }

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Button } from '@/components/atoms/button'
+import { motion } from 'motion/react'
+import { Button } from '@/components/shared/atoms/button'
 import NightIcon from '@/assets/icons/night.svg'
 import Logo from '@/assets/icons/logo.svg'
 import { useTranslations } from 'next-intl'
@@ -18,6 +19,8 @@ export type HeaderProps = {
 export const Header = ({ name, nav }: HeaderProps) => {
   const [isDark, setIsDark] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const [isVisible, setIsVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
   const t = useTranslations('Header')
 
   useEffect(() => {
@@ -36,6 +39,29 @@ export const Header = ({ name, nav }: HeaderProps) => {
     }
   }, [isOpen])
 
+  useEffect(() => {
+    const controlNavbar = () => {
+      const currentScrollY = window.scrollY
+
+      if (currentScrollY < 10) {
+        setIsVisible(true)
+      } else if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setIsVisible(false)
+        setIsOpen(false)
+      } else if (currentScrollY < lastScrollY) {
+        setIsVisible(true)
+      }
+
+      setLastScrollY(currentScrollY)
+    }
+
+    window.addEventListener('scroll', controlNavbar)
+
+    return () => {
+      window.removeEventListener('scroll', controlNavbar)
+    }
+  }, [lastScrollY])
+
   const toggleTheme = () => {
     if (document.documentElement.classList.contains('dark')) {
       document.documentElement.classList.remove('dark')
@@ -49,7 +75,11 @@ export const Header = ({ name, nav }: HeaderProps) => {
   }
 
   return (
-    <header className="relative w-full h-16 bg-white dark:bg-background border-b border-gray-60/20 transition-colors duration-300 z-50">
+    <motion.header
+      animate={{ y: isVisible ? 0 : '-100%' }}
+      transition={{ duration: 0.3, ease: 'easeInOut' }}
+      className="fixed top-0 w-full h-16 bg-white dark:bg-background border-b border-gray-60/20 z-50"
+    >
       <div className="flex justify-between items-center h-full max-w-360 mx-auto px-4">
         <Link
           className="group flex gap-2 items-center body-large cursor-pointer z-50"
@@ -140,6 +170,6 @@ export const Header = ({ name, nav }: HeaderProps) => {
           <Button className="w-full justify-center">{t('getStarted')} →</Button>
         </div>
       </div>
-    </header>
+    </motion.header>
   )
 }
