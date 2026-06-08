@@ -1,0 +1,10 @@
+{
+  "Header": {
+    "login": "Log in",
+    "getStarted": "Get Started"
+  },
+  "Homepage": {
+    "title": "Welcome to the Web App",
+    "description": "This is the main page of the web application."
+  }
+}

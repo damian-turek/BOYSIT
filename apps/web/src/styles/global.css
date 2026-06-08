@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import 'tailwindcss';
+
+@import './typography.css';
+@import './colors.css';
+
+@font-face {
+    font-family: 'Menlo';
+    src: url('/fonts/Menlo-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+    --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+    --radius: 0.625rem;
+}
+
+@theme inline {
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --radius-2xl: calc(var(--radius) + 8px);
+    --radius-3xl: calc(var(--radius) + 12px);
+    --radius-4xl: calc(var(--radius) + 16px);
+
+    --breakpoint-xs: 400px;
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-xxl: 1440px;
+    --breakpoint-2xl: 1536px;
+    --breakpoint-3xl: 1600px;
+
+    --font-mono: 'Menlo', Monaco, Consolas, monospace;
+}
+
+html {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    @apply bg-background overscroll-none overflow-x-hidden min-h-screen max-w-svw;
+}
+
+main {
+    @apply flex flex-col gap-12 md:gap-24 max-w-360 mx-auto w-full mt-16;
+}
