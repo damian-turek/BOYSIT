@@ -3,9 +3,11 @@ import { FeaturesProps } from '@/components/HomePage/organisms/Features'
 import CommunityIcon from '@/assets/icons/community.svg'
 import ExpertIcon from '@/assets/icons/expert.svg'
 import InterviewIcon from '@/assets/icons/interview.svg'
+import BookIcon from '@/assets/icons/book.svg'
 import PowerIcon from '@/assets/icons/power.svg'
 import StatsIcon from '@/assets/icons/stats.svg'
 import FilterIcon from '@/assets/icons/filter.svg'
+import { HowItWorksProps } from '@/components/HomePage/organisms/HowItWorks'
 
 export const getHomePageData = () => {
   const HERO_DATA = {
@@ -90,5 +92,37 @@ export const getHomePageData = () => {
     ],
   } satisfies FeaturesProps
 
-  return { HERO_DATA, FEATURES_DATA }
+  const HOW_IT_WORKS_DATA = {
+    label: 'How It Works',
+    title: 'Your path to interview success',
+    description: 'From zero to ready in four simple steps',
+    tiles: [
+      {
+        icon: BookIcon,
+        title: 'Smart Filtering System',
+        description: 'Filter by technology stack, seniority level, domain, and target company',
+      },
+      {
+        icon: FilterIcon,
+        title: 'Track Your Progress',
+        description: 'Monitor your preparation with detailed analytics and learning insights',
+      },
+      {
+        icon: InterviewIcon,
+        title: 'Active Community',
+        description: 'Join thousands of developers in private Discord and Telegram channels',
+      },
+      {
+        icon: ExpertIcon,
+        title: 'Always Current',
+        description: 'Weekly updates with fresh questions and emerging technology trends',
+      },
+    ],
+    button: {
+      label: 'Start practicing today →',
+      link: '#',
+    },
+  } satisfies HowItWorksProps
+
+  return { HERO_DATA, FEATURES_DATA, HOW_IT_WORKS_DATA }
 }
