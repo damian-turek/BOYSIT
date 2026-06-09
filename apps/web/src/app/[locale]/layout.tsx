@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { getLayoutData } from '@/parsers/HomePage/getLayoutData'
 import { AppProviders } from '@/providers'
 import '@/styles/global.css'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { getMessages } from 'next-intl/server'
 
 import { AuthModal } from '@/components/organisms/AuthModal'
@@ -38,6 +39,7 @@ export default async function LocaleLayout({
           {children}
           <AuthModal />
           <Footer {...FOOTER_DATA} />
+          <SpeedInsights />
         </AppProviders>
       </body>
     </html>

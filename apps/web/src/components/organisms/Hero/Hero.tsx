@@ -2,6 +2,8 @@
 
 import { Variants, motion } from 'motion/react'
 
+import { useAuthStore } from '@/store/useAuthStore'
+
 import { Button } from '@/components/atoms/Button'
 
 export type HeroProps = {
@@ -48,6 +50,7 @@ export const Hero = ({
   questionsCategories,
   label,
 }: HeroProps) => {
+  const openModal = useAuthStore((state) => state.openModal)
   const handleScroll = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (buttonWorks.link.startsWith('#')) {
       e.preventDefault()
@@ -104,7 +107,11 @@ export const Hero = ({
           variants={itemVariants}
           className="pt-4 md:pt-8 pb-4 md:pb-8 flex flex-col md:flex-row gap-3 items-center px-2 w-full md:w-fit"
         >
-          <Button className="w-full md:w-fit shadow-lg shadow-primary/20" size="lg">
+          <Button
+            onClick={() => openModal('register')}
+            className="w-full md:w-fit shadow-lg shadow-primary/20"
+            size="lg"
+          >
             {buttonStart.label}
           </Button>
           <Button className="w-full md:w-fit" variant="secondary" onClick={handleScroll} size="lg">
