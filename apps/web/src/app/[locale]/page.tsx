@@ -1,9 +1,10 @@
-import { Hero } from '@/components/organisms/Hero'
-import { Features } from '@/components/organisms/Features'
-import { HowItWorks } from '@/components/organisms/HowItWorks'
 import { getHomePageData } from '@/parsers/HomePage/getHomePageData'
-import { Pricing } from '@/components/organisms/Pricing'
+
 import { ByNumbers } from '@/components/organisms/ByNumbers'
+import { Features } from '@/components/organisms/Features'
+import { Hero } from '@/components/organisms/Hero'
+import { HowItWorks } from '@/components/organisms/HowItWorks'
+import { Pricing } from '@/components/organisms/Pricing'
 
 export default function Home() {
   const { HERO_DATA, FEATURES_DATA, HOW_IT_WORKS_DATA, BY_NUMBERS_DATA, PRICING_DATA } =

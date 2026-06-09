@@ -7,5 +7,21 @@
     "company": "Company",
     "product": "Product",
     "allRightsReserved": "PrepCode. All rights reserved"
+  },
+  "Auth": {
+    "title": "Welcome back",
+    "registerTitle": "Create your account",
+    "description": "Log in to continue your interview prep",
+    "registerDescription": "Start your interview prep journey today",
+    "label": "Or continue with email",
+    "email": "Email address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "login": "Log in",
+    "signup": "Sign up",
+    "register": "Create account",
+    "dontHaveAccount": "Don't have an account? ",
+    "alreadyHaveAccount": "Already have an account? "
   }
 }

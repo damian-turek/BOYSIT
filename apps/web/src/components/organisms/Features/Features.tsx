@@ -1,8 +1,9 @@
 'use client'
 
 import { StaticImageData } from 'next/image'
+
+import { Variants, motion } from 'motion/react'
 import { ReactSVG } from 'react-svg'
-import { motion, Variants } from 'motion/react'
 
 export type FeaturesProps = {
   label: string

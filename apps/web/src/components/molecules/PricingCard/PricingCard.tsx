@@ -1,7 +1,11 @@
 import { StaticImageData } from 'next/image'
-import { cn } from '@/utils/cn'
-import { Button } from '@/components/atoms/button'
+
 import { ReactSVG } from 'react-svg'
+
+import { cn } from '@/utils/cn'
+
+import { Button } from '@/components/atoms/Button'
+
 import CheckIcon from '@/assets/icons/check.svg'
 import CloseIcon from '@/assets/icons/close.svg'
 

@@ -1,7 +1,8 @@
 'use client'
 
-import { motion, Variants } from 'motion/react'
-import { Button } from '@/components/atoms/button'
+import { Variants, motion } from 'motion/react'
+
+import { Button } from '@/components/atoms/Button'
 
 export type HeroProps = {
   title: string
@@ -71,10 +72,10 @@ export const Hero = ({
   }
 
   return (
-    <div className="relative w-full bg-white dark:bg-background bg-[linear-gradient(to_right,#80808018_1px,transparent_1px),linear-gradient(to_bottom,#80808018_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff0c_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0c_1px,transparent_1px)] bg-size-[40px_40px]">
+    <section className="relative overflow-hidden w-full bg-white dark:bg-background bg-[linear-gradient(to_right,#80808018_1px,transparent_1px),linear-gradient(to_bottom,#80808018_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff0c_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0c_1px,transparent_1px)] bg-size-[40px_40px]">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-150 h-75 bg-primary/10 blur-[120px] pointer-events-none rounded-full" />
 
-      <motion.section
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -143,7 +144,7 @@ export const Hero = ({
             ))}
           </div>
         </motion.div>
-      </motion.section>
-    </div>
+      </motion.div>
+    </section>
   )
 }
