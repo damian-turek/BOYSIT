@@ -16,13 +16,13 @@
 }
 
 .dark {
-    --color-background: #0C0C10;
+    --color-background: #09090E;
     --color-gray-100: #F5F4EF;
     --color-gray-60: #94A3B8;
     --color-gray-05: #1E293B;
     --color-gray-10: #334155;
     --color-primary: #F97316;
-    --color-white: #0C0C10;
+    --color-white: #13131E;
 }
 
 @theme inline {

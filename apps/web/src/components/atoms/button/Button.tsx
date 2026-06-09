@@ -5,7 +5,7 @@ import Image, { type StaticImageData } from 'next/image'
 import Link from 'next/link'
 
 const buttonVariants = cva(
-  'w-fit inline-flex items-center justify-center rounded-xl transition-colors focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
+  'w-fit inline-flex items-center justify-center rounded-xl transition-all ease-in-out duration-200 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
   {
     variants: {
       variant: {
