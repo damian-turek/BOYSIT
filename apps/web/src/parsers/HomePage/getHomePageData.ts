@@ -124,7 +124,6 @@ export const getHomePageData = () => {
     ],
     button: {
       label: 'Start practicing today →',
-      link: '#',
     },
   } satisfies HowItWorksProps
 
@@ -197,7 +196,6 @@ export const getHomePageData = () => {
         ],
         button: {
           label: 'Get Started Free',
-          link: '#',
         },
       },
       {
@@ -246,7 +244,6 @@ export const getHomePageData = () => {
         ],
         button: {
           label: 'Try Free for 7 Days →',
-          link: '#',
         },
       },
     ],

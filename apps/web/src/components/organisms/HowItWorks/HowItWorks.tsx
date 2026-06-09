@@ -5,6 +5,8 @@ import { StaticImageData } from 'next/image'
 import { Variants, motion } from 'motion/react'
 import { ReactSVG } from 'react-svg'
 
+import { useAuthStore } from '@/store/useAuthStore'
+
 import { Button } from '@/components/atoms/Button'
 
 export type HowItWorksProps = {
@@ -18,7 +20,6 @@ export type HowItWorksProps = {
   }[]
   button: {
     label: string
-    link: string
   }
 }
 
@@ -43,6 +44,7 @@ const itemVariants: Variants = {
 }
 
 export const HowItWorks = ({ label, tiles, description, button, title }: HowItWorksProps) => {
+  const openModal = useAuthStore((state) => state.openModal)
   return (
     <motion.section
       variants={containerVariants}
@@ -120,7 +122,7 @@ export const HowItWorks = ({ label, tiles, description, button, title }: HowItWo
         viewport={{ once: true }}
         transition={{ type: 'spring', stiffness: 100, damping: 15, delay: 0.3 }}
       >
-        <Button as="link" href={button.link} size="lg">
+        <Button onClick={() => openModal('register')} size="lg">
           {button.label}
         </Button>
       </motion.div>

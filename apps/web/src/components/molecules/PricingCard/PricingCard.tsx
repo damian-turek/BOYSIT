@@ -2,6 +2,8 @@ import { StaticImageData } from 'next/image'
 
 import { ReactSVG } from 'react-svg'
 
+import { useAuthStore } from '@/store/useAuthStore'
+
 import { cn } from '@/utils/cn'
 
 import { Button } from '@/components/atoms/Button'
@@ -24,7 +26,6 @@ export type PricingCardProps = {
   }[]
   button: {
     label: string
-    link: string
   }
   info?: string
 }
@@ -39,6 +40,7 @@ export const PricingCard = ({
   button,
   info,
 }: PricingCardProps) => {
+  const openModal = useAuthStore((state) => state.openModal)
   return (
     <div
       className={cn(
@@ -134,8 +136,7 @@ export const PricingCard = ({
       <Button
         size="lg"
         variant={label ? 'primary' : 'secondary'}
-        as="link"
-        href={button.link}
+        onClick={() => openModal('register')}
         className={cn('w-full', label ? 'bg-white text-primary shadow-lg hover:bg-gray-10' : '')}
       >
         {button.label}
