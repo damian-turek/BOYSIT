@@ -2,5 +2,10 @@
   "Header": {
     "login": "Log in",
     "getStarted": "Get Started"
+  },
+  "Footer": {
+    "company": "Company",
+    "product": "Product",
+    "allRightsReserved": "PrepCode. All rights reserved"
   }
 }

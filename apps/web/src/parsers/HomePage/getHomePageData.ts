@@ -21,11 +21,10 @@ export const getHomePageData = () => {
     label: 'Updated: 27 May 2026',
     buttonStart: {
       label: 'Start for free →',
-      link: '#',
     },
     buttonWorks: {
       label: 'See how it works',
-      link: '#',
+      link: '#how-it-works-section',
     },
     trusted: 'Trusted by <span>12,000+</span> engineers',
     questionsCategories: {

@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { AppProviders } from '@/providers'
 import { Header } from '@/components/organisms/Nav/Header'
 import { getLayoutData } from '@/parsers/HomePage/getLayoutData'
+import { Footer } from '@/components/organisms/Nav/Footer'
 
 export default async function LocaleLayout({
   children,
@@ -20,7 +21,7 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages()
-  const { HEADER_DATA } = getLayoutData()
+  const { HEADER_DATA, FOOTER_DATA } = getLayoutData()
 
   return (
     <html lang={locale}>
@@ -31,6 +32,7 @@ export default async function LocaleLayout({
         <AppProviders locale={locale} messages={messages}>
           <Header {...HEADER_DATA} />
           {children}
+          <Footer {...FOOTER_DATA} />
         </AppProviders>
       </body>
     </html>

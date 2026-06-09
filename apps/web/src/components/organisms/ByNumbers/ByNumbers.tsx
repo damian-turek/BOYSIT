@@ -73,14 +73,14 @@ export const ByNumbers = ({ label, tiles, title }: ByNumbersProps) => {
                 scale: 1.02,
                 boxShadow: '0 20px 30px -10px rgba(37, 99, 235, 0.15)',
               }}
-              className="p-6 md:p-8 flex flex-col items-center border border-primary/20 dark:border-primary/30 hover:border-primary bg-primary/5 rounded-2xl transition-colors duration-300 cursor-pointer"
+              className="p-6 md:p-8 flex flex-col items-center border border-primary/20 dark:border-primary/30 hover:border-primary bg-primary/5 rounded-2xl transition-colors duration-300"
             >
               <motion.p
                 initial={{ scale: 0.5, opacity: 0 }}
                 whileInView={{ scale: 1, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2, type: 'spring', stiffness: 120 }}
-                className="label-font text-[36px]! md:text-[48px]! font-bold leading-[36px]! md:leading-12 mb-2 text-primary select-none"
+                className="label-font text-[36px]! md:text-[48px]! font-bold leading-9! md:leading-12 mb-2 text-primary select-none"
                 dangerouslySetInnerHTML={{ __html: tile.number }}
               />
               <p
