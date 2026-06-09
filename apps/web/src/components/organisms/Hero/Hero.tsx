@@ -7,7 +7,7 @@ export type HeroProps = {
   title: string
   description: string
   label: string
-  buttonStart: { label: string; link: string }
+  buttonStart: { label: string }
   buttonWorks: { label: string; link: string }
   trusted: string
   questionsCategories: { label: string; categories: string[] }
@@ -47,6 +47,29 @@ export const Hero = ({
   questionsCategories,
   label,
 }: HeroProps) => {
+  const handleScroll = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (buttonWorks.link.startsWith('#')) {
+      e.preventDefault()
+
+      const targetId =
+        buttonWorks.link === '#how-it-works'
+          ? 'how-it-works-section'
+          : buttonWorks.link.replace('#', '')
+      const element = document.getElementById(targetId)
+
+      if (element) {
+        const headerOffset = 64
+        const elementPosition = element.getBoundingClientRect().top
+        const offsetPosition = elementPosition + window.scrollY - headerOffset
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth',
+        })
+      }
+    }
+  }
+
   return (
     <div className="relative w-full bg-white dark:bg-background bg-[linear-gradient(to_right,#80808018_1px,transparent_1px),linear-gradient(to_bottom,#80808018_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff0c_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0c_1px,transparent_1px)] bg-size-[40px_40px]">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-150 h-75 bg-primary/10 blur-[120px] pointer-events-none rounded-full" />
@@ -80,21 +103,10 @@ export const Hero = ({
           variants={itemVariants}
           className="pt-4 md:pt-8 pb-4 md:pb-8 flex flex-col md:flex-row gap-3 items-center px-2 w-full md:w-fit"
         >
-          <Button
-            className="w-full md:w-fit shadow-lg shadow-primary/20"
-            as="link"
-            href={buttonStart.link}
-            size="lg"
-          >
+          <Button className="w-full md:w-fit shadow-lg shadow-primary/20" size="lg">
             {buttonStart.label}
           </Button>
-          <Button
-            className="w-full md:w-fit"
-            variant="secondary"
-            as="link"
-            href={buttonWorks.link}
-            size="lg"
-          >
+          <Button className="w-full md:w-fit" variant="secondary" onClick={handleScroll} size="lg">
             {buttonWorks.label}
           </Button>
         </motion.div>
