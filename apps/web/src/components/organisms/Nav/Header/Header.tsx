@@ -1,14 +1,20 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
 import Link from 'next/link'
-import { useRouter, usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+
 import { motion } from 'motion/react'
-import { Button } from '@/components/atoms/button'
+import { useTranslations } from 'next-intl'
+
+import { useAuthStore } from '@/store/useAuthStore'
+
+import { Button } from '@/components/atoms/Button'
+
+import Logo from '@/assets/icons/logo.svg'
 import NightIcon from '@/assets/icons/night.svg'
 import SunIcon from '@/assets/icons/sun.svg'
-import Logo from '@/assets/icons/logo.svg'
-import { useTranslations } from 'next-intl'
 
 export type HeaderProps = {
   name: string
@@ -24,6 +30,7 @@ export const Header = ({ name, nav }: HeaderProps) => {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const t = useTranslations('Header')
+  const openModal = useAuthStore((state) => state.openModal)
 
   const router = useRouter()
   const pathname = usePathname()
@@ -138,7 +145,7 @@ export const Header = ({ name, nav }: HeaderProps) => {
               className="body-medium text-gray-60 hover:text-gray-100/90 transition-colors duration-200 ease-in-out cursor-pointer"
               href={e.link}
               key={e.label}
-              onClick={(event) => handleNavClick(event, e.link)} // Obługa kliknięcia
+              onClick={(event) => handleNavClick(event, e.link)}
               dangerouslySetInnerHTML={{ __html: e.label }}
             />
           ))}
@@ -152,10 +159,10 @@ export const Header = ({ name, nav }: HeaderProps) => {
             onClick={toggleTheme}
             className={`hover:[&_svg_path]:stroke-primary! ${isDark ? '[&_svg_path]:stroke-primary' : ''}`}
           />
-          <Button variant="text" className="hover:text-primary!">
+          <Button onClick={() => openModal('login')} variant="text" className="hover:text-primary!">
             {t('login')}
           </Button>
-          <Button>{t('getStarted')} →</Button>
+          <Button onClick={() => openModal('register')}>{t('getStarted')} →</Button>
         </div>
 
         <div className="md:hidden flex gap-2 items-center">
@@ -203,10 +210,16 @@ export const Header = ({ name, nav }: HeaderProps) => {
         </nav>
 
         <div className="flex flex-col gap-4 border-t border-gray-60/10 pt-5">
-          <Button variant="text" className="w-full justify-center hover:text-primary!">
+          <Button
+            onClick={() => openModal('login')}
+            variant="text"
+            className="w-full justify-center hover:text-primary!"
+          >
             {t('login')}
           </Button>
-          <Button className="w-full justify-center">{t('getStarted')} →</Button>
+          <Button onClick={() => openModal('register')} className="w-full justify-center">
+            {t('getStarted')} →
+          </Button>
         </div>
       </div>
     </motion.header>

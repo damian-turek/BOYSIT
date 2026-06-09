@@ -1,9 +1,11 @@
 'use client'
 
 import { StaticImageData } from 'next/image'
-import { motion, Variants } from 'motion/react'
-import { Button } from '@/components/atoms/button'
+
+import { Variants, motion } from 'motion/react'
 import { ReactSVG } from 'react-svg'
+
+import { Button } from '@/components/atoms/Button'
 
 export type HowItWorksProps = {
   label: string

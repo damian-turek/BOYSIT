@@ -1,7 +1,8 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { NextIntlClientProvider, AbstractIntlMessages } from 'next-intl'
+
+import { AbstractIntlMessages, NextIntlClientProvider } from 'next-intl'
 
 interface AppProvidersProps {
   children: ReactNode

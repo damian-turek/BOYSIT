@@ -1,10 +1,11 @@
-import * as dotenv from "dotenv";
-import app from "./app";
+import * as dotenv from 'dotenv'
 
-dotenv.config();
+import app from './app'
 
-const PORT = process.env.PORT || 3001;
+dotenv.config()
+
+const PORT = process.env.PORT || 3001
 
 app.listen(PORT, () => {
-  console.log(`🚀 Serwer wystartował na porcie: http://localhost:${PORT}`);
-});
+  console.log(`🚀 Serwer wystartował na porcie: http://localhost:${PORT}`)
+})

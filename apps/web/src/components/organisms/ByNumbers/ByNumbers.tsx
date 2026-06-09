@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, Variants } from 'motion/react'
+import { Variants, motion } from 'motion/react'
 
 export type ByNumbersProps = {
   label: string

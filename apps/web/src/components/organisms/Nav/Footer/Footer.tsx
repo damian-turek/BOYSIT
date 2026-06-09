@@ -1,10 +1,13 @@
-import Logo from '@/assets/icons/logo.svg'
+import Link from 'next/link'
+
+import { useTranslations } from 'next-intl'
+
+import { Button } from '@/components/atoms/Button'
+
 import GitHubIcon from '@/assets/icons/github.svg'
+import Logo from '@/assets/icons/logo.svg'
 import SendIcon from '@/assets/icons/send.svg'
 import TwitterIcon from '@/assets/icons/twitter.svg'
-import { Button } from '@/components/atoms/button'
-import Link from 'next/link'
-import { useTranslations } from 'next-intl'
 
 export type FooterProps = {
   name: string

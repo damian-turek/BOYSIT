@@ -1,11 +1,14 @@
-import { cva, type VariantProps } from 'class-variance-authority'
-import { cn } from '@/utils/cn'
 import { ComponentPropsWithoutRef, ElementType } from 'react'
+
 import Image, { type StaticImageData } from 'next/image'
 import Link from 'next/link'
 
+import { type VariantProps, cva } from 'class-variance-authority'
+
+import { cn } from '@/utils/cn'
+
 const buttonVariants = cva(
-  'w-fit inline-flex items-center justify-center rounded-xl transition-all ease-in-out duration-200 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
+  'w-fit inline-flex gap-2 items-center justify-center rounded-xl transition-all ease-in-out duration-200 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
   {
     variants: {
       variant: {

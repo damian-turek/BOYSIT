@@ -1,6 +1,7 @@
 'use client'
 
-import { motion, Variants } from 'motion/react'
+import { Variants, motion } from 'motion/react'
+
 import { PricingCard, PricingCardProps } from '@/components/molecules/PricingCard'
 
 export type PricingProps = {
