@@ -11,6 +11,7 @@ import StarIcon from '@/assets/icons/star.svg'
 import CrownIcon from '@/assets/icons/crown.svg'
 import { HowItWorksProps } from '@/components/organisms/HowItWorks'
 import { PricingProps } from '@/components/organisms/Pricing'
+import { ByNumbersProps } from '@/components/organisms/ByNumbers'
 
 export const getHomePageData = () => {
   const HERO_DATA = {
@@ -127,6 +128,33 @@ export const getHomePageData = () => {
     },
   } satisfies HowItWorksProps
 
+  const BY_NUMBERS_DATA = {
+    label: 'By the numbers',
+    title: 'Trusted by engineers worldwide',
+    tiles: [
+      {
+        number: '3,850+',
+        title: 'Interview Questions',
+        description: 'From Junior to Senior level',
+      },
+      {
+        number: '20+',
+        title: 'Tech Stacks',
+        description: 'Frontend, Backend, Mobile, DevOps, Data',
+      },
+      {
+        number: '14',
+        title: 'Companies',
+        description: 'Google, Meta, Amazon, Microsoft, and more',
+      },
+      {
+        number: '12K+',
+        title: 'Engineers',
+        description: 'Active community members',
+      },
+    ],
+  } satisfies ByNumbersProps
+
   const PRICING_DATA = {
     label: 'Pricing',
     title: 'Choose Your Plan',
@@ -224,5 +252,5 @@ export const getHomePageData = () => {
     ],
   } satisfies PricingProps
 
-  return { HERO_DATA, FEATURES_DATA, HOW_IT_WORKS_DATA, PRICING_DATA }
+  return { HERO_DATA, FEATURES_DATA, HOW_IT_WORKS_DATA, BY_NUMBERS_DATA, PRICING_DATA }
 }
