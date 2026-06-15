@@ -9,6 +9,7 @@ import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
 import { useAuthStore } from '@/store/useAuthStore'
+import { useThemeStore } from '@/store/useThemeStore'
 
 import { Button } from '@/components/atoms/Button'
 
@@ -25,7 +26,6 @@ export type HeaderProps = {
 }
 
 export const Header = ({ name, nav }: HeaderProps) => {
-  const [isDark, setIsDark] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
@@ -34,19 +34,8 @@ export const Header = ({ name, nav }: HeaderProps) => {
 
   const router = useRouter()
   const pathname = usePathname()
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme')
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      document.documentElement.classList.add('dark')
-      setIsDark(true)
-    } else {
-      document.documentElement.classList.remove('dark')
-      setIsDark(false)
-    }
-  }, [])
+  const isDark = useThemeStore((state) => state.isDark)
+  const toggleTheme = useThemeStore((state) => state.toggleTheme)
 
   useEffect(() => {
     if (isOpen) {
@@ -81,18 +70,6 @@ export const Header = ({ name, nav }: HeaderProps) => {
       window.removeEventListener('scroll', controlNavbar)
     }
   }, [lastScrollY])
-
-  const toggleTheme = () => {
-    if (document.documentElement.classList.contains('dark')) {
-      document.documentElement.classList.remove('dark')
-      localStorage.setItem('theme', 'light')
-      setIsDark(false)
-    } else {
-      document.documentElement.classList.add('dark')
-      localStorage.setItem('theme', 'dark')
-      setIsDark(true)
-    }
-  }
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
     if (link.startsWith('#')) {

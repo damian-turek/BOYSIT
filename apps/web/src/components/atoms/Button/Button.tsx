@@ -1,9 +1,10 @@
-import { ComponentPropsWithoutRef, ElementType } from 'react'
+import { ComponentPropsWithoutRef, ComponentType } from 'react'
 
 import Image, { type StaticImageData } from 'next/image'
 import Link from 'next/link'
 
 import { type VariantProps, cva } from 'class-variance-authority'
+import { LucideProps } from 'lucide-react'
 
 import { cn } from '@/utils/cn'
 
@@ -46,17 +47,16 @@ export type ButtonProps<T extends ButtonAsElement = 'button'> = VariantProps<
 > & {
   as?: T
   className?: string
-  icon?: string | StaticImageData
+  icon?: string | StaticImageData | ComponentType<LucideProps>
   iconOnly?: boolean
 } & (T extends 'link' ? ComponentPropsWithoutRef<typeof Link> : ComponentPropsWithoutRef<'button'>)
-
 export const Button = <T extends ButtonAsElement = 'button'>({
   as,
   className,
   variant,
   size,
   children,
-  icon,
+  icon: Icon,
   iconOnly,
   type,
   ...props
@@ -70,17 +70,23 @@ export const Button = <T extends ButtonAsElement = 'button'>({
     ...props,
   } as any
 
+  const isStaticImage = Icon && typeof Icon === 'object' && 'src' in Icon
+  const isStringImage = typeof Icon === 'string'
+
   return (
     <Component {...componentProps}>
-      {icon && (
-        <Image
-          src={icon}
-          alt="button icon"
-          width={16}
-          height={16}
-          className={cn(variant === 'primary' && !iconOnly ? 'invert' : '')}
-        />
-      )}
+      {Icon &&
+        (isStringImage || isStaticImage ? (
+          <Image
+            src={Icon as string | StaticImageData}
+            alt="button icon"
+            width={16}
+            height={16}
+            className={cn(variant === 'primary' && !iconOnly ? 'invert' : '')}
+          />
+        ) : (
+          <Icon size={16} />
+        ))}
       {children}
     </Component>
   )

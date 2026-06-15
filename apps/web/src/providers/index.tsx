@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react'
 
+import { ThemeProvider } from '@/providers/ThemeProvider'
 import { AbstractIntlMessages, NextIntlClientProvider } from 'next-intl'
 
 interface AppProvidersProps {
@@ -13,7 +14,9 @@ interface AppProvidersProps {
 export function AppProviders({ children, locale, messages }: AppProvidersProps) {
   return (
     <NextIntlClientProvider timeZone="Europe/Warsaw" locale={locale} messages={messages}>
-      <div>{children}</div>
+      <ThemeProvider>
+        <div>{children}</div>
+      </ThemeProvider>
     </NextIntlClientProvider>
   )
 }
