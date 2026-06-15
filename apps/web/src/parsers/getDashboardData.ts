@@ -1,3 +1,4 @@
+import { DashboardContentProps } from '@/components/organisms/DashboardContent'
 import { WelcomeSectionProps } from '@/components/organisms/WelcomeSection'
 
 export const getDashboardData = () => {
@@ -18,5 +19,217 @@ export const getDashboardData = () => {
     ],
   } satisfies WelcomeSectionProps
 
-  return { WELCOME_SECTION_DATA }
+  const DASHBOARD_CONTENT_DATA = {
+    questionsBank: {
+      name: 'Full Question Bank',
+      description: '3,850+ curated interview questions',
+      text: 'Browse our comprehensive database of real interview questions from top tech companies. Filter by technology, difficulty, and company.',
+      badge: 'NEW',
+      button: {
+        label: 'Explore All Questions →',
+        link: '/dashboard/questions',
+      },
+      tags: ['JavaScript', 'Python', 'SQL', 'React', 'System Design'],
+    },
+    topCategories: {
+      name: 'Top Categories',
+      categories: [
+        { name: 'JavaScript / TS', icon: 'Code', theme: '#F0B100', questionNumber: 615 },
+        { name: 'System Design', icon: 'Layers', theme: '#AD46FF', questionNumber: 320 },
+        { name: 'Databases', icon: 'Database', theme: '#FF6900', questionNumber: 290 },
+        { name: 'Algorithms', icon: 'Cpu', theme: '#2B7FFF', questionNumber: 270 },
+        { name: 'Architecture', icon: 'Server', theme: '#615FFF', questionNumber: 215 },
+        { name: 'Security', icon: 'Shield', theme: '#FF2056', questionNumber: 180 },
+        { name: 'DevOps', icon: 'Infinity', theme: '#00BC7D', questionNumber: 155 },
+        { name: 'CSS & HTML', icon: 'Terminal', theme: '#00B8DB', questionNumber: 140 },
+      ],
+    },
+    platformStats: {
+      name: 'Platform Stats',
+      tiles: [
+        {
+          icon: 'BookOpen',
+          name: '3,850+',
+          text: 'Questions',
+        },
+        {
+          icon: 'Layers',
+          name: '11',
+          text: 'Categories',
+        },
+        {
+          icon: 'Users',
+          name: '18k+',
+          text: 'Learners',
+        },
+        {
+          icon: 'Database',
+          name: '120+',
+          text: 'Companies',
+        },
+      ],
+    },
+    proPlanCard: {
+      name: 'Pro Plan',
+      text: 'Unlock all 3,850+ questions',
+      list: ['Full access to all topics', 'Senior-level questions', 'Company-specific sets'],
+      button: {
+        label: 'View Plans →',
+        link: '/pricing',
+      },
+      badge: 'From €9/month · Cancel anytime',
+    },
+    practiceTools: {
+      name: 'Practice Tools',
+      tools: [
+        {
+          name: 'Questions',
+          description: 'Collection of questions',
+          label: '3000 questions',
+          theme: '#FF2056',
+          icon: 'BookOpen',
+          link: '/dashboard/questions',
+        },
+        {
+          name: 'Coding Challenges',
+          description: 'HackerRank-style problems from real interviews',
+          label: '10 problems',
+          badge: 'NEW',
+          theme: '#7F22FE',
+          icon: 'Terminal',
+          link: '/dashboard/coding',
+        },
+        {
+          name: 'Exam Mode',
+          description: 'Timed multiple-choice · simulate a real interview',
+          label: '3 modes',
+          badge: 'POPULAR',
+          theme: '#2563EB',
+          icon: 'ClipboardCheck',
+          link: '/dashboard/exam',
+        },
+        {
+          name: 'Job Tracker',
+          description: 'Track applications, get tailored interview questions',
+          label: '6 active',
+          theme: '#FE9A00',
+          icon: 'Briefcase',
+          link: '/dashboard/job-tracker',
+        },
+      ],
+    },
+    questionsLibrary: {
+      name: 'My Library',
+      allQuestionsLink: '/dashboard/questions',
+      tabs: [
+        { id: 'last-seen', label: 'Last Seen', icon: 'Clock' },
+        { id: 'saved', label: 'Saved', icon: 'Bookmark' },
+        { id: 'for-you', label: 'For You', icon: 'Lightbulb' },
+      ],
+      items: [
+        {
+          id: 'q1',
+          tabId: 'last-seen',
+          title: 'Explain event delegation in JavaScript',
+          category: 'JavaScript',
+          level: 'Junior',
+          levelColor: '#00BC7D',
+          timeAgo: '2h ago',
+          link: '/dashboard/questions/event-delegation',
+        },
+        {
+          id: 'q5',
+          tabId: 'last-seen',
+          title: 'Explain event delegation in JavaScript',
+          category: 'JavaScript',
+          level: 'Junior',
+          levelColor: '#00BC7D',
+          timeAgo: '2h ago',
+          link: '/dashboard/questions/event-delegation',
+        },
+        {
+          id: 'q2',
+          tabId: 'saved',
+          title: 'What is the difference between SQL JOIN types?',
+          category: 'SQL',
+          level: 'Mid',
+          levelColor: '#FE9A00',
+          timeAgo: 'Yesterday',
+          link: '/dashboard/questions/sql-joins',
+        },
+        {
+          id: 'q10',
+          tabId: 'last-seen',
+          title: 'What is the difference between SQL JOIN types?',
+          category: 'SQL',
+          level: 'Mid',
+          levelColor: '#FE9A00',
+          timeAgo: 'Yesterday',
+          link: '/dashboard/questions/sql-joins',
+        },
+        {
+          id: 'q6',
+          tabId: 'saved',
+          title: 'What is the difference between SQL JOIN types?',
+          category: 'SQL',
+          level: 'Mid',
+          levelColor: '#FE9A00',
+          timeAgo: 'Yesterday',
+          link: '/dashboard/questions/sql-joins',
+        },
+        {
+          id: 'q7',
+          tabId: 'saved',
+          title: 'What is the difference between SQL JOIN types?',
+          category: 'SQL',
+          level: 'Mid',
+          levelColor: '#FE9A00',
+          timeAgo: 'Yesterday',
+          link: '/dashboard/questions/sql-joins',
+        },
+        {
+          id: 'q3',
+          tabId: 'last-seen',
+          title: 'How does React reconciliation work?',
+          category: 'React',
+          level: 'Mid',
+          levelColor: '#FE9A00',
+          timeAgo: '2 days ago',
+          link: '/dashboard/questions/react-reconciliation',
+        },
+        {
+          id: 'q4',
+          tabId: 'for-you',
+          title: 'Describe CAP theorem with examples',
+          category: 'System Design',
+          level: 'Senior',
+          levelColor: '#FF2056',
+          timeAgo: '3 days ago',
+          link: '/dashboard/questions/cap-theorem',
+        },
+        {
+          id: 'q8',
+          tabId: 'for-you',
+          title: 'Describe CAP theorem with examples',
+          category: 'System Design',
+          level: 'Senior',
+          levelColor: '#FF2056',
+          timeAgo: '3 days ago',
+          link: '/dashboard/questions/cap-theorem',
+        },
+        {
+          id: 'q9',
+          tabId: 'for-you',
+          title: 'Describe CAP theorem with examples',
+          category: 'System Design',
+          level: 'Senior',
+          levelColor: '#FF2056',
+          timeAgo: '3 days ago',
+          link: '/dashboard/questions/cap-theorem',
+        },
+      ],
+    },
+  } satisfies DashboardContentProps
+
+  return { WELCOME_SECTION_DATA, DASHBOARD_CONTENT_DATA }
 }

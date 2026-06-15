@@ -1,18 +1,20 @@
 import { getDashboardData } from '@/parsers/getDashboardData'
-import { LangProps } from '@/types/lang'
+import { Metadata } from 'next'
 
+import { DashboardContent } from '@/components/organisms/DashboardContent'
 import { WelcomeSection } from '@/components/organisms/WelcomeSection'
 
-type PageProps = {
-  params: Promise<{ locale: LangProps }>
+export const metadata: Metadata = {
+  title: 'Dashboard',
 }
-export default async function DashboardPage({ params }: PageProps) {
-  const { locale } = await params
-  const { WELCOME_SECTION_DATA } = getDashboardData()
+
+export default async function DashboardPage() {
+  const { WELCOME_SECTION_DATA, DASHBOARD_CONTENT_DATA } = getDashboardData()
 
   return (
-    <main className="dashboard-container">
-      <WelcomeSection {...WELCOME_SECTION_DATA} lang={locale} />
+    <main className="dashboard-container flex flex-col gap-6">
+      <WelcomeSection {...WELCOME_SECTION_DATA} />
+      <DashboardContent {...DASHBOARD_CONTENT_DATA} />
     </main>
   )
 }

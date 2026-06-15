@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react'
 
+import { router } from 'next/client'
+
 import { AnimatePresence, motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 

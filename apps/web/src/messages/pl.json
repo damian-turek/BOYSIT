@@ -23,5 +23,25 @@
     "register": "Utwórz konto",
     "dontHaveAccount": "Nie masz konta? ",
     "alreadyHaveAccount": "Masz już konto? "
+  },
+  "Sidebar": {
+    "openMenu": "Otwórz menu",
+    "closeMenu": "Zamknij menu",
+    "darkMode": "Motyw ciemny",
+    "logout": "Wyloguj się"
+  },
+  "ActivityCalendar": {
+    "days": "P,W,Ś,C,P,S,N",
+    "info": "{questions} pytań • {activeDays} aktywne dni",
+    "streak": "{count} dni z rzędu",
+    "less": "Mniej",
+    "more": "Więcej"
+  },
+  "WelcomeSection": {
+    "streak": "dni z rzędu",
+    "searchPlaceholder": "Szukaj pytań, tematów, firm..."
+  },
+  "QuestionsBank": {
+    "shortcut": "Skróty"
   }
 }

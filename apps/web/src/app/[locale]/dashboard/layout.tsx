@@ -1,13 +1,8 @@
 import React from 'react'
 
 import { getLayoutData } from '@/parsers/getLayoutData'
-import { Metadata } from 'next'
 
 import { Sidebar } from '@/components/organisms/Nav/Sidebar'
-
-export const metadata: Metadata = {
-  title: 'DashBoard',
-}
 
 export default async function LocaleLayout({
   children,
