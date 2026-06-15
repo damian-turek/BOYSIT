@@ -38,7 +38,7 @@ const itemVariants: Variants = {
 
 export const ByNumbers = ({ label, tiles, title }: ByNumbersProps) => {
   return (
-    <section className="bg-background">
+    <section className="bg-background/30">
       <motion.section
         variants={containerVariants}
         initial="hidden"

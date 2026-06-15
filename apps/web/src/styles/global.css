@@ -56,10 +56,10 @@ body {
     @apply bg-white overscroll-none overflow-x-hidden min-h-screen max-w-svw;
 }
 
-main {
-    @apply mt-16;
-}
-
 @utility section-container {
     @apply px-4 py-12 lg:px-8 lg:py-24 max-w-360 mx-auto;
+}
+
+@utility dashboard-container {
+    @apply px-4 pb-6 lg:p-8 pt-20 md:py-6 md:ml-55 max-w-6xl 2xl:mx-auto;
 }

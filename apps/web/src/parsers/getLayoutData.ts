@@ -1,4 +1,7 @@
+import { BookOpen, Briefcase, ClipboardCheck, LayoutDashboard, Terminal, User } from 'lucide-react'
+
 import { HeaderProps } from '@/components/organisms/Nav/Header'
+import { SidebarProps } from '@/components/organisms/Nav/Sidebar'
 
 export const getLayoutData = () => {
   const HEADER_DATA = {
@@ -67,5 +70,46 @@ export const getLayoutData = () => {
     ],
   }
 
-  return { HEADER_DATA, FOOTER_DATA }
+  const SIDEBAR_DATA = {
+    name: 'PrepCode',
+    nav: [
+      {
+        label: 'Dashboard',
+        link: '/dashboard',
+        icon: 'LayoutDashboard',
+      },
+      {
+        label: 'Questions',
+        link: '/dashboard/questions',
+        icon: 'BookOpen',
+      },
+      {
+        label: 'Coding',
+        link: '/dashboard/coding',
+        icon: 'Terminal',
+      },
+      {
+        label: 'Job Tracker',
+        link: '/dashboard/job-tracker',
+        icon: 'Briefcase',
+      },
+      {
+        label: 'Exam',
+        link: '/dashboard/exam',
+        icon: 'ClipboardCheck',
+      },
+      {
+        label: 'Profile',
+        link: '/dashboard/profile',
+        icon: 'User',
+      },
+    ],
+    upgradeButton: {
+      link: '/price',
+      title: 'Upgrade to Pro',
+      text: 'From €9/month',
+    },
+  } satisfies SidebarProps
+
+  return { HEADER_DATA, FOOTER_DATA, SIDEBAR_DATA }
 }

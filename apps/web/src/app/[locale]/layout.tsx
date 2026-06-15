@@ -2,15 +2,10 @@ import React from 'react'
 
 import { notFound } from 'next/navigation'
 
-import { getLayoutData } from '@/parsers/HomePage/getLayoutData'
 import { AppProviders } from '@/providers'
 import '@/styles/global.css'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { getMessages } from 'next-intl/server'
-
-import { AuthModal } from '@/components/organisms/AuthModal'
-import { Footer } from '@/components/organisms/Nav/Footer'
-import { Header } from '@/components/organisms/Nav/Header'
 
 export default async function LocaleLayout({
   children,
@@ -26,19 +21,12 @@ export default async function LocaleLayout({
   }
 
   const messages = await getMessages()
-  const { HEADER_DATA, FOOTER_DATA } = getLayoutData()
 
   return (
     <html lang={locale}>
-      <head>
-        <title>PrepCode</title>
-      </head>
       <body>
         <AppProviders locale={locale} messages={messages}>
-          <Header {...HEADER_DATA} />
           {children}
-          <AuthModal />
-          <Footer {...FOOTER_DATA} />
           <SpeedInsights />
         </AppProviders>
       </body>

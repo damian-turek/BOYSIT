@@ -1,4 +1,4 @@
-import { getHomePageData } from '@/parsers/HomePage/getHomePageData'
+import { getHomePageData } from '@/parsers/getHomePageData'
 
 import { ByNumbers } from '@/components/organisms/ByNumbers'
 import { Features } from '@/components/organisms/Features'

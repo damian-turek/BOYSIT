@@ -23,5 +23,25 @@
     "register": "Create account",
     "dontHaveAccount": "Don't have an account? ",
     "alreadyHaveAccount": "Already have an account? "
+  },
+  "Sidebar": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "darkMode": "Dark mode",
+    "logout": "Log out"
+  },
+  "ActivityCalendar": {
+    "days": "M,T,W,T,F,S,S",
+    "info": "{questions} questions • {activeDays} active days",
+    "streak": "{count}d streak",
+    "less": "Less",
+    "more": "More"
+  },
+  "WelcomeSection": {
+    "streak": "streak",
+    "searchPlaceholder": "Search questions, topics, companies..."
+  },
+  "QuestionsBank": {
+    "shortcut": "Shortcuts"
   }
 }
