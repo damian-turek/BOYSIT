@@ -175,7 +175,7 @@ export const Sidebar = ({ name, nav, upgradeButton }: SidebarProps) => {
           </div>
 
           <MotionLink
-            className="p-3 flex items-center gap-3 border border-primary/50 rounded-xl bg-linear-to-r from-primary/15 to-primary/5 shrink-0"
+            className="p-3 mx-3 flex items-center gap-3 border border-primary/50 rounded-xl bg-linear-to-r from-primary/15 to-primary/5 shrink-0"
             href={upgradeButton.link}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}

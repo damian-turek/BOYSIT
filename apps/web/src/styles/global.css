@@ -7,15 +7,23 @@
 @font-face {
     font-family: 'Menlo';
     src: url('/fonts/Menlo-Regular.ttf') format('truetype');
-    font-weight: 400;
+    font-weight: 400; /* Regular */
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
     font-family: 'Menlo';
-    src: url('/fonts/Menlo-Bold.ttf') format('truetype');
+    src: url('/fonts/Menlo-Italic.ttf') format('truetype');
     font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Menlo';
+    src: url('/fonts/Menlo-Bold.ttf') format('truetype');
+    font-weight: 700;
     font-style: normal;
     font-display: swap;
 }
