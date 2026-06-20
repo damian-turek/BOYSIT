@@ -32,27 +32,43 @@ enum UserPlan {
   admin
 }
 
+enum SubscriptionStatus {
+  incomplete
+  incomplete_expired
+  trialing
+  active
+  past_due
+  canceled
+  unpaid
+}
+
 model User {
-  id        String   @id @default(uuid()) @db.Uuid
-  email     String   @unique
-  name      String?
-  plan      UserPlan @default(free)
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email          String   @unique
+  name           String?
+  authProviderId String?  @unique @map("auth_provider_id")
+  plan           UserPlan @default(free)
 
   proUntil  DateTime? @map("pro_until")
   createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
-  attempts  Attempt[]
-  bookmarks Bookmark[]
+  attempts      Attempt[]
+  bookmarks     Bookmark[]
+  subscriptions Subscription[]
 
   @@map("users")
 }
 
 model Category {
-  id          String   @id @default(uuid()) @db.Uuid
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String   @unique
+  slug        String   @unique
   description String?
+  isActive    Boolean  @default(true) @map("is_active")
 
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   technologies Technology[]
   questions    Question[]
@@ -61,11 +77,14 @@ model Category {
 }
 
 model Technology {
-  id          String   @id @default(uuid()) @db.Uuid
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String   @unique
+  slug        String   @unique
   description String?
+  isActive    Boolean  @default(true) @map("is_active")
 
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   categoryId String?   @db.Uuid @map("category_id")
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -77,12 +96,15 @@ model Technology {
 }
 
 model Question {
-  id           String @id @default(uuid()) @db.Uuid
+  id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   title        String
+  slug         String @unique
+  excerpt      String?
 
   questionText String  @map("question_text")
   answerText   String? @map("answer_text")
   explanation  String?
+  codeSnippet  String? @map("code_snippet")
 
   difficulty   Difficulty
   questionType QuestionType @map("question_type")
@@ -119,8 +141,9 @@ model Question {
 }
 
 model Tag {
-  id   String @id @default(uuid()) @db.Uuid
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name String @unique
+  slug String @unique
 
   questionTags QuestionTag[]
 
@@ -141,7 +164,7 @@ model QuestionTag {
 }
 
 model Attempt {
-  id String @id @default(uuid()) @db.Uuid
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
 
   userId     String @db.Uuid @map("user_id")
   questionId String @db.Uuid @map("question_id")
@@ -175,4 +198,26 @@ model Bookmark {
   @@index([questionId])
 
   @@map("bookmarks")
+}
+
+model Subscription {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  userId String @db.Uuid @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  stripeCustomerId     String? @unique @map("stripe_customer_id")
+  stripeSubscriptionId String? @unique @map("stripe_subscription_id")
+  stripePriceId        String? @map("stripe_price_id")
+
+  status           SubscriptionStatus @default(incomplete)
+  currentPeriodEnd DateTime?          @map("current_period_end")
+  cancelAtPeriodEnd Boolean           @default(false) @map("cancel_at_period_end")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@map("subscriptions")
 }

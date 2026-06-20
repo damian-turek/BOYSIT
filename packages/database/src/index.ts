@@ -1,0 +1,5 @@
+export { Prisma, PrismaClient } from '../generated/prisma/client.js'
+export * from '../generated/prisma/enums.js'
+export * from '../generated/prisma/models.js'
+export { prisma } from './client.js'
+export type { DatabaseClient } from './client.js'
