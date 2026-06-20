@@ -1,5 +1,6 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
+  "globalEnv": ["PAYLOAD_DATABASE_URL", "PAYLOAD_DB_PUSH", "PAYLOAD_SECRET", "NEXT_PUBLIC_SERVER_URL"],
   "ui": "tui",
   "tasks": {
     "build": {
