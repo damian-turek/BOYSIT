@@ -12,6 +12,7 @@
     "migrate:status": "prisma migrate status",
     "studio": "prisma studio",
     "seed": "tsx prisma/seed.ts",
+    "sync:payload": "tsx scripts/sync-payload-content.ts",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {

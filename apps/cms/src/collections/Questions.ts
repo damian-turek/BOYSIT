@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminOnly } from '@/access/adminOnly'
-import { populateSlug } from './slug'
+import { adminOnly, denyDelete } from '@/access/adminOnly'
+import { populateSlug, preventSlugChange } from './slug'
 
 export const Questions: CollectionConfig = {
   slug: 'cms-questions',
@@ -15,11 +15,12 @@ export const Questions: CollectionConfig = {
   },
   access: {
     create: adminOnly,
-    delete: adminOnly,
+    delete: denyDelete,
     read: adminOnly,
     update: adminOnly,
   },
   hooks: {
+    beforeChange: [preventSlugChange],
     beforeValidate: [populateSlug('title')],
   },
   fields: [
@@ -42,6 +43,7 @@ export const Questions: CollectionConfig = {
       type: 'relationship',
       admin: { position: 'sidebar' },
       relationTo: 'cms-categories',
+      required: true,
     },
     {
       name: 'technology',

@@ -200,7 +200,7 @@ export interface CmsQuestion {
   answerText?: string | null;
   explanation?: string | null;
   codeSnippet?: string | null;
-  category?: (string | null) | CmsCategory;
+  category: string | CmsCategory;
   technology?: (string | null) | CmsTechnology;
   tags?: (string | CmsTag)[] | null;
   difficulty: 'junior' | 'middle' | 'senior';

@@ -8,6 +8,8 @@ export const isAdminUser = (user: null | PayloadUser | undefined): boolean => us
 
 export const adminOnly: Access = ({ req }) => isAdminUser(req.user as PayloadUser | undefined)
 
+export const denyDelete: Access = () => false
+
 export const adminPanelOnly = ({ req }: Parameters<Access>[0]): boolean =>
   isAdminUser(req.user as PayloadUser | undefined)
 

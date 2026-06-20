@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { adminOnly } from '@/access/adminOnly'
-import { populateSlug } from './slug'
+import { adminOnly, denyDelete } from '@/access/adminOnly'
+import { populateSlug, preventSlugChange } from './slug'
 
 export const Technologies: CollectionConfig = {
   slug: 'cms-technologies',
@@ -15,11 +15,12 @@ export const Technologies: CollectionConfig = {
   },
   access: {
     create: adminOnly,
-    delete: adminOnly,
+    delete: denyDelete,
     read: adminOnly,
     update: adminOnly,
   },
   hooks: {
+    beforeChange: [preventSlugChange],
     beforeValidate: [populateSlug('name')],
   },
   fields: [
