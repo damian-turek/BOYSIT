@@ -39,3 +39,5 @@ yarn-error.log*
 AGENTS.md
 /docs
 /.agents
+.idea/*
+.idea

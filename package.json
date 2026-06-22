@@ -5,11 +5,12 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,prisma}\"",
+    "format": "prettier --write \"apps/**/*.{ts,tsx,js,jsx}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,prisma}\"",
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "prettier": "^3.7.4",
     "turbo": "^2.9.16",
     "typescript": "5.9.2"
@@ -35,5 +36,15 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs"
+  "type": "commonjs",
+  "overrides": {
+    "minimatch": "^9.0.7",
+    "flatted": "^3.4.2",
+    "picomatch": "^4.0.4",
+    "next": "^16.2.6",
+    "next-intl>next": "^16.2.6",
+    "apps/web>next": "^16.2.6",
+    "@hono/node-server": "^1.19.13",
+    "postcss": "^8.5.10"
+  }
 }

@@ -1,0 +1,47 @@
+{
+  "Header": {
+    "login": "Zaloguj się",
+    "getStarted": "Rozpocznij"
+  },
+  "Footer": {
+    "company": "Firma",
+    "product": "Produkt",
+    "allRightsReserved": "PrepCode. Wszelkie prawa zastrzeżone"
+  },
+  "Auth": {
+    "title": "Witamy ponownie",
+    "registerTitle": "Utwórz swoje konto",
+    "description": "Zaloguj się, aby kontynuować przygotowania do rozmowy kwalifikacyjnej",
+    "registerDescription": "Rozpocznij swoją przygodę z przygotowaniami do rozmowy kwalifikacyjnej już dziś",
+    "label": "Lub kontynuuj za pomocą e-maila",
+    "email": "Adres e-mail",
+    "password": "Hasło",
+    "confirmPassword": "Potwierdź hasło",
+    "name": "Pełna nazwa",
+    "login": "Zaloguj się",
+    "signup": "Zarejestruj się",
+    "register": "Utwórz konto",
+    "dontHaveAccount": "Nie masz konta? ",
+    "alreadyHaveAccount": "Masz już konto? "
+  },
+  "Sidebar": {
+    "openMenu": "Otwórz menu",
+    "closeMenu": "Zamknij menu",
+    "darkMode": "Motyw ciemny",
+    "logout": "Wyloguj się"
+  },
+  "ActivityCalendar": {
+    "days": "P,W,Ś,C,P,S,N",
+    "info": "{questions} pytań • {activeDays} aktywne dni",
+    "streak": "{count} dni z rzędu",
+    "less": "Mniej",
+    "more": "Więcej"
+  },
+  "WelcomeSection": {
+    "streak": "dni z rzędu",
+    "searchPlaceholder": "Szukaj pytań, tematów, firm..."
+  },
+  "QuestionsBank": {
+    "shortcut": "Skróty"
+  }
+}

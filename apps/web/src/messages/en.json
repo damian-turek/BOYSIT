@@ -1,0 +1,47 @@
+{
+  "Header": {
+    "login": "Log in",
+    "getStarted": "Get Started"
+  },
+  "Footer": {
+    "company": "Company",
+    "product": "Product",
+    "allRightsReserved": "PrepCode. All rights reserved"
+  },
+  "Auth": {
+    "title": "Welcome back",
+    "registerTitle": "Create your account",
+    "description": "Log in to continue your interview prep",
+    "registerDescription": "Start your interview prep journey today",
+    "label": "Or continue with email",
+    "email": "Email address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "name": "Full Name",
+    "login": "Log in",
+    "signup": "Sign up",
+    "register": "Create account",
+    "dontHaveAccount": "Don't have an account? ",
+    "alreadyHaveAccount": "Already have an account? "
+  },
+  "Sidebar": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "darkMode": "Dark mode",
+    "logout": "Log out"
+  },
+  "ActivityCalendar": {
+    "days": "M,T,W,T,F,S,S",
+    "info": "{questions} questions • {activeDays} active days",
+    "streak": "{count}d streak",
+    "less": "Less",
+    "more": "More"
+  },
+  "WelcomeSection": {
+    "streak": "streak",
+    "searchPlaceholder": "Search questions, topics, companies..."
+  },
+  "QuestionsBank": {
+    "shortcut": "Shortcuts"
+  }
+}
