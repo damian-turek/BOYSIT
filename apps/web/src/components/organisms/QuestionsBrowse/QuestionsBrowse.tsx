@@ -5,7 +5,6 @@ import { MouseEvent, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 
 import {
-  BarChart3,
   Bookmark,
   BookmarkCheck,
   CheckCircle2,
@@ -17,71 +16,51 @@ import {
   Database,
   Filter,
   GitBranch,
-  Globe,
   Layers,
+  LoaderCircle,
   Lock,
+  RefreshCw,
   Search,
   Server,
   Shield,
   SlidersHorizontal,
   X,
-  Zap,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 
-import { Question, QuestionGrade } from '@/parsers/getQuestionData'
+import { useAuthStore } from '@/store/useAuthStore'
+import { useAuthSessionStore } from '@/store/useAuthSessionStore'
+
+import {
+  Category,
+  fetchCategories,
+  fetchQuestion,
+  fetchQuestions,
+  fetchTechnologies,
+  Pagination,
+  QuestionDetailData,
+  QuestionDifficulty,
+  QuestionPreview,
+  Technology,
+} from '@/services/questionsApi'
 import { cn } from '@/utils/cn'
 
-type GradeFilter = 'all' | QuestionGrade
+type GradeFilter = 'all' | QuestionDifficulty
 
-const allStacks = [
-  'JavaScript',
-  'TypeScript',
-  'React',
-  'Node.js',
-  'Python',
-  'Java',
-  'Go',
-  'Docker',
-  'Kubernetes',
-  'AWS',
-  'Kafka',
-  'PostgreSQL',
-  'Redis',
-  'Distributed Systems',
-  'CSS',
-  'HTML',
-]
+const PAGE_SIZE = 20
 
-const domainConfig = [
-  { name: 'JavaScript/TypeScript', icon: Code2, color: 'text-[#F0B100]' },
-  { name: 'Algorithms', icon: Cpu, color: 'text-[#2B7FFF]' },
-  { name: 'System Design', icon: Layers, color: 'text-[#AD46FF]' },
-  { name: 'Databases', icon: Database, color: 'text-[#FF6900]' },
-  { name: 'Architecture', icon: Server, color: 'text-[#615FFF]' },
-  { name: 'CSS & HTML', icon: Globe, color: 'text-[#00B8DB]' },
-  { name: 'Security', icon: Shield, color: 'text-[#FF2056]' },
-  { name: 'DevOps', icon: GitBranch, color: 'text-[#00BC7D]' },
-  { name: 'Performance', icon: Zap, color: 'text-[#FE9A00]' },
-  { name: 'Testing', icon: CheckCircle2, color: 'text-[#14B8A6]' },
-  { name: 'Concurrency', icon: BarChart3, color: 'text-[#EC4899]' },
-] as const
+const categoryIconConfig = {
+  algorithms: { icon: Cpu, color: 'text-[#2B7FFF]' },
+  backend: { icon: Server, color: 'text-[#615FFF]' },
+  databases: { icon: Database, color: 'text-[#FF6900]' },
+  devops: { icon: GitBranch, color: 'text-[#00BC7D]' },
+  frontend: { icon: Code2, color: 'text-[#F0B100]' },
+  security: { icon: Shield, color: 'text-[#FF2056]' },
+  'system-design': { icon: Layers, color: 'text-[#AD46FF]' },
+  testing: { icon: CheckCircle2, color: 'text-[#14B8A6]' },
+} as const
 
-const companies = [
-  'Google',
-  'Meta',
-  'Amazon',
-  'Microsoft',
-  'Yandex',
-  'JetBrains',
-  'Avito',
-  'Tinkoff',
-  'Wildberries',
-  '2GIS',
-  'Kaspersky',
-]
-
-const gradeConfig: Record<QuestionGrade, { label: string; className: string }> = {
+const gradeConfig: Record<QuestionDifficulty, { label: string; className: string }> = {
   junior: {
     label: 'Junior',
     className:
@@ -99,13 +78,7 @@ const gradeConfig: Record<QuestionGrade, { label: string; className: string }> =
   },
 }
 
-const gradeOrder: Record<QuestionGrade, number> = {
-  junior: 0,
-  middle: 1,
-  senior: 2,
-}
-
-const GradeBadge = ({ grade }: { grade: QuestionGrade }) => {
+const GradeBadge = ({ grade }: { grade: QuestionDifficulty }) => {
   const config = gradeConfig[grade]
 
   return (
@@ -121,11 +94,15 @@ const GradeBadge = ({ grade }: { grade: QuestionGrade }) => {
 }
 
 type QuestionCardProps = {
-  question: Question
+  question: QuestionPreview
   index: number
   expanded: boolean
   saved: boolean
+  detail?: QuestionDetailData
+  detailLoading: boolean
+  detailError?: string
   onToggle: () => void
+  onRetry: () => void
   onSave: (event: MouseEvent<HTMLButtonElement>) => void
 }
 
@@ -134,11 +111,22 @@ const QuestionCard = ({
   index,
   expanded,
   saved,
+  detail,
+  detailLoading,
+  detailError,
   onToggle,
+  onRetry,
   onSave,
 }: QuestionCardProps) => {
-  const domain = domainConfig.find((item) => item.name === question.domain)
-  const DomainIcon = domain?.icon ?? Code2
+  const profile = useAuthSessionStore((state) => state.profile)
+  const openAuthModal = useAuthStore((state) => state.openModal)
+  const categoryConfig =
+    categoryIconConfig[question.category?.slug as keyof typeof categoryIconConfig]
+  const CategoryIcon = categoryConfig?.icon ?? Code2
+  const chips = [
+    ...(question.technology ? [question.technology.name] : []),
+    ...question.tags.map((tag) => tag.name),
+  ]
 
   return (
     <motion.article
@@ -164,30 +152,36 @@ const QuestionCard = ({
 
           <span className="min-w-0 flex-1">
             <span className="mb-2.5 flex flex-wrap items-center gap-2">
-              <GradeBadge grade={question.grade} />
-              <span className="flex items-center gap-1 font-mono text-[11px] leading-4 text-gray-60">
-                <DomainIcon size={12} className={domain?.color} />
-                {question.domain}
-              </span>
-              <span className="hidden font-mono text-[11px] leading-4 text-gray-60/70 sm:inline">
-                · {question.company}
-              </span>
+              <GradeBadge grade={question.difficulty} />
+              {question.category && (
+                <span className="flex items-center gap-1 font-mono text-[11px] leading-4 text-gray-60">
+                  <CategoryIcon size={12} className={categoryConfig?.color} />
+                  {question.category.name}
+                </span>
+              )}
+              {question.technology && (
+                <span className="hidden font-mono text-[11px] leading-4 text-gray-60/70 sm:inline">
+                  · {question.technology.name}
+                </span>
+              )}
             </span>
 
             <span className="block text-[14px] leading-[22px] font-medium text-gray-100">
-              {question.text}
+              {question.title}
             </span>
 
-            <span className="mt-3 flex flex-wrap gap-1.5">
-              {question.stacks.map((stack) => (
-                <span
-                  key={stack}
-                  className="rounded border border-[var(--color-gray-10)] bg-background px-2 py-0.5 font-mono text-[11px] leading-4 text-gray-60"
-                >
-                  {stack}
-                </span>
-              ))}
-            </span>
+            {chips.length > 0 && (
+              <span className="mt-3 flex flex-wrap gap-1.5">
+                {chips.slice(0, 5).map((chip) => (
+                  <span
+                    key={chip}
+                    className="rounded border border-[var(--color-gray-10)] bg-background px-2 py-0.5 font-mono text-[11px] leading-4 text-gray-60"
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </span>
+            )}
           </span>
         </Link>
 
@@ -219,10 +213,14 @@ const QuestionCard = ({
             title={expanded ? 'Hide answer' : 'Show answer'}
             className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-gray-60 transition-colors hover:bg-white hover:text-gray-100"
           >
-            <ChevronDown
-              size={16}
-              className={cn('transition-transform duration-200', expanded && 'rotate-180')}
-            />
+            {detailLoading ? (
+              <LoaderCircle size={15} className="animate-spin" />
+            ) : (
+              <ChevronDown
+                size={16}
+                className={cn('transition-transform duration-200', expanded && 'rotate-180')}
+              />
+            )}
           </button>
         </div>
       </div>
@@ -245,32 +243,66 @@ const QuestionCard = ({
                     </div>
                     <p className="mb-1 text-sm font-semibold text-gray-100">Pro answer</p>
                     <p className="body-small mb-5 max-w-xs text-gray-60">
-                      Upgrade to Pro to unlock expert answers to all Senior-level questions.
+                      {profile
+                        ? 'Upgrade to Pro to unlock expert answers to all Pro questions.'
+                        : 'Sign in to unlock the full answer preview and your personal progress.'}
                     </p>
-                    <Link
-                      href="/pricing"
-                      className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary/20 transition-all hover:opacity-90 active:scale-95"
-                    >
-                      Try Pro free for 7 days
-                      <ChevronRight size={14} />
-                    </Link>
+                    {profile ? (
+                      <Link
+                        href="/pricing"
+                        className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+                      >
+                        Try Pro free for 7 days
+                        <ChevronRight size={14} />
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => openAuthModal('login')}
+                        className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95"
+                      >
+                        Sign in
+                        <ChevronRight size={14} />
+                      </button>
+                    )}
                   </div>
-                ) : (
+                ) : detailLoading ? (
+                  <div className="flex items-center gap-2 py-4 text-sm text-gray-60">
+                    <LoaderCircle size={16} className="animate-spin" />
+                    Loading answer...
+                  </div>
+                ) : detailError ? (
+                  <div className="flex items-center justify-between gap-4 py-3">
+                    <p className="text-sm text-alert-100">{detailError}</p>
+                    <button
+                      type="button"
+                      onClick={onRetry}
+                      className="flex cursor-pointer items-center gap-1.5 text-xs font-semibold text-primary"
+                    >
+                      <RefreshCw size={13} />
+                      Retry
+                    </button>
+                  </div>
+                ) : detail ? (
                   <div>
                     <p className="mb-3 font-mono text-[11px] leading-4 font-semibold tracking-[1.2px] text-gray-60 uppercase">
                       Answer
                     </p>
-                    {question.answer.includes('\n') ? (
-                      <pre className="overflow-x-auto whitespace-pre-wrap rounded-xl border border-gray-60/25 bg-background p-4 font-mono text-xs leading-relaxed text-gray-100">
-                        <code>{question.answer}</code>
+                    {detail.codeSnippet && (
+                      <pre className="mb-4 overflow-x-auto whitespace-pre-wrap rounded-xl border border-[var(--color-gray-10)] bg-background p-4 font-mono text-xs leading-relaxed text-gray-100">
+                        <code>{detail.codeSnippet}</code>
                       </pre>
-                    ) : (
-                      <p className="text-[14px] leading-[22px] text-gray-60">
-                        {question.answer}
+                    )}
+                    <p className="text-[14px] leading-[22px] text-gray-60">
+                      {detail.answerText ?? 'No answer has been added yet.'}
+                    </p>
+                    {detail.explanation && (
+                      <p className="mt-3 border-l-2 border-primary/30 pl-3 text-[13px] leading-5 text-gray-60">
+                        {detail.explanation}
                       </p>
                     )}
                   </div>
-                )}
+                ) : null}
               </div>
             </div>
           </motion.div>
@@ -283,12 +315,12 @@ const QuestionCard = ({
 type FilterSidebarProps = {
   grade: GradeFilter
   setGrade: (grade: GradeFilter) => void
-  selectedDomains: string[]
-  toggleDomain: (domain: string) => void
-  selectedCompanies: string[]
-  toggleCompany: (company: string) => void
-  selectedStacks: string[]
-  toggleStack: (stack: string) => void
+  categories: Category[]
+  selectedCategories: string[]
+  toggleCategory: (slug: string) => void
+  technologies: Technology[]
+  selectedTechnologies: string[]
+  toggleTechnology: (slug: string) => void
   onClearAll: () => void
   hasActiveFilters: boolean
 }
@@ -296,18 +328,17 @@ type FilterSidebarProps = {
 const FilterSidebar = ({
   grade,
   setGrade,
-  selectedDomains,
-  toggleDomain,
-  selectedCompanies,
-  toggleCompany,
-  selectedStacks,
-  toggleStack,
+  categories,
+  selectedCategories,
+  toggleCategory,
+  technologies,
+  selectedTechnologies,
+  toggleTechnology,
   onClearAll,
   hasActiveFilters,
 }: FilterSidebarProps) => {
-  const [domainsExpanded, setDomainsExpanded] = useState(true)
-  const [companiesExpanded, setCompaniesExpanded] = useState(true)
-  const [stacksExpanded, setStacksExpanded] = useState(false)
+  const [categoriesExpanded, setCategoriesExpanded] = useState(true)
+  const [technologiesExpanded, setTechnologiesExpanded] = useState(false)
 
   const grades: { value: GradeFilter; label: string }[] = [
     { value: 'all', label: 'All levels' },
@@ -363,20 +394,23 @@ const FilterSidebar = ({
       <div className="border-t border-[var(--color-gray-10)]" />
 
       <FilterSection
-        label="Domain"
-        count={selectedDomains.length}
-        expanded={domainsExpanded}
-        onToggle={() => setDomainsExpanded((value) => !value)}
+        label="Category"
+        count={selectedCategories.length}
+        expanded={categoriesExpanded}
+        onToggle={() => setCategoriesExpanded((value) => !value)}
       >
         <div className="space-y-0.5">
-          {domainConfig.map(({ name, icon: Icon, color }) => {
-            const active = selectedDomains.includes(name)
+          {categories.map((category) => {
+            const active = selectedCategories.includes(category.slug)
+            const config =
+              categoryIconConfig[category.slug as keyof typeof categoryIconConfig]
+            const Icon = config?.icon ?? Code2
 
             return (
               <button
-                key={name}
+                key={category.id}
                 type="button"
-                onClick={() => toggleDomain(name)}
+                onClick={() => toggleCategory(category.slug)}
                 className={cn(
                   'flex w-full cursor-pointer items-center gap-2.5 rounded-xl px-3 py-2 text-left text-[12px] leading-4 transition-all',
                   active
@@ -384,39 +418,8 @@ const FilterSidebar = ({
                     : 'text-gray-60 hover:bg-background hover:text-gray-100',
                 )}
               >
-                <Icon size={13} className={active ? 'text-primary' : color} />
-                {name}
-              </button>
-            )
-          })}
-        </div>
-      </FilterSection>
-
-      <div className="border-t border-[var(--color-gray-10)]" />
-
-      <FilterSection
-        label="Company"
-        count={selectedCompanies.length}
-        expanded={companiesExpanded}
-        onToggle={() => setCompaniesExpanded((value) => !value)}
-      >
-        <div className="flex flex-wrap gap-1.5">
-          {companies.map((company) => {
-            const active = selectedCompanies.includes(company)
-
-            return (
-              <button
-                key={company}
-                type="button"
-                onClick={() => toggleCompany(company)}
-                className={cn(
-                  'cursor-pointer rounded-lg border px-2.5 py-1 font-mono text-[11px] leading-4 transition-all',
-                  active
-                    ? 'border-primary/30 bg-primary/10 font-semibold text-primary'
-                    : 'border-[var(--color-gray-10)] text-gray-60 hover:bg-background hover:text-gray-100',
-                )}
-              >
-                {company}
+                <Icon size={13} className={active ? 'text-primary' : config?.color} />
+                {category.name}
               </button>
             )
           })}
@@ -427,19 +430,19 @@ const FilterSidebar = ({
 
       <FilterSection
         label="Technology"
-        count={selectedStacks.length}
-        expanded={stacksExpanded}
-        onToggle={() => setStacksExpanded((value) => !value)}
+        count={selectedTechnologies.length}
+        expanded={technologiesExpanded}
+        onToggle={() => setTechnologiesExpanded((value) => !value)}
       >
         <div className="flex flex-wrap gap-1.5">
-          {allStacks.map((stack) => {
-            const active = selectedStacks.includes(stack)
+          {technologies.map((technology) => {
+            const active = selectedTechnologies.includes(technology.slug)
 
             return (
               <button
-                key={stack}
+                key={technology.id}
                 type="button"
-                onClick={() => toggleStack(stack)}
+                onClick={() => toggleTechnology(technology.slug)}
                 className={cn(
                   'cursor-pointer rounded-lg border px-2.5 py-1 font-mono text-[11px] leading-4 transition-all',
                   active
@@ -447,7 +450,7 @@ const FilterSidebar = ({
                     : 'border-[var(--color-gray-10)] text-gray-60 hover:bg-background hover:text-gray-100',
                 )}
               >
-                {stack}
+                {technology.name}
               </button>
             )
           })}
@@ -460,7 +463,7 @@ const FilterSidebar = ({
           <span className="text-xs font-bold text-primary">Pro Plan</span>
         </div>
         <p className="body-small mb-3 text-gray-60">
-          Unlock all Senior questions and expert answers.
+          Unlock all Pro questions and expert answers.
         </p>
         <Link
           href="/pricing"
@@ -519,19 +522,48 @@ const FilterSection = ({
   </div>
 )
 
-export type QuestionsBrowseProps = {
-  questions: Question[]
-}
-
-export const QuestionsBrowse = ({ questions }: QuestionsBrowseProps) => {
+export const QuestionsBrowse = () => {
   const [search, setSearch] = useState('')
   const [grade, setGrade] = useState<GradeFilter>('all')
-  const [selectedDomains, setSelectedDomains] = useState<string[]>([])
-  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([])
-  const [selectedStacks, setSelectedStacks] = useState<string[]>([])
-  const [expandedId, setExpandedId] = useState<number | null>(null)
-  const [savedIds, setSavedIds] = useState<Set<number>>(() => new Set())
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedTechnologies, setSelectedTechnologies] = useState<string[]>([])
+  const [questions, setQuestions] = useState<QuestionPreview[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [technologies, setTechnologies] = useState<Technology[]>([])
+  const [pagination, setPagination] = useState<Pagination>({
+    page: 1,
+    pageSize: PAGE_SIZE,
+    total: 0,
+  })
+  const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [error, setError] = useState<string>()
+  const [reloadToken, setReloadToken] = useState(0)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [details, setDetails] = useState<Record<string, QuestionDetailData>>({})
+  const [detailLoadingId, setDetailLoadingId] = useState<string | null>(null)
+  const [detailErrors, setDetailErrors] = useState<Record<string, string>>({})
+  const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set())
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    void Promise.all([
+      fetchCategories(controller.signal),
+      fetchTechnologies(controller.signal),
+    ])
+      .then(([categoryData, technologyData]) => {
+        setCategories(categoryData)
+        setTechnologies(technologyData)
+      })
+      .catch((requestError: unknown) => {
+        if (requestError instanceof DOMException && requestError.name === 'AbortError') return
+        setError('Could not load question filters. Make sure the API is running.')
+      })
+
+    return () => controller.abort()
+  }, [])
 
   useEffect(() => {
     document.body.style.overflow = mobileFiltersOpen ? 'hidden' : ''
@@ -540,6 +572,55 @@ export const QuestionsBrowse = ({ questions }: QuestionsBrowseProps) => {
       document.body.style.overflow = ''
     }
   }, [mobileFiltersOpen])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const timeout = window.setTimeout(
+      () => {
+        setLoading(true)
+        setError(undefined)
+
+        void fetchQuestions(
+          {
+            categorySlugs: selectedCategories,
+            technologySlugs: selectedTechnologies,
+            difficulty: grade === 'all' ? undefined : grade,
+            search,
+            page: 1,
+            pageSize: PAGE_SIZE,
+          },
+          controller.signal,
+        )
+          .then((response) => {
+            setQuestions(response.data)
+            setPagination(response.pagination)
+            setExpandedId(null)
+          })
+          .catch((requestError: unknown) => {
+            if (requestError instanceof DOMException && requestError.name === 'AbortError') return
+            setError('Could not load questions. Make sure the API is running on port 4000.')
+          })
+          .finally(() => {
+            if (!controller.signal.aborted) setLoading(false)
+          })
+      },
+      search ? 300 : 0,
+    )
+
+    return () => {
+      window.clearTimeout(timeout)
+      controller.abort()
+    }
+  }, [grade, reloadToken, search, selectedCategories, selectedTechnologies])
+
+  const visibleTechnologies = useMemo(() => {
+    if (selectedCategories.length === 0) return technologies
+
+    return technologies.filter(
+      (technology) =>
+        technology.category && selectedCategories.includes(technology.category.slug),
+    )
+  }, [selectedCategories, technologies])
 
   const toggleValue = (
     value: string,
@@ -550,7 +631,7 @@ export const QuestionsBrowse = ({ questions }: QuestionsBrowseProps) => {
     )
   }
 
-  const toggleSave = (id: number, event: MouseEvent<HTMLButtonElement>) => {
+  const toggleSave = (id: string, event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation()
     setSavedIds((current) => {
       const next = new Set(current)
@@ -560,86 +641,98 @@ export const QuestionsBrowse = ({ questions }: QuestionsBrowseProps) => {
     })
   }
 
+  const loadDetail = async (question: QuestionPreview) => {
+    if (question.locked || details[question.id]) return
+
+    setDetailLoadingId(question.id)
+    setDetailErrors((current) => {
+      const next = { ...current }
+      delete next[question.id]
+      return next
+    })
+
+    try {
+      const detail = await fetchQuestion(question.slug)
+      setDetails((current) => ({ ...current, [question.id]: detail }))
+    } catch {
+      setDetailErrors((current) => ({
+        ...current,
+        [question.id]: 'The answer could not be loaded.',
+      }))
+    } finally {
+      setDetailLoadingId((current) => (current === question.id ? null : current))
+    }
+  }
+
+  const toggleQuestion = (question: QuestionPreview) => {
+    const willExpand = expandedId !== question.id
+    setExpandedId(willExpand ? question.id : null)
+
+    if (willExpand) void loadDetail(question)
+  }
+
+  const loadMore = async () => {
+    const nextPage = pagination.page + 1
+    setLoadingMore(true)
+
+    try {
+      const response = await fetchQuestions({
+        categorySlugs: selectedCategories,
+        technologySlugs: selectedTechnologies,
+        difficulty: grade === 'all' ? undefined : grade,
+        search,
+        page: nextPage,
+        pageSize: PAGE_SIZE,
+      })
+      setQuestions((current) => [...current, ...response.data])
+      setPagination(response.pagination)
+    } catch {
+      setError('Could not load more questions.')
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
   const hasActiveFilters =
     grade !== 'all' ||
-    selectedDomains.length > 0 ||
-    selectedCompanies.length > 0 ||
-    selectedStacks.length > 0
+    selectedCategories.length > 0 ||
+    selectedTechnologies.length > 0
 
   const clearAll = () => {
     setGrade('all')
-    setSelectedDomains([])
-    setSelectedCompanies([])
-    setSelectedStacks([])
+    setSelectedCategories([])
+    setSelectedTechnologies([])
     setSearch('')
   }
-
-  const filteredQuestions = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase()
-
-    return questions
-      .filter((question) => grade === 'all' || question.grade === grade)
-      .filter(
-        (question) =>
-          selectedDomains.length === 0 || selectedDomains.includes(question.domain),
-      )
-      .filter(
-        (question) =>
-          selectedCompanies.length === 0 || selectedCompanies.includes(question.company),
-      )
-      .filter(
-        (question) =>
-          selectedStacks.length === 0 ||
-          question.stacks.some((stack) => selectedStacks.includes(stack)),
-      )
-      .filter(
-        (question) =>
-          !normalizedSearch ||
-          question.text.toLowerCase().includes(normalizedSearch) ||
-          question.company.toLowerCase().includes(normalizedSearch) ||
-          question.domain.toLowerCase().includes(normalizedSearch) ||
-          question.stacks.some((stack) => stack.toLowerCase().includes(normalizedSearch)),
-      )
-      .sort((first, second) => gradeOrder[first.grade] - gradeOrder[second.grade])
-  }, [
-    grade,
-    questions,
-    search,
-    selectedCompanies,
-    selectedDomains,
-    selectedStacks,
-  ])
 
   const activeChips = [
     ...(grade !== 'all'
       ? [{ label: gradeConfig[grade].label, onRemove: () => setGrade('all') }]
       : []),
-    ...selectedDomains.map((domain) => ({
-      label: domain,
-      onRemove: () => toggleValue(domain, setSelectedDomains),
+    ...selectedCategories.map((slug) => ({
+      label: categories.find((category) => category.slug === slug)?.name ?? slug,
+      onRemove: () => toggleValue(slug, setSelectedCategories),
     })),
-    ...selectedCompanies.map((company) => ({
-      label: company,
-      onRemove: () => toggleValue(company, setSelectedCompanies),
-    })),
-    ...selectedStacks.map((stack) => ({
-      label: stack,
-      onRemove: () => toggleValue(stack, setSelectedStacks),
+    ...selectedTechnologies.map((slug) => ({
+      label: technologies.find((technology) => technology.slug === slug)?.name ?? slug,
+      onRemove: () => toggleValue(slug, setSelectedTechnologies),
     })),
   ]
 
   const filterSidebarProps: FilterSidebarProps = {
     grade,
     setGrade,
-    selectedDomains,
-    toggleDomain: (domain) => toggleValue(domain, setSelectedDomains),
-    selectedCompanies,
-    toggleCompany: (company) => toggleValue(company, setSelectedCompanies),
-    selectedStacks,
-    toggleStack: (stack) => toggleValue(stack, setSelectedStacks),
+    categories,
+    selectedCategories,
+    toggleCategory: (slug) => toggleValue(slug, setSelectedCategories),
+    technologies: visibleTechnologies,
+    selectedTechnologies,
+    toggleTechnology: (slug) => toggleValue(slug, setSelectedTechnologies),
     onClearAll: clearAll,
     hasActiveFilters,
   }
+
+  const hasMore = questions.length < pagination.total
 
   return (
     <main className="dashboard-container max-w-7xl">
@@ -653,7 +746,7 @@ export const QuestionsBrowse = ({ questions }: QuestionsBrowseProps) => {
             <input
               type="search"
               aria-label="Search questions"
-              placeholder="Search questions, topics, companies..."
+              placeholder="Search questions, topics, technologies..."
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               className="w-full rounded-xl border border-[var(--color-gray-10)] bg-white py-2.5 pr-10 pl-10 text-[14px] leading-[22px] text-gray-100 outline-none transition-all placeholder:text-gray-60 focus:border-primary/50 focus:ring-4 focus:ring-primary/10"
@@ -673,8 +766,8 @@ export const QuestionsBrowse = ({ questions }: QuestionsBrowseProps) => {
 
           <div className="ml-auto flex items-center gap-2">
             <span className="hidden font-mono text-[11px] leading-4 text-gray-60 sm:block">
-              <span className="font-semibold text-gray-100">{filteredQuestions.length}</span> /{' '}
-              {questions.length} questions
+              <span className="font-semibold text-gray-100">{questions.length}</span> /{' '}
+              {pagination.total} questions
             </span>
             <button
               type="button"
@@ -780,13 +873,38 @@ export const QuestionsBrowse = ({ questions }: QuestionsBrowseProps) => {
         <section className="min-w-0 flex-1" aria-label="Questions">
           <div className="mb-4 flex items-center justify-between">
             <p className="font-mono text-[12px] leading-4 text-gray-60">
-              <span className="font-semibold text-gray-100">{filteredQuestions.length}</span>{' '}
-              questions
+              <span className="font-semibold text-gray-100">{pagination.total}</span> questions
               {hasActiveFilters && ' matching filters'}
             </p>
           </div>
 
-          {filteredQuestions.length === 0 ? (
+          {loading ? (
+            <div className="space-y-3" aria-label="Loading questions">
+              {Array.from({ length: 6 }, (_, index) => (
+                <div
+                  key={index}
+                  className="h-32 animate-pulse rounded-2xl border border-[var(--color-gray-10)] bg-[var(--color-gray-05)]"
+                />
+              ))}
+            </div>
+          ) : error && questions.length === 0 ? (
+            <div className="py-24 text-center">
+              <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-white">
+                <RefreshCw size={22} className="text-gray-60" />
+              </div>
+              <p className="mb-1 text-sm font-semibold text-gray-100">
+                Questions are unavailable
+              </p>
+              <p className="body-small mb-4 text-gray-60">{error}</p>
+              <button
+                type="button"
+                onClick={() => setReloadToken((current) => current + 1)}
+                className="cursor-pointer text-xs font-medium text-primary hover:underline"
+              >
+                Try again
+              </button>
+            </div>
+          ) : questions.length === 0 ? (
             <div className="py-24 text-center">
               <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-white">
                 <Search size={22} className="text-gray-60" />
@@ -804,21 +922,39 @@ export const QuestionsBrowse = ({ questions }: QuestionsBrowseProps) => {
               </button>
             </div>
           ) : (
-            <motion.div layout className="space-y-3">
-              {filteredQuestions.map((question, index) => (
-                <QuestionCard
-                  key={question.id}
-                  question={question}
-                  index={index}
-                  expanded={expandedId === question.id}
-                  saved={savedIds.has(question.id)}
-                  onToggle={() =>
-                    setExpandedId((current) => (current === question.id ? null : question.id))
-                  }
-                  onSave={(event) => toggleSave(question.id, event)}
-                />
-              ))}
-            </motion.div>
+            <>
+              <motion.div layout className="space-y-3">
+                {questions.map((question, index) => (
+                  <QuestionCard
+                    key={question.id}
+                    question={question}
+                    index={index}
+                    expanded={expandedId === question.id}
+                    saved={savedIds.has(question.id)}
+                    detail={details[question.id]}
+                    detailLoading={detailLoadingId === question.id}
+                    detailError={detailErrors[question.id]}
+                    onToggle={() => toggleQuestion(question)}
+                    onRetry={() => void loadDetail(question)}
+                    onSave={(event) => toggleSave(question.id, event)}
+                  />
+                ))}
+              </motion.div>
+
+              {hasMore && (
+                <div className="mt-6 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => void loadMore()}
+                    disabled={loadingMore}
+                    className="flex cursor-pointer items-center gap-2 rounded-xl border border-[var(--color-gray-10)] bg-white px-5 py-2.5 text-sm font-semibold text-gray-100 transition-colors hover:border-primary/30 hover:text-primary disabled:cursor-wait disabled:opacity-60"
+                  >
+                    {loadingMore && <LoaderCircle size={15} className="animate-spin" />}
+                    Load more
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
       </div>

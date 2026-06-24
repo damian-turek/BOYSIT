@@ -1,14 +1,21 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
-  "globalEnv": ["PAYLOAD_DATABASE_URL", "PAYLOAD_DB_PUSH", "PAYLOAD_SECRET", "NEXT_PUBLIC_SERVER_URL"],
+  "globalEnv": [
+    "PAYLOAD_DATABASE_URL",
+    "PAYLOAD_DB_PUSH",
+    "PAYLOAD_SECRET",
+    "NEXT_PUBLIC_SERVER_URL",
+    "NEXT_PUBLIC_API_URL",
+    "DATABASE_URL",
+    "DIRECT_URL"
+  ],
   "ui": "tui",
-  "globalEnv": ["DATABASE_URL", "DIRECT_URL"],
   "tasks": {
     "db:generate": {
       "cache": false
     },
     "build": {
-      "dependsOn": ["^db:generate"],
+      "dependsOn": ["^build", "^db:generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
