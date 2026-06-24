@@ -1,18 +1,14 @@
-import { getDashboardData } from '@/parsers/getDashboardData'
-import { LangProps } from '@/types/lang'
 import { Metadata } from 'next'
 
-type PageProps = {
-  params: Promise<{ locale: LangProps }>
-}
+import { getQuestionsData } from '@/parsers/getQuestionData'
+
+import { QuestionsBrowse } from '@/components/organisms/QuestionsBrowse'
 
 export const metadata: Metadata = {
   title: 'Questions',
+  description: 'Browse and filter technical interview questions by level, domain, and company.',
 }
 
-export default async function QuestionsPage({ params }: PageProps) {
-  const { locale } = await params
-  const { WELCOME_SECTION_DATA } = getDashboardData()
-
-  return <main className="dashboard-container">x</main>
+export default function QuestionsPage() {
+  return <QuestionsBrowse questions={getQuestionsData()} />
 }
