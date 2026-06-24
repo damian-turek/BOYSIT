@@ -9,7 +9,9 @@ import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
 import { useAuthStore } from '@/store/useAuthStore'
+import { useAuthSessionStore } from '@/store/useAuthSessionStore'
 import { useThemeStore } from '@/store/useThemeStore'
+import { getSupabaseClient } from '@/services/supabase'
 
 import { Button } from '@/components/atoms/Button'
 
@@ -31,11 +33,19 @@ export const Header = ({ name, nav }: HeaderProps) => {
   const [lastScrollY, setLastScrollY] = useState(0)
   const t = useTranslations('Header')
   const openModal = useAuthStore((state) => state.openModal)
+  const profile = useAuthSessionStore((state) => state.profile)
+  const clearAuth = useAuthSessionStore((state) => state.clear)
 
   const router = useRouter()
   const pathname = usePathname()
   const isDark = useThemeStore((state) => state.isDark)
   const toggleTheme = useThemeStore((state) => state.toggleTheme)
+
+  const handleSignOut = async () => {
+    const supabase = getSupabaseClient()
+    await supabase.auth.signOut()
+    clearAuth()
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -136,10 +146,21 @@ export const Header = ({ name, nav }: HeaderProps) => {
             onClick={toggleTheme}
             className={`hover:[&_svg_path]:stroke-primary! ${isDark ? '[&_svg_path]:stroke-primary' : ''}`}
           />
-          <Button onClick={() => openModal('login')} variant="text" className="hover:text-primary!">
-            {t('login')}
-          </Button>
-          <Button onClick={() => openModal('register')}>{t('getStarted')} →</Button>
+          {profile ? (
+            <>
+              <span className="body-small text-gray-60">{profile.email}</span>
+              <Button onClick={() => void handleSignOut()} variant="text" className="hover:text-primary!">
+                Sign out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button onClick={() => openModal('login')} variant="text" className="hover:text-primary!">
+                {t('login')}
+              </Button>
+              <Button onClick={() => openModal('register')}>{t('getStarted')} →</Button>
+            </>
+          )}
         </div>
 
         <div className="md:hidden flex gap-2 items-center">
@@ -187,16 +208,31 @@ export const Header = ({ name, nav }: HeaderProps) => {
         </nav>
 
         <div className="flex flex-col gap-4 border-t border-gray-60/10 pt-5">
-          <Button
-            onClick={() => openModal('login')}
-            variant="text"
-            className="w-full justify-center hover:text-primary!"
-          >
-            {t('login')}
-          </Button>
-          <Button onClick={() => openModal('register')} className="w-full justify-center">
-            {t('getStarted')} →
-          </Button>
+          {profile ? (
+            <>
+              <span className="text-center body-small text-gray-60">{profile.email}</span>
+              <Button
+                onClick={() => void handleSignOut()}
+                variant="text"
+                className="w-full justify-center hover:text-primary!"
+              >
+                Sign out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                onClick={() => openModal('login')}
+                variant="text"
+                className="w-full justify-center hover:text-primary!"
+              >
+                {t('login')}
+              </Button>
+              <Button onClick={() => openModal('register')} className="w-full justify-center">
+                {t('getStarted')} →
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </motion.header>

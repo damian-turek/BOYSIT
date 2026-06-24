@@ -5,7 +5,9 @@
   "type": "module",
   "main": "dist/server.js",
   "scripts": {
+    "predev": "pnpm --filter database build",
     "dev": "tsx watch src/server.ts",
+    "prebuild": "pnpm --filter database build",
     "build": "tsc",
     "start": "node dist/server.js",
     "check-types": "tsc --noEmit",
