@@ -6,6 +6,7 @@ export type Env = {
   NODE_ENV: NodeEnv
   PORT: number
   CORS_ORIGIN: string
+  SUPABASE_JWT_SECRET: string
 }
 
 const validNodeEnvs = new Set<NodeEnv>(['development', 'test', 'production'])
@@ -38,4 +39,9 @@ export const env: Env = {
   NODE_ENV: parseNodeEnv(process.env.NODE_ENV),
   PORT: parsePort(process.env.PORT),
   CORS_ORIGIN: process.env.CORS_ORIGIN ?? 'http://localhost:3000',
+  SUPABASE_JWT_SECRET: process.env.SUPABASE_JWT_SECRET ?? '',
+}
+
+if (!env.SUPABASE_JWT_SECRET) {
+  throw new Error('SUPABASE_JWT_SECRET is required')
 }
