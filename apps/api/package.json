@@ -9,7 +9,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "check-types": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tsx --test src/**/*.test.ts"
   },
   "keywords": [],
   "author": "",

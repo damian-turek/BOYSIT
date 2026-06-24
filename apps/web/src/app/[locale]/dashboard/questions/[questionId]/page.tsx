@@ -1,7 +1,10 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
-import { getQuestionData, getQuestionSlugs } from '@/parsers/getQuestionData'
+import {
+  ApiRequestError,
+  fetchQuestion,
+} from '@/services/questionsApi'
 
 import { QuestionDetail } from '@/components/organisms/QuestionDetail'
 
@@ -12,31 +15,37 @@ type PageProps = {
   }>
 }
 
-export const generateStaticParams = () =>
-  getQuestionSlugs().flatMap((questionId) => [
-    { locale: 'en', questionId },
-    { locale: 'pl', questionId },
-  ])
+export const dynamic = 'force-dynamic'
 
 export const generateMetadata = async ({ params }: PageProps): Promise<Metadata> => {
   const { questionId } = await params
-  const data = getQuestionData(questionId)
 
-  if (!data) {
+  try {
+    const question = await fetchQuestion(questionId)
+
+    return {
+      title: `${question.title} | Questions`,
+      description:
+        question.excerpt ??
+        `${question.difficulty} ${question.category?.name ?? ''} interview question.`,
+    }
+  } catch {
     return { title: 'Question not found' }
-  }
-
-  return {
-    title: `${data.question.text} | Questions`,
-    description: `${data.question.grade} ${data.question.domain} interview question from ${data.question.company}.`,
   }
 }
 
 export default async function QuestionPage({ params }: PageProps) {
   const { questionId } = await params
-  const data = getQuestionData(questionId)
 
-  if (!data) notFound()
+  try {
+    const question = await fetchQuestion(questionId)
 
-  return <QuestionDetail {...data} />
+    return <QuestionDetail question={question} />
+  } catch (error) {
+    if (error instanceof ApiRequestError && error.status === 404) {
+      notFound()
+    }
+
+    throw error
+  }
 }
