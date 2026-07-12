@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react'
 
-import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
-
 import { AuthApiError, fetchCurrentUser } from '@/services/authApi'
 import { getSupabaseClient } from '@/services/supabase'
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
+
 import { useAuthSessionStore } from '@/store/useAuthSessionStore'
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -17,10 +17,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     let active = true
+    const supabase = getSupabaseClient()
 
     const syncSession = async () => {
       setLoading(true)
-      const supabase = getSupabaseClient()
 
       try {
         const { data } = await supabase.auth.getSession()
@@ -42,13 +42,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setProfile(profile)
         markInitialized()
       } catch (error) {
+        console.error('Auth session sync failed', error)
+
         if (error instanceof AuthApiError && error.status === 401) {
           await supabase.auth.signOut()
           clear()
-          return
+        } else {
+          setProfile(null)
+          markInitialized()
         }
-
-        console.error('Auth session sync failed', error)
       } finally {
         if (active) {
           setLoading(false)
@@ -58,9 +60,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     void syncSession()
 
-    const supabase = getSupabaseClient()
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_event: AuthChangeEvent, session: Session | null) => {
+      (_event: AuthChangeEvent, session: Session | null) => {
+        if (!active) return
+
         setSession(session)
 
         if (!session) {
@@ -70,21 +73,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return
         }
 
-        try {
-          const profile = await fetchCurrentUser()
-          setProfile(profile)
-        } catch (error) {
-          if (error instanceof AuthApiError && error.status === 401) {
-            await supabase.auth.signOut()
-            clear()
-            return
-          }
+        void (async () => {
+          try {
+            setLoading(true)
+            const profile = await fetchCurrentUser()
 
-          console.error('Auth session refresh failed', error)
-        } finally {
-          markInitialized()
-          setLoading(false)
-        }
+            if (!active) return
+
+            setProfile(profile)
+          } catch (error) {
+            console.error('Auth session refresh failed', error)
+
+            if (error instanceof AuthApiError && error.status === 401) {
+              await supabase.auth.signOut()
+              clear()
+            } else {
+              setProfile(null)
+            }
+          } finally {
+            if (active) {
+              markInitialized()
+              setLoading(false)
+            }
+          }
+        })()
       },
     )
 
