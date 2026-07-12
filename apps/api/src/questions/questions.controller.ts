@@ -4,7 +4,7 @@ import { AuthGuard } from '../auth/auth.guard'
 import { AddQuestionDto, GetQuestionDto } from './dto/questions.dto'
 
 @Controller('api/questions')
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}
 
