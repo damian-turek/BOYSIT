@@ -32,13 +32,11 @@ export class AuthApiError extends Error {
   }
 }
 
-export const fetchCurrentUser = async (
-  signal?: AbortSignal,
-): Promise<AuthUserProfile> => {
+export const fetchCurrentUser = async (signal?: AbortSignal): Promise<AuthUserProfile> => {
   const supabase = getSupabaseClient()
   const { data } = await supabase.auth.getSession()
 
-  const response = await fetch(`${apiBaseUrl}/api/v1/me`, {
+  const response = await fetch(`${apiBaseUrl}/api/me`, {
     headers: {
       Accept: 'application/json',
       ...(data.session?.access_token
