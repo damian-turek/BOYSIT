@@ -9,6 +9,7 @@ import { Pricing } from '@/components/organisms/Pricing'
 export default function Home() {
   const { HERO_DATA, FEATURES_DATA, HOW_IT_WORKS_DATA, BY_NUMBERS_DATA, PRICING_DATA } =
     getHomePageData()
+
   return (
     <main>
       <Hero {...HERO_DATA} />

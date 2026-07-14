@@ -9,21 +9,49 @@ export class QuestionsService {
 
   async findFilteredQuestions(query: GetQuestionDto) {
     const page = query.page || 1
+    const take = 20;
 
-    return this.questions.client.question.findMany({
-      where: {
-        technology: { slug: query.technology },
-        questionType: query.type,
-        difficulty: query.difficulty,
-        title: {
-          mode: 'insensitive',
-          contains: query.search
-        }
-      },
-      skip: 20 * (page - 1),
-      take: 20,
-      orderBy: { id: 'asc' }
-    })
+    const [questions, totalCount] = await this.questions.client.$transaction([
+      this.questions.client.question.findMany({
+        where: {
+          technology: { slug: query.technology },
+          questionType: query.type,
+          difficulty: query.difficulty,
+          title: {
+            mode: 'insensitive',
+            contains: query.search
+          }
+        },
+        include: {
+          category: true,
+          technology: true
+        },
+        skip: 20 * (page - 1),
+        take: 20,
+        orderBy: { id: 'asc' }
+      }),
+      this.questions.client.question.count({
+        where: {
+          technology: { slug: query.technology },
+          questionType: query.type,
+          difficulty: query.difficulty,
+          title: {
+            mode: 'insensitive',
+            contains: query.search
+          }
+        },
+        orderBy: { id: 'asc' }
+      })
+    ])
+
+    return {
+      data: questions,
+      meta: {
+        totalCount,
+        page,
+        totalPages: Math.ceil(totalCount / take)
+      }
+    }
   }
 
   async findSingle(id: string) {

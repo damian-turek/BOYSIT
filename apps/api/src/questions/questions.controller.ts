@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common'
 import { QuestionsService } from './questions.service'
 import { AuthGuard } from '../auth/auth.guard'
 import { AddQuestionDto, GetQuestionDto } from './dto/questions.dto'
@@ -19,7 +19,7 @@ export class QuestionsController {
   }
 
   @Post()
-  createOne(@Query() query: AddQuestionDto) {
-    return this.questionsService.createQuestion(query)
+  createOne(@Body() body: AddQuestionDto) {
+    return this.questionsService.createQuestion(body)
   }
 }

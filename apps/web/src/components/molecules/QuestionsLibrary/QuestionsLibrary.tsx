@@ -1,12 +1,13 @@
-// @/components/molecules/MyLibrary.tsx
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import Link from 'next/link'
 
 import { ArrowRight, Bookmark, Clock, Lightbulb } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+
+import { useBookmarksStore } from '@/store/useBookmarksStore'
 
 import { cn } from '@/utils/cn'
 
@@ -18,38 +19,43 @@ const tabIconMap = {
   Lightbulb,
 } as const
 
+type Item = {
+  id: string
+  tabId: string
+  title: string
+  category: string
+  level: string
+  levelColor: string
+  timeAgo: string
+  link: string
+}
+
 export type QuestionsLibraryProps = {
   name: string
   allQuestionsLink: string
-  tabs: {
-    id: string
-    label: string
-    icon: keyof typeof tabIconMap
-  }[]
-  items: {
-    id: string
-    tabId: string // Dodane pole mapujące
-    title: string
-    category: string
-    level: string
-    levelColor: string
-    timeAgo: string
-    link: string
-  }[]
+  tabs: { id: string; label: string; icon: keyof typeof tabIconMap }[]
 }
 
 const MotionLink = motion.create(Link)
 
-export const QuestionsLibrary = ({
-  name,
-  allQuestionsLink,
-  tabs,
-  items,
-}: QuestionsLibraryProps) => {
+export const QuestionsLibrary = ({ name, allQuestionsLink, tabs }: QuestionsLibraryProps) => {
   const [activeTab, setActiveTab] = useState(tabs[0]?.id || '')
+  const { savedItems, lastSeenItems } = useBookmarksStore()
+  const [hasHydrated, setHasHydrated] = useState(false)
 
-  const filteredItems = items.filter((item) => item.tabId === activeTab)
+  useEffect(() => {
+    setHasHydrated(true)
+  }, [])
 
+  let filteredItems: Item[] = []
+
+  if (hasHydrated) {
+    if (activeTab === 'saved') {
+      filteredItems = savedItems
+    } else if (activeTab === 'last-seen') {
+      filteredItems = lastSeenItems
+    }
+  }
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.98 }}

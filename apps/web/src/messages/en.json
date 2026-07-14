@@ -43,5 +43,9 @@
   },
   "QuestionsBank": {
     "shortcut": "Shortcuts"
+  },
+  "QuestionsPage": {
+    "inputPlaceholder": "Search questions, topics, companies...",
+    "filters": "Filters"
   }
 }
