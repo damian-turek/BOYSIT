@@ -1,4 +1,4 @@
-export type Level = 'Junior' | 'Regular' | 'Senior'
+export type Level = 'Junior' | 'Middle' | 'Senior'
 
 type Category = {
   name: string

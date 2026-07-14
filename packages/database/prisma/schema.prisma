@@ -7,67 +7,217 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Difficulty {
+  junior
+  middle
+  senior
+}
+
+enum QuestionType {
+  theory
+  practical
+  code
+  system_design
+  troubleshooting
+}
+
+enum AccessLevel {
+  free
+  pro
+}
+
+enum UserPlan {
+  free
+  pro
+  admin
+}
+
+enum SubscriptionStatus {
+  incomplete
+  incomplete_expired
+  trialing
+  active
+  past_due
+  canceled
+  unpaid
+}
+
 model User {
-  id        String            @id @default(uuid())
-  email     String            @unique
-  hashPassword  String
-  name      String?
-  surname   String?
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email          String   @unique
+  name           String?
+  authProviderId String?  @unique @map("auth_provider_id")
+  plan           UserPlan @default(free)
 
-  role      ROLE              @default(USER)
+  proUntil  DateTime? @map("pro_until")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
 
-  subscriptionCode String     @default("FREE")
-  subscription Subscription   @relation(fields: [subscriptionCode], references: [id])
+  attempts      Attempt[]
+  bookmarks     Bookmark[]
+  subscriptions Subscription[]
 
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-}
-
-enum ROLE {
-  USER
-  MENTHOR
-  ADMIN
-}
-
-enum DIFFICULTY {
-  JUNIOR
-  MIDDLE
-  SENIOR
-}
-
-model Subscription {
-  id            String   @id
-  name          String 
-  price         Int
-  durationDays  Int
-  
-  Users         User[]
-}
-
-model Question {
-  id          String      @id @default(uuid())
-  text        String
-  explanation String?
-  difficulty  DIFFICULTY  @default(MIDDLE)
-  source      String?
-  createdAt   DateTime    @default(now())
-
-  categoryId  String
-  category    Category    @relation(fields: [categoryId], references: [id])
-
-  tags        Tag[]
+  @@map("users")
 }
 
 model Category {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  slug        String    @unique   //for beautidul URL's
-  questions   Question[]
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  technologies Technology[]
+  questions    Question[]
+
+  @@map("categories")
+}
+
+model Technology {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  categoryId String?   @db.Uuid @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  questions Question[]
+
+  @@index([categoryId])
+  @@map("technologies")
+}
+
+model Question {
+  id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title        String
+  slug         String @unique
+  excerpt      String?
+
+  questionText String  @map("question_text")
+  answerText   String? @map("answer_text")
+  explanation  String?
+  codeSnippet  String? @map("code_snippet")
+
+  difficulty   Difficulty
+  questionType QuestionType @map("question_type")
+
+  // free = visible for everyone
+  // pro = visible only for paid users
+  accessLevel AccessLevel @default(free) @map("access_level")
+
+  isActive Boolean @default(true) @map("is_active")
+  verified Boolean @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  categoryId   String? @db.Uuid @map("category_id")
+  technologyId String? @db.Uuid @map("technology_id")
+
+  category   Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  technology Technology? @relation(fields: [technologyId], references: [id], onDelete: SetNull)
+
+  attempts     Attempt[]
+  bookmarks    Bookmark[]
+  questionTags QuestionTag[]
+
+  @@index([categoryId])
+  @@index([technologyId])
+  @@index([difficulty])
+  @@index([questionType])
+  @@index([accessLevel])
+  @@index([isActive])
+  @@index([verified])
+
+  @@map("questions")
 }
 
 model Tag {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  questions   Question[]
+  id   String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name String @unique
+  slug String @unique
+
+  questionTags QuestionTag[]
+
+  @@map("tags")
 }
 
+model QuestionTag {
+  questionId String @db.Uuid @map("question_id")
+  tagId      String @db.Uuid @map("tag_id")
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  tag      Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, tagId])
+  @@index([tagId])
+
+  @@map("question_tags")
+}
+
+model Attempt {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  userId     String @db.Uuid @map("user_id")
+  questionId String @db.Uuid @map("question_id")
+
+  userAnswer String? @map("user_answer")
+  score      Int?
+  feedback   String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([questionId])
+  @@index([createdAt])
+
+  @@map("attempts")
+}
+
+model Bookmark {
+  userId     String @db.Uuid @map("user_id")
+  questionId String @db.Uuid @map("question_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, questionId])
+  @@index([questionId])
+
+  @@map("bookmarks")
+}
+
+model Subscription {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  userId String @db.Uuid @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  stripeCustomerId     String? @unique @map("stripe_customer_id")
+  stripeSubscriptionId String? @unique @map("stripe_subscription_id")
+  stripePriceId        String? @map("stripe_price_id")
+
+  status           SubscriptionStatus @default(incomplete)
+  currentPeriodEnd DateTime?          @map("current_period_end")
+  cancelAtPeriodEnd Boolean           @default(false) @map("cancel_at_period_end")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@map("subscriptions")
+}

@@ -21,7 +21,9 @@ export const Search = () => {
   const [isHidden, setIsHidden] = useState(false)
 
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
+    if (inputValue === searchParams.get('search') || '') return
+
+    const delayBounceFn = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString())
 
       if (inputValue) {
@@ -30,11 +32,13 @@ export const Search = () => {
         params.delete('search')
       }
 
+      params.set('page', '1')
+
       router.push(`${pathname}?${params.toString()}`, { scroll: false })
     }, 300)
 
-    return () => clearTimeout(delayDebounceFn)
-  }, [inputValue, pathname, router])
+    return clearTimeout(delayBounceFn)
+  }, [inputValue])
 
   useEffect(() => {
     let lastScrollY = window.scrollY

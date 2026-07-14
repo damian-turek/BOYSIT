@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import React, { FormEvent, useEffect, useState } from 'react'
 
-import { router } from 'next/client'
+import { usePathname, useRouter } from 'next/navigation'
 
+import { getSupabaseClient } from '@/services/supabase'
 import { AnimatePresence, motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
@@ -17,9 +18,23 @@ import GitHubIcon from '@/assets/icons/github.svg'
 import GoogleIcon from '@/assets/icons/google.svg'
 import Logo from '@/assets/icons/logo.svg'
 
+type OAuthProvider = 'github' | 'google'
+
 export const AuthModal = () => {
   const t = useTranslations('Auth')
+  const router = useRouter()
+  const pathname = usePathname()
   const { isOpen, view, closeModal, setView } = useAuthStore()
+
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [statusMessage, setStatusMessage] = useState<string | null>(null)
+
+  const locale = pathname.startsWith('/pl') ? 'pl' : 'en'
+  const dashboardPath = `/${locale}/dashboard`
 
   useEffect(() => {
     if (isOpen) {
@@ -40,6 +55,98 @@ export const AuthModal = () => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [closeModal])
 
+  useEffect(() => {
+    if (!isOpen) {
+      setStatusMessage(null)
+      setIsSubmitting(false)
+    }
+  }, [isOpen])
+
+  const handleOAuth = async (provider: OAuthProvider) => {
+    setStatusMessage(null)
+    setIsSubmitting(true)
+    const supabase = getSupabaseClient()
+
+    const redirectTo =
+      typeof window !== 'undefined' ? `${window.location.origin}${dashboardPath}` : undefined
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo,
+      },
+    })
+
+    if (error) {
+      setStatusMessage(error.message)
+      setIsSubmitting(false)
+      return
+    }
+
+    setIsSubmitting(false)
+  }
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setStatusMessage(null)
+
+    if (view === 'register' && password !== confirmPassword) {
+      setStatusMessage('Passwords do not match')
+      return
+    }
+
+    setIsSubmitting(true)
+    console.log('x')
+    const supabase = getSupabaseClient()
+
+    console.log('x')
+    const redirectTo =
+      typeof window !== 'undefined' ? `${window.location.origin}${dashboardPath}` : undefined
+
+    console.log('x')
+    const result =
+      view === 'login'
+        ? await supabase.auth.signInWithPassword({
+            email,
+            password,
+          })
+        : await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                name,
+              },
+              emailRedirectTo: redirectTo,
+            },
+          })
+
+    console.log('x')
+    if (result.error) {
+      setStatusMessage(result.error.message)
+      setIsSubmitting(false)
+      return
+    }
+
+    console.log('x')
+    if (result.data.session) {
+      closeModal()
+      router.replace(dashboardPath)
+      setIsSubmitting(false)
+      return
+    }
+
+    console.log('x')
+    if (view === 'register') {
+      setStatusMessage('Check your email to confirm the account before logging in.')
+    } else {
+      setStatusMessage('Sign-in completed, but no active session was created.')
+    }
+
+    console.log('x')
+    setIsSubmitting(false)
+  }
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -57,72 +164,110 @@ export const AuthModal = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ type: 'spring', duration: 0.4, bounce: 0 }}
-            className="relative w-full max-w-md bg-white dark:bg-white border border-gray-60/20 dark:border-gray-10/30 rounded-2xl p-6 md:p-8 shadow-2xl z-10 flex flex-col items-center"
+            className="relative z-10 flex w-full max-w-md flex-col items-center rounded-2xl border border-gray-60/20 bg-white p-6 shadow-2xl md:p-8 dark:border-gray-10/30 dark:bg-white"
           >
             <Button
               onClick={closeModal}
               icon={CloseIcon}
               variant="text"
-              className="absolute top-4 right-4"
+              className="absolute right-4 top-4"
               aria-label="Close modal"
             />
 
-            <div className="absolute text-gray-100 -top-15 body-font font-bold tracking-[-0.6px] flex gap-2 items-center font-">
-              <Button icon={Logo} iconOnly className="w-10 h-10" />
+            <div className="absolute -top-15 flex items-center gap-2 font-bold tracking-[-0.6px] text-gray-100 body-font">
+              <Button icon={Logo} iconOnly className="h-10 w-10" />
               PrepCode
             </div>
 
-            <div className="flex flex-col items-center mb-8 w-full text-center">
+            <div className="mb-8 flex w-full flex-col items-center text-center">
               <h3 className="body-font font-bold text-gray-100">
                 {view === 'login' ? t('title') : t('registerTitle')}
               </h3>
-              <p className="body-medium text-gray-60 mt-1">
+              <p className="body-medium mt-1 text-gray-60">
                 {view === 'login' ? t('description') : t('registerDescription')}
               </p>
             </div>
 
-            <div className="flex items-center gap-3 mb-6 w-full">
-              <Button icon={GitHubIcon} variant="secondary" className="w-full">
+            <div className="mb-6 flex w-full items-center gap-3">
+              <Button
+                icon={GitHubIcon}
+                variant="secondary"
+                className="w-full"
+                onClick={() => void handleOAuth('github')}
+                disabled={isSubmitting}
+              >
                 GitHub
               </Button>
-              <Button icon={GoogleIcon} variant="secondary" className="w-full">
+              <Button
+                icon={GoogleIcon}
+                variant="secondary"
+                className="w-full"
+                onClick={() => void handleOAuth('google')}
+                disabled={isSubmitting}
+              >
                 Google
               </Button>
             </div>
 
-            <div className="relative w-full flex items-center justify-center my-5">
-              <div className="w-full h-px bg-gray-60/20" />
-              <span className="absolute bg-white dark:bg-white px-3 body-small text-gray-60">
+            <div className="relative my-5 flex w-full items-center justify-center">
+              <div className="h-px w-full bg-gray-60/20" />
+              <span className="absolute bg-white px-3 body-small text-gray-60 dark:bg-white">
                 {t('label')}
               </span>
             </div>
 
-            <form onSubmit={(e) => e.preventDefault()} className="w-full flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
               {view === 'register' && (
-                <Input label={t('name')} type="text" placeholder="John Doe" required />
+                <Input
+                  label={t('name')}
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
               )}
 
-              <Input label={t('email')} type="email" placeholder="name@example.com" required />
+              <Input
+                label={t('email')}
+                type="email"
+                placeholder="name@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
 
-              <Input label={t('password')} type="password" placeholder="••••••••" required />
+              <Input
+                label={t('password')}
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
 
               {view === 'register' && (
                 <Input
                   label={t('confirmPassword')}
                   type="password"
                   placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                   required
                 />
               )}
 
               <Button
                 type="submit"
-                className="w-full justify-center shadow-md shadow-primary/20 mt-2"
+                className="mt-2 w-full justify-center shadow-md shadow-primary/20"
                 size="lg"
+                disabled={isSubmitting}
               >
-                {view === 'login' ? t('login') : t('register')}
+                {isSubmitting ? 'Please wait...' : view === 'login' ? t('login') : t('register')}
               </Button>
             </form>
+
+            {statusMessage && <p className="mt-4 w-full text-sm text-gray-60">{statusMessage}</p>}
 
             <div className="mt-6 text-center body-medium text-gray-60">
               {view === 'login' ? (
@@ -130,7 +275,7 @@ export const AuthModal = () => {
                   {t('dontHaveAccount')}
                   <span
                     onClick={() => setView('register')}
-                    className="text-primary cursor-pointer hover:font-semibold transition-all duration-150"
+                    className="cursor-pointer text-primary transition-all duration-150 hover:font-semibold"
                   >
                     {t('signup')}
                   </span>
@@ -140,7 +285,7 @@ export const AuthModal = () => {
                   {t('alreadyHaveAccount')}
                   <span
                     onClick={() => setView('login')}
-                    className="text-primary cursor-pointer hover:font-semibold transition-all duration-150"
+                    className="cursor-pointer text-primary transition-all duration-150 hover:font-semibold"
                   >
                     {t('login')}
                   </span>

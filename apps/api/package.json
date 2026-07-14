@@ -1,36 +1,31 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.ts",
   "scripts": {
-    "dev": "tsx watch index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "predev": "pnpm --filter database build",
+    "dev": "nest start --watch",
+    "prebuild": "pnpm --filter database build",
+    "build": "nest build",
+    "start": "node dist/main.js",
+    "check-types": "tsc --noEmit"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "@prisma/adapter-pg": "^7.8.0",
-    "bcrypt": "^6.0.0",
-    "cors": "^2.8.6",
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^4.0.4",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/platform-fastify": "^11.0.0",
+    "@supabase/supabase-js": "^2.49.1",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
     "database": "workspace:*",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "helmet": "^8.2.0",
-    "jsonwebtoken": "^9.0.3",
-    "pg": "^8.21.0"
+    "fastify": "^5.0.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
-    "@types/jsonwebtoken": "^9.0.10",
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/schematics": "^11.0.0",
     "@types/node": "^22.15.3",
-    "@types/pg": "^8.20.0",
-    "tsx": "^4.22.4",
-    "typescript": "^6.0.3"
+    "typescript": "^5.7.0"
   }
 }

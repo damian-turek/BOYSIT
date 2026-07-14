@@ -1,5 +1,10 @@
+'use client'
+
+import { useSearchParams } from 'next/navigation'
+
 import { Question } from '@/types/question'
 
+import { Pagination } from '@/components/atoms/Pagination'
 import { QuestionCard } from '@/components/molecules/QuestionCard'
 
 export type QuestionsProps = {
@@ -8,7 +13,9 @@ export type QuestionsProps = {
 }
 
 export const Questions = ({ questionsCount, questions }: QuestionsProps) => {
-  const levelOrder = { Junior: 1, Regular: 2, Senior: 3 }
+  const searchParams = useSearchParams()
+  const currentPage = Number(searchParams.get('page')) || 1
+  const totalPages = Math.ceil(questionsCount / 20)
 
   return (
     <section className="mt-40 md:mt-20">
@@ -18,12 +25,12 @@ export const Questions = ({ questionsCount, questions }: QuestionsProps) => {
       </p>
 
       <div className="flex flex-col gap-3">
-        {[...questions]
-          .sort((a, b) => levelOrder[a.level] - levelOrder[b.level])
-          .map((question) => (
-            <QuestionCard {...question} key={question.index} />
-          ))}
+        {questions.map((question) => (
+          <QuestionCard {...question} key={question.index} />
+        ))}
       </div>
+
+      <Pagination currentPage={currentPage} totalPages={totalPages} />
     </section>
   )
 }

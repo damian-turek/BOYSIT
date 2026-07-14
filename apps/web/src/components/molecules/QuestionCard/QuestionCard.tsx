@@ -2,15 +2,17 @@
 
 import { useState } from 'react'
 
+import Link from 'next/link'
+
 import { Level, Question } from '@/types/question'
 import {
-  // eslint-disable-next-line no-shadow-restricted-names
   Infinity,
   Bookmark,
   ChartColumn,
   ChevronDown,
   CircleCheck,
   CodeXml,
+  Component,
   Cpu,
   Database,
   Globe,
@@ -20,6 +22,7 @@ import {
   Server,
   Shield,
   Terminal,
+  Variable,
   Zap,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
@@ -36,18 +39,20 @@ const iconMap: Record<string, LucideIcon> = {
   'CSS & HTML': Globe,
   Algorithms: Cpu,
   Terminal: Terminal,
+  'System Design': Layers,
+  Backend: Variable,
+  Frontend: Component,
   Performance: Zap,
   Databases: Database,
   Testing: CircleCheck,
   Concurrency: ChartColumn,
   DevOps: Infinity,
   Architecture: Server,
-  SystemDesign: Layers,
 }
 
 const levelColorMap: Record<Level, string> = {
   Junior: 'bg-success-50/15 text-success-50 border-success-50/30',
-  Regular: 'bg-warning-50/15 text-warning-50 border-warning-50/30',
+  Middle: 'bg-warning-50/15 text-warning-50 border-warning-50/30',
   Senior: 'bg-alert-50/15 text-alert-50 border-alert-50/30',
 }
 
@@ -59,35 +64,31 @@ export const QuestionCard = ({
   category,
   question,
   answer,
-}: Question) => {
+  pageNumber,
+}: Question & { pageNumber?: number }) => {
   const [isOpen, setIsOpen] = useState(false)
   const { toggleBookmark, savedIds, addToLastSeen } = useBookmarksStore()
-  const qId = `q-generated-${index}`
+  const qId = index.toString()
   const isBookmarked = savedIds.includes(qId)
 
   const matchedIcon = category ? iconMap[category.name] : undefined
   const SelectedIcon: LucideIcon = matchedIcon || HelpCircle
-
   const levelClass = levelColorMap[level]
-
-  const handleCardClick = () => {
-    const nextOpenState = !isOpen
-    setIsOpen(nextOpenState)
-
-    if (nextOpenState) {
-      addToLastSeen({ index, level, company, technologies, category, question, answer })
-    }
-  }
 
   return (
     <div
       className={cn(
-        `w-full p-5 flex gap-4 border rounded-xl bg-gray-60/5 transition-colors duration-200 cursor-pointer select-none hover:bg-gray-60/10`,
+        'relative w-full p-5 flex gap-4 border rounded-xl bg-gray-60/5 transition-colors duration-200 select-none hover:bg-gray-60/10',
         isOpen ? 'border-primary shadow-xs' : 'border-gray-60/40',
       )}
-      onClick={handleCardClick}
     >
-      <p className="label-font text-gray-60 mt-1 mr-2">{index < 10 ? `0${index}` : index}</p>
+      <Link href={`/dashboard/questions/${qId}`} className="after:absolute after:inset-0 z-0">
+        <span className="sr-only">Zobacz szczegóły</span>
+      </Link>
+
+      <p className="label-font text-gray-60 mt-1 mr-2">
+        {index < 10 ? `0${pageNumber}` : pageNumber}
+      </p>
 
       <div className="w-full flex flex-col gap-3">
         <div className="flex flex-wrap gap-3 items-center">
@@ -122,7 +123,6 @@ export const QuestionCard = ({
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.15, ease: 'easeInOut' }}
               className="overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
             >
               <div className="pt-4 border-t border-gray-60/20">
                 <p className="body-medium text-gray-60">{answer}</p>
@@ -132,7 +132,7 @@ export const QuestionCard = ({
         </AnimatePresence>
       </div>
 
-      <div className="flex gap-2 mt-0.5">
+      <div className="relative z-10 flex gap-2 mt-0.5">
         <button
           onClick={(e) => {
             e.stopPropagation()
@@ -143,7 +143,6 @@ export const QuestionCard = ({
             isBookmarked ? 'text-primary' : 'text-gray-60 hover:text-primary',
           )}
         >
-          {/* Dynamiczne sterowanie parametrem fill oraz stroke */}
           <Bookmark
             size={15}
             fill={isBookmarked ? 'currentColor' : 'none'}
@@ -154,7 +153,13 @@ export const QuestionCard = ({
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.2, ease: 'easeInOut' }}
-          className="text-gray-60 h-fit"
+          className="text-gray-60 h-fit cursor-pointer"
+          onClick={() => {
+            setIsOpen(!isOpen)
+            if (!isOpen) {
+              addToLastSeen({ index, level, company, technologies, category, question, answer })
+            }
+          }}
         >
           <ChevronDown size={16} />
         </motion.div>

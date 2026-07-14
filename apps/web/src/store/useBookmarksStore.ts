@@ -35,7 +35,7 @@ export const useBookmarksStore = create<BookmarksState>()(
       lastSeenItems: [],
 
       toggleBookmark: (question) => {
-        const qId = `q-generated-${question.index}`
+        const qId = question.index.toString()
         const isAlreadySaved = get().savedIds.includes(qId)
 
         if (isAlreadySaved) {
@@ -62,7 +62,7 @@ export const useBookmarksStore = create<BookmarksState>()(
       },
 
       addToLastSeen: (question) => {
-        const qId = `q-generated-${question.index}`
+        const qId = question.index.toString()
 
         const filtered = get().lastSeenItems.filter((item) => item.id !== qId)
 
