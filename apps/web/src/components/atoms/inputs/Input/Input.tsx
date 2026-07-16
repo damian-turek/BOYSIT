@@ -1,9 +1,9 @@
 'use client'
 
-import * as React from 'react'
-import { useState } from 'react'
+/* eslint-disable react/prop-types */
 
-import { ReactSVG } from 'react-svg'
+import * as React from 'react'
+import { useId, useState } from 'react'
 
 import { cn } from '@/utils/cn'
 
@@ -17,9 +17,11 @@ export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   className?: string
 }
 
-export const Input = ({ className, label, error, type, ...props }: InputProps) => {
+export const Input = ({ className, id, label, error, type, ...props }: InputProps) => {
+  const generatedId = useId()
   const [showPassword, setShowPassword] = useState(false)
   const isPasswordType = type === 'password'
+  const inputId = id ?? generatedId
 
   const currentType = isPasswordType ? (showPassword ? 'text' : 'password') : type
 
@@ -29,10 +31,15 @@ export const Input = ({ className, label, error, type, ...props }: InputProps) =
 
   return (
     <div className="flex flex-col gap-1.5 w-full">
-      {label && <label className="label-font text-gray-60 select-none">{label}</label>}
+      {label && (
+        <label htmlFor={inputId} className="label-font text-gray-60 select-none">
+          {label}
+        </label>
+      )}
 
       <div className="relative w-full flex items-center">
         <input
+          id={inputId}
           type={currentType}
           className={cn(
             'w-full h-11 px-4 rounded-xl transition-colors duration-200',
