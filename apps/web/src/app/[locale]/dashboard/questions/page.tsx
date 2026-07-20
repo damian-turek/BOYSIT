@@ -2,7 +2,7 @@ import { getQuestionsPageData } from '@/parsers/getQuestionsPageData'
 import { LangProps } from '@/types/lang'
 import { Metadata } from 'next'
 
-import { Search } from '@/components/organisms/Filters'
+import { DesktopFilters, Search } from '@/components/organisms/Filters'
 import { Questions } from '@/components/organisms/Questions'
 
 type PageProps = {
@@ -18,13 +18,19 @@ export const metadata: Metadata = {
 
 export default async function QuestionsPage({ params, searchParams }: PageProps) {
   const filters = await searchParams
-  const { QUESTIONS_DATA } = await getQuestionsPageData(filters)
+  const { QUESTIONS_DATA, dbCategories, dbTechnologies } = await getQuestionsPageData(filters)
 
   return (
     <>
-      <Search />
+      <Search categories={dbCategories} technologies={dbTechnologies} />
       <main className="dashboard-container">
-        <Questions {...QUESTIONS_DATA} />
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          <DesktopFilters categories={dbCategories} technologies={dbTechnologies} />
+
+          <div className="flex-1 w-full">
+            <Questions {...QUESTIONS_DATA} />
+          </div>
+        </div>
       </main>
     </>
   )

@@ -4,14 +4,15 @@ import { useEffect, useState } from 'react'
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
-import { Filter, Search as SearchIcon } from 'lucide-react'
+import { Search as SearchIcon } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
-import { Button } from '@/components/atoms/Button'
 import { Input } from '@/components/atoms/inputs/Input'
+import { FiltersContentProps } from '@/components/organisms/Filters/FiltersContent'
+import { MobileFilters } from '@/components/organisms/Filters/MobileFilters'
 
-export const Search = () => {
+export const Search = ({ categories, technologies }: FiltersContentProps) => {
   const t = useTranslations('QuestionsPage')
   const router = useRouter()
   const pathname = usePathname()
@@ -21,12 +22,13 @@ export const Search = () => {
   const [isHidden, setIsHidden] = useState(false)
 
   useEffect(() => {
-    if (inputValue === searchParams.get('search') || '') return
+    // Zabezpieczenie przed niepotrzebnym triggerem na starcie
+    if (inputValue === (searchParams.get('search') || '')) return
 
     const delayBounceFn = setTimeout(() => {
       const params = new URLSearchParams(searchParams.toString())
 
-      if (inputValue) {
+      if (inputValue.trim()) {
         params.set('search', inputValue)
       } else {
         params.delete('search')
@@ -37,8 +39,8 @@ export const Search = () => {
       router.push(`${pathname}?${params.toString()}`, { scroll: false })
     }, 300)
 
-    return clearTimeout(delayBounceFn)
-  }, [inputValue])
+    return () => clearTimeout(delayBounceFn)
+  }, [inputValue, pathname, router, searchParams])
 
   useEffect(() => {
     let lastScrollY = window.scrollY
@@ -85,8 +87,8 @@ export const Search = () => {
       transition={{ duration: 0.25, ease: 'easeInOut' }}
       className="fixed top-0 left-0 w-full border-b border-gray-60/30 bg-white z-10"
     >
-      <div className="flex w-screen flex-col gap-3 items-end dashboard-container mt-20 md:mt-0 pr-8 py-3">
-        <div className="w-full relative">
+      <div className="flex w-screen flex-col gap-3 items-end md:items-start dashboard-container mt-20 md:mt-0 pr-8 py-3">
+        <div className="2xl:w-full w-full md:w-[calc(100%-14rem)] relative">
           <SearchIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-60" />
           <Input
             type="text"
@@ -97,9 +99,7 @@ export const Search = () => {
           />
         </div>
 
-        <Button className="md:hidden" variant="secondary" icon={Filter}>
-          {t('filters')}
-        </Button>
+        <MobileFilters categories={categories} technologies={technologies} />
       </div>
     </motion.div>
   )

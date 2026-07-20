@@ -3,7 +3,7 @@ import { readFile } from 'fs/promises'
 import path from 'path'
 import { getPayload } from 'payload'
 
-type Difficulty = 'junior' | 'middle' | 'senior'
+export type Difficulty = 'junior' | 'middle' | 'senior'
 type QuestionType = 'theory' | 'practical' | 'code' | 'system_design' | 'troubleshooting'
 type AccessLevel = 'free' | 'pro'
 
@@ -135,7 +135,10 @@ const upsertBySlug = async (
 ): Promise<PayloadDoc> => {
   const existing = await findBySlug(payload, collection, slug)
   const localApi = payload as unknown as {
-    create: (args: { collection: CollectionSlug; data: Record<string, unknown> }) => Promise<PayloadDoc>
+    create: (args: {
+      collection: CollectionSlug
+      data: Record<string, unknown>
+    }) => Promise<PayloadDoc>
     update: (args: {
       collection: CollectionSlug
       data: Record<string, unknown>
@@ -186,7 +189,9 @@ const main = async () => {
 
   for (const technologyName of technologies) {
     const slug = slugify(technologyName)
-    const firstQuestion = importFile.questions.find((question) => question.technology === technologyName)
+    const firstQuestion = importFile.questions.find(
+      (question) => question.technology === technologyName,
+    )
     const categoryId = firstQuestion ? categoryIds.get(firstQuestion.category) : undefined
 
     const technology = await upsertBySlug(payload, 'cms-technologies', slug, {
@@ -220,7 +225,9 @@ const main = async () => {
     }
 
     const technologyId = question.technology ? technologyIds.get(question.technology) : undefined
-    const questionTagIds = (question.tags ?? []).map((tag) => tagIds.get(tag)).filter(Boolean) as string[]
+    const questionTagIds = (question.tags ?? [])
+      .map((tag) => tagIds.get(tag))
+      .filter(Boolean) as string[]
 
     await upsertBySlug(payload, 'cms-questions', question.slug, {
       accessLevel: question.accessLevel,

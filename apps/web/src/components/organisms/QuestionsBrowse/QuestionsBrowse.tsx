@@ -4,6 +4,7 @@ import { MouseEvent, useEffect, useMemo, useState } from 'react'
 
 import Link from 'next/link'
 
+import { Category, Level } from '@/types/question'
 import {
   Bookmark,
   BookmarkCheck,
@@ -28,26 +29,15 @@ import {
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 
-import { useAuthStore } from '@/store/useAuthStore'
 import { useAuthSessionStore } from '@/store/useAuthSessionStore'
+import { useAuthStore } from '@/store/useAuthStore'
 
-import {
-  Category,
-  fetchCategories,
-  fetchQuestion,
-  fetchQuestions,
-  fetchTechnologies,
-  Pagination,
-  QuestionDetailData,
-  QuestionDifficulty,
-  QuestionPreview,
-  Technology,
-} from '@/services/questionsApi'
 import { cn } from '@/utils/cn'
 
-type GradeFilter = 'all' | QuestionDifficulty
+type GradeFilter = 'all' | Level
 
 const PAGE_SIZE = 20
+const MAX_DETAIL_CACHE_SIZE = 120
 
 const categoryIconConfig = {
   algorithms: { icon: Cpu, color: 'text-[#2B7FFF]' },
@@ -60,7 +50,7 @@ const categoryIconConfig = {
   testing: { icon: CheckCircle2, color: 'text-[#14B8A6]' },
 } as const
 
-const gradeConfig: Record<QuestionDifficulty, { label: string; className: string }> = {
+const gradeConfig: Record<Level, { label: string; className: string }> = {
   junior: {
     label: 'Junior',
     className:
@@ -78,7 +68,7 @@ const gradeConfig: Record<QuestionDifficulty, { label: string; className: string
   },
 }
 
-const GradeBadge = ({ grade }: { grade: QuestionDifficulty }) => {
+const GradeBadge = ({ grade }: { grade: Level }) => {
   const config = gradeConfig[grade]
 
   return (
@@ -135,10 +125,8 @@ const QuestionCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.03, 0.25), duration: 0.3 }}
       className={cn(
-        'group overflow-hidden rounded-2xl border bg-[var(--color-gray-05)] transition-colors duration-200',
-        expanded
-          ? 'border-primary/40'
-          : 'border-[var(--color-gray-10)] hover:border-primary/25',
+        'group overflow-hidden rounded-2xl border bg-(--color-gray-05) transition-colors duration-200',
+        expanded ? 'border-primary/40' : 'border-[var(--color-gray-10)] hover:border-primary/25',
       )}
     >
       <div className="flex items-start gap-3 p-4 sm:gap-4 sm:p-5">
@@ -200,11 +188,7 @@ const QuestionCard = ({
             aria-pressed={saved}
             className="flex size-8 cursor-pointer items-center justify-center rounded-lg text-gray-60 transition-all hover:bg-white hover:text-primary"
           >
-            {saved ? (
-              <BookmarkCheck size={15} className="text-primary" />
-            ) : (
-              <Bookmark size={15} />
-            )}
+            {saved ? <BookmarkCheck size={15} className="text-primary" /> : <Bookmark size={15} />}
           </button>
           <button
             type="button"
@@ -342,9 +326,9 @@ const FilterSidebar = ({
 
   const grades: { value: GradeFilter; label: string }[] = [
     { value: 'all', label: 'All levels' },
-    { value: 'junior', label: 'Junior' },
-    { value: 'middle', label: 'Mid-level' },
-    { value: 'senior', label: 'Senior' },
+    { value: 'Junior', label: 'Junior' },
+    { value: 'Middle', label: 'Middle' },
+    { value: 'Senior', label: 'Senior' },
   ]
 
   return (
@@ -352,9 +336,7 @@ const FilterSidebar = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <SlidersHorizontal size={15} className="text-primary" />
-          <span className="text-[14px] leading-[22px] font-semibold text-gray-100">
-            Filters
-          </span>
+          <span className="text-[14px] leading-[22px] font-semibold text-gray-100">Filters</span>
         </div>
         {hasActiveFilters && (
           <button
@@ -402,8 +384,7 @@ const FilterSidebar = ({
         <div className="space-y-0.5">
           {categories.map((category) => {
             const active = selectedCategories.includes(category.slug)
-            const config =
-              categoryIconConfig[category.slug as keyof typeof categoryIconConfig]
+            const config = categoryIconConfig[category.slug as keyof typeof categoryIconConfig]
             const Icon = config?.icon ?? Code2
 
             return (
@@ -462,9 +443,7 @@ const FilterSidebar = ({
           <Crown size={15} className="text-primary" />
           <span className="text-xs font-bold text-primary">Pro Plan</span>
         </div>
-        <p className="body-small mb-3 text-gray-60">
-          Unlock all Pro questions and expert answers.
-        </p>
+        <p className="body-small mb-3 text-gray-60">Unlock all Pro questions and expert answers.</p>
         <Link
           href="/pricing"
           className="block rounded-full bg-primary py-2 text-center text-xs font-semibold text-white transition-opacity hover:opacity-90"
@@ -484,13 +463,7 @@ type FilterSectionProps = {
   children: React.ReactNode
 }
 
-const FilterSection = ({
-  label,
-  count,
-  expanded,
-  onToggle,
-  children,
-}: FilterSectionProps) => (
+const FilterSection = ({ label, count, expanded, onToggle, children }: FilterSectionProps) => (
   <div>
     <button
       type="button"
@@ -549,10 +522,7 @@ export const QuestionsBrowse = () => {
   useEffect(() => {
     const controller = new AbortController()
 
-    void Promise.all([
-      fetchCategories(controller.signal),
-      fetchTechnologies(controller.signal),
-    ])
+    void Promise.all([fetchCategories(controller.signal), fetchTechnologies(controller.signal)])
       .then(([categoryData, technologyData]) => {
         setCategories(categoryData)
         setTechnologies(technologyData)
@@ -595,6 +565,9 @@ export const QuestionsBrowse = () => {
             setQuestions(response.data)
             setPagination(response.pagination)
             setExpandedId(null)
+            // Reset answer detail cache when the query context changes.
+            setDetails({})
+            setDetailErrors({})
           })
           .catch((requestError: unknown) => {
             if (requestError instanceof DOMException && requestError.name === 'AbortError') return
@@ -617,8 +590,7 @@ export const QuestionsBrowse = () => {
     if (selectedCategories.length === 0) return technologies
 
     return technologies.filter(
-      (technology) =>
-        technology.category && selectedCategories.includes(technology.category.slug),
+      (technology) => technology.category && selectedCategories.includes(technology.category.slug),
     )
   }, [selectedCategories, technologies])
 
@@ -653,7 +625,15 @@ export const QuestionsBrowse = () => {
 
     try {
       const detail = await fetchQuestion(question.slug)
-      setDetails((current) => ({ ...current, [question.id]: detail }))
+      setDetails((current) => {
+        const next = { ...current, [question.id]: detail }
+        const keys = Object.keys(next)
+
+        if (keys.length <= MAX_DETAIL_CACHE_SIZE) return next
+
+        delete next[keys[0]]
+        return next
+      })
     } catch {
       setDetailErrors((current) => ({
         ...current,
@@ -694,9 +674,7 @@ export const QuestionsBrowse = () => {
   }
 
   const hasActiveFilters =
-    grade !== 'all' ||
-    selectedCategories.length > 0 ||
-    selectedTechnologies.length > 0
+    grade !== 'all' || selectedCategories.length > 0 || selectedTechnologies.length > 0
 
   const clearAll = () => {
     setGrade('all')
@@ -739,10 +717,7 @@ export const QuestionsBrowse = () => {
       <div className="sticky top-16 z-30 -mx-4 border-b border-[var(--color-gray-10)] bg-white/95 px-4 py-4 backdrop-blur-md md:top-0 lg:-mx-8 lg:px-8">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative min-w-0 flex-1">
-            <Search
-              size={15}
-              className="absolute top-1/2 left-3.5 -translate-y-1/2 text-gray-60"
-            />
+            <Search size={15} className="absolute top-1/2 left-3.5 -translate-y-1/2 text-gray-60" />
             <input
               type="search"
               aria-label="Search questions"
@@ -892,9 +867,7 @@ export const QuestionsBrowse = () => {
               <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-white">
                 <RefreshCw size={22} className="text-gray-60" />
               </div>
-              <p className="mb-1 text-sm font-semibold text-gray-100">
-                Questions are unavailable
-              </p>
+              <p className="mb-1 text-sm font-semibold text-gray-100">Questions are unavailable</p>
               <p className="body-small mb-4 text-gray-60">{error}</p>
               <button
                 type="button"
