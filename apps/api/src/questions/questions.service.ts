@@ -1,88 +1,70 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
+import { GetQuestionsDto } from './dto/questions.dto'
+import { QuestionWhereInput } from 'database'
 import { PrismaService } from '../prisma/prisma.service'
-import { AddQuestionDto, GetQuestionDto } from './dto/questions.dto'
-import { Prisma } from 'database/dist/generated/prisma/client'
 
 @Injectable()
 export class QuestionsService {
-  constructor(private readonly questions: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async findFilteredQuestions(query: GetQuestionDto) {
-    const page = query.page || 1
-    const take = 20;
+  async findAll(query: GetQuestionsDto) {
+    const { search, accessLevel, categories, technologies, difficulty, type, page, limit } = query
 
-    const [questions, totalCount] = await this.questions.client.$transaction([
-      this.questions.client.question.findMany({
-        where: {
-          technology: { slug: query.technology },
-          questionType: query.type,
-          difficulty: query.difficulty,
-          title: {
-            mode: 'insensitive',
-            contains: query.search
-          }
-        },
+    const where: QuestionWhereInput = {
+      isActive: true
+    }
+
+    if (search) {
+      where.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { excerpt: { contains: search, mode: 'insensitive' } },
+        { questionText: { contains: search, mode: 'insensitive' } },
+      ]
+    }
+
+    if (categories && categories.length > 0) {
+      where.category = {
+        slug: { in: categories }
+      }
+    }
+
+    if (technologies && technologies.length > 0) {
+      where.technology = {
+        slug: { in: technologies }
+      }
+    }
+    if (difficulty) where.difficulty = difficulty
+    if (type) where.questionType = type
+    if (accessLevel) where.accessLevel = accessLevel
+
+    const pageNumber = page ? Number(page) : 1
+    const limitNumber = limit ? Number(limit) : 10
+
+    const skip = (pageNumber - 1) * limitNumber
+    const take = limitNumber
+
+    const [data, total] = await this.prisma.client.$transaction([
+      this.prisma.client.question.findMany({
+        where,
+        skip,
+        take,
         include: {
-          category: true,
-          technology: true
-        },
-        skip: 20 * (page - 1),
-        take: 20,
-        orderBy: { id: 'asc' }
+          category: { select: { id: true, name: true, slug: true } },
+          technology: { select: { id: true, name: true, slug: true } },
+          questionTags: { select: { tag: true } },
+        }
       }),
-      this.questions.client.question.count({
-        where: {
-          technology: { slug: query.technology },
-          questionType: query.type,
-          difficulty: query.difficulty,
-          title: {
-            mode: 'insensitive',
-            contains: query.search
-          }
-        },
-        orderBy: { id: 'asc' }
-      })
+      this.prisma.client.question.count({ where })
     ])
 
     return {
-      data: questions,
+      data,
       meta: {
-        totalCount,
-        page,
-        totalPages: Math.ceil(totalCount / take)
+        total,
+        page: pageNumber,
+        limit: limitNumber,
+        totalPages: Math.ceil(total / take),
       }
-    }
-  }
-
-  async findSingle(id: string) {
-    return this.questions.client.question.findUnique({
-      where: {
-        id: id,
-      }
-    })
-  }
-
-  async createQuestion(query: AddQuestionDto) {
-    try {
-      const { categoryId, technologyId, ...restOfData } = query
-
-      return this.questions.client.question.create({
-        data: {
-          ...restOfData,
-          ...(categoryId && { category: { connect: { id: categoryId } } }),
-          ...(technologyId && { technology: { connect: { id: technologyId } } }),
-        }
-      })
-
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new ConflictException('Question with this slug already exists')
-        }
-      }
-
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      throw new InternalServerErrorException(`Error: ${errorMessage}`)
     }
   }
 }

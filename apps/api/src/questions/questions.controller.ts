@@ -1,25 +1,16 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common'
+import { Controller, Get, Query, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common'
+import { GetQuestionsDto } from './dto/questions.dto'
 import { QuestionsService } from './questions.service'
 import { AuthGuard } from '../auth/auth.guard'
-import { AddQuestionDto, GetQuestionDto } from './dto/questions.dto'
 
-@Controller('api/questions')
-// @UseGuards(AuthGuard)
+@Controller('questions')
 export class QuestionsController {
   constructor(private readonly questionsService: QuestionsService) {}
 
   @Get()
-  findFilteredQuestions(@Query() query: GetQuestionDto) {
-    return this.questionsService.findFilteredQuestions(query)
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.questionsService.findSingle(id)
-  }
-
-  @Post()
-  createOne(@Body() body: AddQuestionDto) {
-    return this.questionsService.createQuestion(body)
+  // @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async getQuestions(@Query() query: GetQuestionsDto, @Req() req: any) {
+    return this.questionsService.findAll(query)
   }
 }

@@ -9,7 +9,7 @@ interface LibraryItem {
   category: string
   level: string
   levelColor: string
-  timeAgo: string
+  timestamp: number
   link: string
 }
 
@@ -21,10 +21,14 @@ interface BookmarksState {
   addToLastSeen: (question: Question) => void
 }
 
-const levelColors: Record<string, string> = {
-  Junior: '#00BC7D',
-  Regular: '#FE9A00',
-  Senior: '#FF2056',
+const getLevelColor = (level: string): string => {
+  const fallbackColors: Record<string, string> = {
+    Junior: '#00BC7D',
+    Middle: '#FE9A00',
+    Regular: '#FE9A00',
+    Senior: '#FF2056',
+  }
+  return fallbackColors[level] || '#FE9A00'
 }
 
 export const useBookmarksStore = create<BookmarksState>()(
@@ -36,12 +40,13 @@ export const useBookmarksStore = create<BookmarksState>()(
 
       toggleBookmark: (question) => {
         const qId = question.index.toString()
-        const isAlreadySaved = get().savedIds.includes(qId)
+        const { savedIds, savedItems } = get()
+        const isAlreadySaved = savedIds.includes(qId)
 
         if (isAlreadySaved) {
           set({
-            savedIds: get().savedIds.filter((id) => id !== qId),
-            savedItems: get().savedItems.filter((item) => item.id !== qId),
+            savedIds: savedIds.filter((id) => id !== qId),
+            savedItems: savedItems.filter((item) => item.id !== qId),
           })
         } else {
           const newItem: LibraryItem = {
@@ -50,21 +55,22 @@ export const useBookmarksStore = create<BookmarksState>()(
             title: question.question,
             category: question.category?.name || 'General',
             level: question.level,
-            levelColor: levelColors[question.level] || '#FE9A00',
-            timeAgo: 'Just now',
+            levelColor: getLevelColor(question.level),
+            timestamp: Date.now(),
             link: `/dashboard/questions`,
           }
           set({
-            savedIds: [...get().savedIds, qId],
-            savedItems: [newItem, ...get().savedItems],
+            savedIds: [...savedIds, qId],
+            savedItems: [newItem, ...savedItems],
           })
         }
       },
 
       addToLastSeen: (question) => {
         const qId = question.index.toString()
+        const { lastSeenItems } = get()
 
-        const filtered = get().lastSeenItems.filter((item) => item.id !== qId)
+        const filtered = lastSeenItems.filter((item) => item.id !== qId)
 
         const newItem: LibraryItem = {
           id: qId,
@@ -72,8 +78,8 @@ export const useBookmarksStore = create<BookmarksState>()(
           title: question.question,
           category: question.category?.name || 'General',
           level: question.level,
-          levelColor: levelColors[question.level] || '#FE9A00',
-          timeAgo: '1m ago', // Można tu wstawić dynamiczny czas
+          levelColor: getLevelColor(question.level),
+          timestamp: Date.now(), // Dokładny czas kliknięcia
           link: `/dashboard/questions/${question.index}`,
         }
 
@@ -84,6 +90,7 @@ export const useBookmarksStore = create<BookmarksState>()(
     }),
     {
       name: 'prepcode-bookmarks',
+      skipHydration: true,
     },
   ),
 )

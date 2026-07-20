@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { User } from '@supabase/supabase-js'
 
 export interface UserProfileResponse {
   data: {
     id: string
-    email: string | undefined
+    email: string
     name: string | null
     plan: 'free' | 'pro' | 'admin'
     proUntil: string | null
@@ -13,17 +12,18 @@ export interface UserProfileResponse {
 
 @Injectable()
 export class UsersService {
-
-  formatUserProfile(supabaseUser: User): UserProfileResponse {
-    const metadata = supabaseUser.user_metadata || {}
+  formatUserProfile(user: any): UserProfileResponse {
+    if (!user) {
+      throw new Error('User data is missing')
+    }
 
     return {
       data: {
-        id: supabaseUser.id,
-        email: supabaseUser.email,
-        name: typeof metadata.name === 'string' ? metadata.name : null,
-        plan: (metadata.plan === 'pro' || metadata.plan === 'admin') ? metadata.plan : 'free',
-        proUntil: typeof metadata.proUntil === 'string' ? metadata.proUntil : null,
+        id: user.id,
+        email: user.email,
+        name: user.name ?? null,
+        plan: user.plan === 'pro' || user.plan === 'admin' ? user.plan : 'free',
+        proUntil: user.proUntil ? new Date(user.proUntil).toISOString() : null,
       },
     }
   }

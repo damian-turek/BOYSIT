@@ -1,79 +1,47 @@
-import { IsBoolean, IsEnum, IsInt, IsOptional, IsString } from 'class-validator'
+import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from 'class-validator'
 import { AccessLevel, Difficulty, QuestionType } from 'database/dist/generated/prisma/enums'
-import { Type } from 'class-transformer'
+import { Transform } from 'class-transformer'
 
-export class GetQuestionDto {
+export class GetQuestionsDto {
   @IsOptional()
   @IsString()
-  search?: string
+  search?: string;
 
   @IsOptional()
-  @IsEnum(QuestionType)
-  type?: QuestionType
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
+  categories?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  @Transform(({ value }) => (typeof value === 'string' ? value.split(',') : value))
+  technologies?: string[];
 
   @IsOptional()
   @IsEnum(Difficulty)
-  difficulty?: Difficulty
+  difficulty?: Difficulty;
 
   @IsOptional()
-  @IsString()
-  technology?: string
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  page?: number
-}
-
-export class AddQuestionDto {
-  @IsString()
-  title!: string
-
-  @IsString()
-  slug!: string
-
-  @IsOptional()
-  @IsString()
-  excerpt?: string
-
-  @IsString()
-  questionText!: string
-
-  @IsOptional()
-  @IsString()
-  answerText?: string
-
-  @IsOptional()
-  @IsString()
-  explanation?: string
-
-  @IsOptional()
-  @IsString()
-  codeSnippet?: string
-
-  @IsEnum(Difficulty)
-  difficulty!: Difficulty
-
   @IsEnum(QuestionType)
-  questionType!: QuestionType
+  type?: QuestionType;
 
   @IsOptional()
   @IsEnum(AccessLevel)
-  accessLevel?: AccessLevel
+  accessLevel?: AccessLevel;
+
+  // Paginacja z domyślnymi wartościami
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Transform(({ value }) => parseInt(value, 10))
+  page?: number = 1;
 
   @IsOptional()
-  @IsBoolean()
-  isActive?: boolean
-
-  @IsOptional()
-  @IsBoolean()
-  verified?: boolean
-
-  @IsOptional()
-  @IsString()
-  categoryId?: string
-
-  @IsOptional()
-  @IsString()
-  technologyId?: string
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  @Transform(({ value }) => parseInt(value, 10))
+  limit?: number = 20;
 }
