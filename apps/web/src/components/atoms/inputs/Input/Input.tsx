@@ -1,9 +1,10 @@
 'use client'
 
 import * as React from 'react'
+import { ComponentType } from 'react'
 import { useState } from 'react'
 
-import { ReactSVG } from 'react-svg'
+import { LucideProps } from 'lucide-react'
 
 import { cn } from '@/utils/cn'
 
@@ -14,10 +15,22 @@ import EyeIcon from '@/assets/icons/eye.svg'
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   label?: string
   error?: string
+  hint?: string
   className?: string
+  labelClassName?: string
+  leftIcon?: ComponentType<LucideProps>
 }
 
-export const Input = ({ className, label, error, type, ...props }: InputProps) => {
+export const Input = ({
+  className,
+  label,
+  error,
+  hint,
+  type,
+  labelClassName,
+  leftIcon: LeftIcon,
+  ...props
+}: InputProps) => {
   const [showPassword, setShowPassword] = useState(false)
   const isPasswordType = type === 'password'
 
@@ -29,9 +42,20 @@ export const Input = ({ className, label, error, type, ...props }: InputProps) =
 
   return (
     <div className="flex flex-col gap-1.5 w-full">
-      {label && <label className="label-font text-gray-60 select-none">{label}</label>}
+      {label && (
+        <label className={cn('label-font text-gray-60 select-none', labelClassName)}>
+          {label}
+        </label>
+      )}
 
       <div className="relative w-full flex items-center">
+        {LeftIcon && (
+          <LeftIcon
+            size={16}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-60"
+            aria-hidden="true"
+          />
+        )}
         <input
           type={currentType}
           className={cn(
@@ -39,6 +63,7 @@ export const Input = ({ className, label, error, type, ...props }: InputProps) =
             'bg-gray-65/5 dark:bg-gray-10/20',
             'text-gray-100 placeholder:body-medium placeholder:text-gray-60/50',
             'border focus:outline-hidden',
+            LeftIcon ? 'pl-10' : '',
             isPasswordType ? 'pr-11' : '',
             error
               ? 'border-alert-50 focus:border-alert-50'
@@ -61,6 +86,7 @@ export const Input = ({ className, label, error, type, ...props }: InputProps) =
       </div>
 
       {error && <p className="body-small text-alert-50">{error}</p>}
+      {!error && hint && <p className="body-small text-gray-60">{hint}</p>}
     </div>
   )
 }
