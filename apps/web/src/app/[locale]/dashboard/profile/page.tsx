@@ -1,18 +1,21 @@
-import { getDashboardData } from '@/parsers/getDashboardData'
-import { LangProps } from '@/types/lang'
 import { Metadata } from 'next'
 
+import { ProfileSettings } from '@/components/organisms/ProfileSettings'
+
 type PageProps = {
-  params: Promise<{ locale: LangProps }>
+  params: Promise<{ locale: string }>
 }
 
 export const metadata: Metadata = {
   title: 'Profile',
 }
 
-export default async function ProfiledPage({ params }: PageProps) {
+export default async function ProfilePage({ params }: PageProps) {
   const { locale } = await params
-  const { WELCOME_SECTION_DATA } = getDashboardData()
 
-  return <main className="dashboard-container">x</main>
+  return (
+    <main className="dashboard-container">
+      <ProfileSettings locale={locale} />
+    </main>
+  )
 }
