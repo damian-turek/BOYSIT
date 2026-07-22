@@ -119,7 +119,7 @@ export const JobApplicationCard = ({
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2, ease: 'easeInOut' }}
-                className="absolute left-0 top-full z-20 mt-2 w-44 overflow-hidden rounded-xl border border-[var(--color-gray-10)] bg-white shadow-xl"
+                className="absolute left-0 top-full z-20 mt-2 w-44 overflow-hidden rounded-xl border border-[var(--color-gray-10)] bg-white shadow-xl dark:bg-[var(--color-gray-05)]"
               >
                 <div className="p-1">
                   {JOB_APPLICATION_STATUSES.map((statusId) => {
