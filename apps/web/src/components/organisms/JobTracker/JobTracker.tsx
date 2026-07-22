@@ -248,7 +248,7 @@ export const JobTracker = () => {
   }
 
   return (
-    <main className="dashboard-container max-w-[1040px]">
+    <>
       <JobTrackerHeader onAddJob={handleOpenCreateModal} />
       <JobTrackerStats applications={applications} />
       <JobTrackerFilters
@@ -278,7 +278,7 @@ export const JobTracker = () => {
         onCancel={() => setPendingDeleteId(null)}
         onConfirm={handleConfirmDelete}
       />
-    </main>
+    </>
   )
 }
 

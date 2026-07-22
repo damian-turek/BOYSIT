@@ -7,5 +7,9 @@ export const metadata: Metadata = {
 }
 
 export default function JobTrackerPage() {
-  return <JobTracker />
+  return (
+    <main className="dashboard-container max-w-[1040px]">
+      <JobTracker />
+    </main>
+  )
 }
