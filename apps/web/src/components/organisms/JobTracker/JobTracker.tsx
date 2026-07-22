@@ -4,22 +4,14 @@ import { FormEvent, useEffect, useId, useMemo, useState } from 'react'
 
 import { AlertTriangle, Briefcase, Plus, Save, Search, SearchX, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import { useTranslations } from 'next-intl'
 
+import { JOB_APPLICATION_STATUSES, JOB_TRACKER_STATS } from '@/constants/job-tracker'
+import type { JobApplication, JobApplicationStatus } from '@/types/job-tracker'
 import { Button } from '@/components/atoms/Button'
 import { Input } from '@/components/atoms/inputs/Input'
-import {
-  JobApplication,
-  JobApplicationCard,
-  JobApplicationStatus,
-  jobStatusConfig,
-} from '@/components/molecules/JobApplicationCard'
-import { JobTrackerStatCard, JobTrackerStatTone } from '@/components/molecules/JobTrackerStatCard'
-
-type JobStatusStat = {
-  id: Exclude<JobApplicationStatus, 'wishlist'>
-  label: string
-  tone: JobTrackerStatTone
-}
+import { JobApplicationCard } from '@/components/molecules/JobApplicationCard'
+import { JobTrackerStatCard } from '@/components/molecules/JobTrackerStatCard'
 
 type JobApplicationFormState = {
   company: string
@@ -32,21 +24,6 @@ type JobApplicationFormState = {
 }
 
 type JobApplicationPayload = Omit<JobApplication, 'id' | 'date' | 'technologies'>
-
-const statusStats: JobStatusStat[] = [
-  { id: 'applied', label: 'Applied', tone: 'blue' },
-  { id: 'phone_screen', label: 'Phone Screen', tone: 'purple' },
-  { id: 'technical', label: 'Technical', tone: 'amber' },
-  { id: 'final_round', label: 'Final Round', tone: 'orange' },
-  { id: 'offer', label: 'Offer', tone: 'green' },
-  { id: 'rejected', label: 'Rejected', tone: 'rose' },
-]
-
-const statusOptions: { id: JobApplicationStatus | 'all'; label: string }[] = [
-  { id: 'all', label: 'All statuses' },
-  { id: 'wishlist', label: 'Wishlist' },
-  ...statusStats,
-]
 
 const emptyJobForm: JobApplicationFormState = {
   company: '',
@@ -133,14 +110,8 @@ const initialApplications: JobApplication[] = [
   },
 ]
 
-const createApplication = (payload: JobApplicationPayload): JobApplication => ({
-  id: Date.now(),
-  ...payload,
-  date: new Date().toISOString().slice(0, 10),
-  technologies: ['Research'],
-})
-
 export const JobTracker = () => {
+  const t = useTranslations('JobTracker')
   const [applications, setApplications] = useState(initialApplications)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState<JobApplicationStatus | 'all'>('all')
@@ -177,11 +148,11 @@ export const JobTracker = () => {
     const applicationPayload: JobApplicationPayload = {
       company: form.company.trim(),
       role: form.role.trim(),
-      location: form.location.trim() || 'Remote',
+      location: form.location.trim() || t('defaults.remote'),
       salary: form.salary.trim(),
       status: form.status,
       jobUrl: form.jobUrl.trim(),
-      note: form.note.trim() || 'No notes yet.',
+      note: form.note.trim() || t('defaults.noNotes'),
     }
 
     if (editingApplicationId) {
@@ -193,7 +164,15 @@ export const JobTracker = () => {
         ),
       )
     } else {
-      setApplications((current) => [createApplication(applicationPayload), ...current])
+      setApplications((current) => [
+        {
+          id: Date.now(),
+          ...applicationPayload,
+          date: new Date().toISOString().slice(0, 10),
+          technologies: ['Research'],
+        },
+        ...current,
+      ])
     }
 
     setForm(emptyJobForm)
@@ -283,6 +262,8 @@ export const JobTracker = () => {
 }
 
 const JobTrackerHeader = ({ onAddJob }: { onAddJob: () => void }) => {
+  const t = useTranslations('JobTracker')
+
   return (
     <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-4">
@@ -291,27 +272,29 @@ const JobTrackerHeader = ({ onAddJob }: { onAddJob: () => void }) => {
         </span>
         <div>
           <h1 className="text-[25px] leading-8 font-bold text-gray-100">
-            Job Tracker
+            {t('title')}
           </h1>
           <p className="body-medium text-gray-60">
-            Track your applications & prep smarter
+            {t('description')}
           </p>
         </div>
       </div>
       <Button icon={Plus} size="lg" className="px-5 py-3" onClick={onAddJob}>
-        Add Job
+        {t('addJob')}
       </Button>
     </header>
   )
 }
 
 const JobTrackerStats = ({ applications }: { applications: JobApplication[] }) => {
+  const t = useTranslations('JobTracker')
+
   return (
     <section className="mb-6 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
-      {statusStats.map((status) => (
+      {JOB_TRACKER_STATS.map((status) => (
         <JobTrackerStatCard
           key={status.id}
-          label={status.label}
+          label={t(`statuses.${status.id}`)}
           value={applications.filter((application) => application.status === status.id).length}
           tone={status.tone}
         />
@@ -331,6 +314,8 @@ const JobTrackerFilters = ({
   onSearchChange: (value: string) => void
   onStatusChange: (value: JobApplicationStatus | 'all') => void
 }) => {
+  const t = useTranslations('JobTracker')
+
   return (
     <section className="mb-8 grid grid-cols-1 gap-3 lg:grid-cols-[1fr_150px]">
       <div className="relative">
@@ -342,7 +327,7 @@ const JobTrackerFilters = ({
         <Input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Search company or role..."
+          placeholder={t('searchPlaceholder')}
           className="pl-10"
         />
       </div>
@@ -354,9 +339,10 @@ const JobTrackerFilters = ({
         }
         className="h-11 rounded-xl border border-gray-60/20 bg-gray-60/5 px-3 font-mono text-[13px] leading-5 text-gray-100 focus:border-primary/60 focus:outline-hidden"
       >
-        {statusOptions.map((status) => (
-          <option key={status.id} value={status.id}>
-            {status.label}
+        <option value="all">{t('allStatuses')}</option>
+        {JOB_APPLICATION_STATUSES.map((status) => (
+          <option key={status} value={status}>
+            {t(`statuses.${status}`)}
           </option>
         ))}
       </select>
@@ -375,16 +361,17 @@ const JobApplicationsGrid = ({
   onDelete: (applicationId: number) => void
   onStatusChange: (applicationId: number, status: JobApplicationStatus) => void
 }) => {
+  const t = useTranslations('JobTracker')
+
   if (applications.length === 0) {
     return (
       <section className="rounded-xl border border-dashed border-gray-60/30 bg-gray-60/5 px-4 py-12 text-center">
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-gray-60/10 text-gray-60">
           <SearchX size={22} aria-hidden="true" />
         </div>
-        <h2 className="body-large text-gray-100">No applications found</h2>
+        <h2 className="body-large text-gray-100">{t('emptyState.title')}</h2>
         <p className="body-medium mx-auto mt-1 max-w-md text-gray-60">
-          Try changing the search query or status filter, or add a new job to
-          start tracking applications.
+          {t('emptyState.description')}
         </p>
       </section>
     )
@@ -436,14 +423,11 @@ const AddJobModal = ({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
   onFormChange: (form: JobApplicationFormState) => void
 }) => {
+  const t = useTranslations('JobTracker')
   const titleId = useId()
   const descriptionId = useId()
   const statusId = useId()
   const notesId = useId()
-
-  const availableStatuses = statusOptions.filter(
-    (status): status is { id: JobApplicationStatus; label: string } => status.id !== 'all',
-  )
 
   useEffect(() => {
     if (!isOpen) return
@@ -486,10 +470,10 @@ const AddJobModal = ({
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
                   <h2 id={titleId} className="body-large text-gray-100">
-                    {mode === 'edit' ? 'Edit job' : 'Add job'}
+                    {mode === 'edit' ? t('modal.editTitle') : t('modal.addTitle')}
                   </h2>
                   <p id={descriptionId} className="body-small text-gray-60">
-                    This is local frontend state until backend endpoints exist.
+                    {t('modal.description')}
                   </p>
                 </div>
                 <Button
@@ -497,7 +481,7 @@ const AddJobModal = ({
                   variant="text"
                   icon={X}
                   iconOnly
-                  aria-label="Close"
+                  aria-label={t('modal.close')}
                   onClick={onClose}
                 />
               </div>
@@ -507,53 +491,53 @@ const AddJobModal = ({
                   id="job-company"
                   name="company"
                   autoComplete="organization"
-                  label="Company"
+                  label={t('modal.company')}
                   value={form.company}
                   onChange={(event) =>
                     onFormChange({ ...form, company: event.target.value })
                   }
                   required
-                  placeholder="Company name"
+                  placeholder={t('modal.companyPlaceholder')}
                 />
                 <Input
                   id="job-role"
                   name="role"
                   autoComplete="organization-title"
-                  label="Role"
+                  label={t('modal.role')}
                   value={form.role}
                   onChange={(event) =>
                     onFormChange({ ...form, role: event.target.value })
                   }
                   required
-                  placeholder="Frontend Engineer"
+                  placeholder={t('modal.rolePlaceholder')}
                 />
                 <Input
                   id="job-location"
                   name="location"
                   autoComplete="address-level2"
-                  label="Location"
+                  label={t('modal.location')}
                   value={form.location}
                   onChange={(event) =>
                     onFormChange({ ...form, location: event.target.value })
                   }
-                  placeholder="Warsaw / Remote"
+                  placeholder={t('modal.locationPlaceholder')}
                 />
                 <Input
                   id="job-salary"
                   name="salary"
                   autoComplete="off"
-                  label="Salary"
+                  label={t('modal.salary')}
                   value={form.salary}
                   onChange={(event) =>
                     onFormChange({ ...form, salary: event.target.value })
                   }
-                  placeholder="€6,000-8,000/mo"
+                  placeholder={t('modal.salaryPlaceholder')}
                 />
                 <Input
                   id="job-url"
                   name="jobUrl"
                   autoComplete="url"
-                  label="Job posting URL"
+                  label={t('modal.jobPostingUrl')}
                   type="url"
                   value={form.jobUrl}
                   onChange={(event) =>
@@ -564,7 +548,7 @@ const AddJobModal = ({
                 />
                 <div className="flex flex-col gap-1.5">
                   <label htmlFor={statusId} className="label-font text-gray-60 select-none">
-                    Status
+                    {t('modal.status')}
                   </label>
                   <select
                     id={statusId}
@@ -578,16 +562,16 @@ const AddJobModal = ({
                     }
                     className="h-11 w-full rounded-xl border border-gray-60/20 bg-gray-65/5 px-4 body-medium text-gray-100 transition-colors duration-200 focus:border-primary/60 focus:outline-hidden dark:bg-gray-10/20"
                   >
-                    {availableStatuses.map((status) => (
-                      <option key={status.id} value={status.id}>
-                        {jobStatusConfig[status.id].label}
+                    {JOB_APPLICATION_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {t(`statuses.${status}`)}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5 sm:col-span-2">
                   <label htmlFor={notesId} className="label-font text-gray-60 select-none">
-                    Notes
+                    {t('modal.notes')}
                   </label>
                   <textarea
                     id={notesId}
@@ -597,7 +581,7 @@ const AddJobModal = ({
                     onChange={(event) =>
                       onFormChange({ ...form, note: event.target.value })
                     }
-                    placeholder="Interview details, recruiter context, next steps..."
+                    placeholder={t('modal.notesPlaceholder')}
                     rows={4}
                     className="min-h-28 w-full resize-y rounded-xl border border-gray-60/20 bg-gray-65/5 px-4 py-3 body-medium text-gray-100 transition-colors duration-200 placeholder:text-gray-60/50 focus:border-primary/60 focus:outline-hidden dark:bg-gray-10/20"
                   />
@@ -606,14 +590,14 @@ const AddJobModal = ({
 
               <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <Button type="button" variant="secondary" onClick={onClose}>
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button
                   type="submit"
                   icon={mode === 'edit' ? Save : Plus}
                   className="w-full sm:w-fit"
                 >
-                  {mode === 'edit' ? 'Save changes' : 'Add Job'}
+                  {mode === 'edit' ? t('saveChanges') : t('addJob')}
                 </Button>
               </div>
             </motion.form>
@@ -637,6 +621,7 @@ const DeleteJobDialog = ({
   onCancel: () => void
   onConfirm: () => void
 }) => {
+  const t = useTranslations('JobTracker')
   const titleId = useId()
   const descriptionId = useId()
 
@@ -683,26 +668,26 @@ const DeleteJobDialog = ({
                 </span>
                 <div className="min-w-0">
                   <h2 id={titleId} className="body-large text-gray-100">
-                    Delete job application?
+                    {t('deleteDialog.title')}
                   </h2>
                   <p id={descriptionId} className="body-medium mt-1 text-gray-60">
                     {company && role
-                      ? `${role} at ${company} will be removed from your tracker.`
-                      : 'This application will be removed from your tracker.'}
+                      ? t('deleteDialog.description', { role, company })
+                      : t('deleteDialog.descriptionFallback')}
                   </p>
                 </div>
               </div>
 
               <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <Button type="button" variant="secondary" onClick={onCancel}>
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button
                   type="button"
                   className="bg-alert-50 hover:bg-alert-50/90"
                   onClick={onConfirm}
                 >
-                  Delete
+                  {t('delete')}
                 </Button>
               </div>
             </motion.div>

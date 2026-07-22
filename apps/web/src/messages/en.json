@@ -47,5 +47,62 @@
   "QuestionsPage": {
     "inputPlaceholder": "Search questions, topics, companies...",
     "filters": "Filters"
+  },
+  "JobTracker": {
+    "title": "Job Tracker",
+    "description": "Track your applications & prep smarter",
+    "addJob": "Add job",
+    "allStatuses": "All statuses",
+    "searchPlaceholder": "Search company or role...",
+    "cancel": "Cancel",
+    "saveChanges": "Save changes",
+    "delete": "Delete",
+    "defaults": {
+      "remote": "Remote",
+      "noNotes": "No notes yet."
+    },
+    "statuses": {
+      "wishlist": "Wishlist",
+      "applied": "Applied",
+      "phone_screen": "Phone Screen",
+      "technical": "Technical",
+      "final_round": "Final Round",
+      "offer": "Offer",
+      "rejected": "Rejected"
+    },
+    "card": {
+      "editJob": "Edit job",
+      "deleteJob": "Delete job",
+      "changeStatus": "Change application status",
+      "jobPosting": "Job posting",
+      "likelyInterviewQuestions": "Likely interview questions ({count})"
+    },
+    "emptyState": {
+      "title": "No applications found",
+      "description": "Try changing the search query or status filter, or add a new job to start tracking applications."
+    },
+    "modal": {
+      "editTitle": "Edit job",
+      "addTitle": "Add job",
+      "description": "This is local frontend state until backend endpoints exist.",
+      "close": "Close",
+      "company": "Company",
+      "companyPlaceholder": "Company name",
+      "role": "Role",
+      "rolePlaceholder": "Frontend Engineer",
+      "location": "Location",
+      "locationPlaceholder": "Warsaw / Remote",
+      "salary": "Salary",
+      "salaryPlaceholder": "€6,000-8,000/mo",
+      "jobPostingUrl": "Job posting URL",
+      "status": "Status",
+      "notes": "Notes",
+      "notesPlaceholder": "Interview details, recruiter context, next steps..."
+    },
+    "deleteDialog": {
+      "title": "Delete job application?",
+      "description": "{role} at {company} will be removed from your tracker.",
+      "descriptionFallback": "This application will be removed from your tracker."
+    }
   }
 }

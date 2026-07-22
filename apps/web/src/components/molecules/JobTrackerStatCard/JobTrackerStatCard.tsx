@@ -9,13 +9,13 @@ import {
 } from 'lucide-react'
 import { motion } from 'motion/react'
 
+import type { JobTrackerStatTone } from '@/types/job-tracker'
+
 type JobTrackerStatCardProps = {
   label: string
   value: number
   tone: JobTrackerStatTone
 }
-
-export type JobTrackerStatTone = 'blue' | 'purple' | 'amber' | 'orange' | 'green' | 'rose'
 
 const toneClassName: Record<
   JobTrackerStatTone,

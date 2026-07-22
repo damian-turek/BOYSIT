@@ -11,79 +11,19 @@ import {
   Trash2,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import { useTranslations } from 'next-intl'
 
+import { JOB_APPLICATION_STATUSES, JOB_STATUS_CONFIG } from '@/constants/job-tracker'
+import type { JobApplication, JobApplicationStatus } from '@/types/job-tracker'
 import { cn } from '@/utils/cn'
 
 import { Tag } from '@/components/atoms/Tag'
-
-export type JobApplicationStatus =
-  | 'wishlist'
-  | 'applied'
-  | 'phone_screen'
-  | 'technical'
-  | 'final_round'
-  | 'offer'
-  | 'rejected'
-
-export type JobApplication = {
-  id: number
-  company: string
-  role: string
-  location: string
-  status: JobApplicationStatus
-  salary: string
-  date: string
-  jobUrl: string
-  note: string
-  technologies: string[]
-}
 
 type JobApplicationCardProps = {
   application: JobApplication
   onEdit: (application: JobApplication) => void
   onDelete: (applicationId: number) => void
   onStatusChange: (applicationId: number, status: JobApplicationStatus) => void
-}
-
-export const jobStatusConfig: Record<
-  JobApplicationStatus,
-  { label: string; className: string; dotClassName: string }
-> = {
-  wishlist: {
-    label: 'Wishlist',
-    className: 'border-gray-60/20 bg-gray-60/10 text-gray-60',
-    dotClassName: 'bg-gray-60',
-  },
-  applied: {
-    label: 'Applied',
-    className: 'border-[#93C5FD] bg-[#DBEAFE] text-[#2563EB]',
-    dotClassName: 'bg-[#2B7FFF]',
-  },
-  phone_screen: {
-    label: 'Phone Screen',
-    className: 'border-[#C4B5FD] bg-[#EDE9FE] text-[#7C3AED]',
-    dotClassName: 'bg-[#8B5CF6]',
-  },
-  technical: {
-    label: 'Technical',
-    className: 'border-[#FDBA74] bg-[#FFEDD5] text-[#EA580C]',
-    dotClassName: 'bg-[#F59E0B]',
-  },
-  final_round: {
-    label: 'Final Round',
-    className: 'border-[#FDBA74] bg-[#FFEDD5] text-[#F97316]',
-    dotClassName: 'bg-[#F97316]',
-  },
-  offer: {
-    label: 'Offer',
-    className: 'border-[#A7F3D0] bg-[#D1FAE5] text-[#059669]',
-    dotClassName: 'bg-[#10B981]',
-  },
-  rejected: {
-    label: 'Rejected',
-    className: 'border-[#FDA4AF] bg-[#FFE4E6] text-[#E11D48]',
-    dotClassName: 'bg-[#FB5A7A]',
-  },
 }
 
 const getInitials = (company: string) =>
@@ -100,13 +40,10 @@ export const JobApplicationCard = ({
   onDelete,
   onStatusChange,
 }: JobApplicationCardProps) => {
+  const t = useTranslations('JobTracker')
   const [isStatusOpen, setIsStatusOpen] = useState(false)
   const statusRef = useRef<HTMLDivElement>(null)
-  const status = jobStatusConfig[application.status]
-  const statusEntries = Object.entries(jobStatusConfig) as [
-    JobApplicationStatus,
-    (typeof jobStatusConfig)[JobApplicationStatus],
-  ][]
+  const status = JOB_STATUS_CONFIG[application.status]
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -138,7 +75,7 @@ export const JobApplicationCard = ({
           <button
             type="button"
             className="transition-colors hover:text-primary"
-            aria-label="Edit job"
+            aria-label={t('card.editJob')}
             onClick={() => onEdit(application)}
           >
             <Pencil size={15} />
@@ -146,7 +83,7 @@ export const JobApplicationCard = ({
           <button
             type="button"
             className="transition-colors hover:text-alert-100"
-            aria-label="Delete job"
+            aria-label={t('card.deleteJob')}
             onClick={() => onDelete(application.id)}
           >
             <Trash2 size={15} />
@@ -163,11 +100,11 @@ export const JobApplicationCard = ({
               status.className,
             )}
             aria-expanded={isStatusOpen}
-            aria-label="Change application status"
+            aria-label={t('card.changeStatus')}
             onClick={() => setIsStatusOpen((current) => !current)}
           >
             <span className={`size-1.5 rounded-full ${status.dotClassName}`} />
-            {status.label}
+            {t(`statuses.${application.status}`)}
             <ChevronDown
               size={12}
               aria-hidden="true"
@@ -185,7 +122,8 @@ export const JobApplicationCard = ({
                 className="absolute left-0 top-full z-20 mt-2 w-44 overflow-hidden rounded-xl border border-[var(--color-gray-10)] bg-white shadow-xl"
               >
                 <div className="p-1">
-                  {statusEntries.map(([statusId, statusConfig]) => {
+                  {JOB_APPLICATION_STATUSES.map((statusId) => {
+                    const statusConfig = JOB_STATUS_CONFIG[statusId]
                     const isSelected = statusId === application.status
 
                     return (
@@ -204,7 +142,7 @@ export const JobApplicationCard = ({
                         <span
                           className={`size-1.5 rounded-full ${statusConfig.dotClassName}`}
                         />
-                        <span className="truncate">{statusConfig.label}</span>
+                        <span className="truncate">{t(`statuses.${statusId}`)}</span>
                       </button>
                     )
                   })}
@@ -237,7 +175,7 @@ export const JobApplicationCard = ({
           className="mb-3 inline-flex min-w-0 items-center gap-1.5 body-small font-semibold text-primary transition-colors hover:text-primary/80"
         >
           <ExternalLink size={13} className="shrink-0" aria-hidden="true" />
-          <span className="truncate">Job posting</span>
+          <span className="truncate">{t('card.jobPosting')}</span>
         </a>
       )}
 
@@ -260,7 +198,7 @@ export const JobApplicationCard = ({
         className="mt-auto inline-flex items-center gap-2 body-small font-semibold text-primary transition-colors hover:text-primary/80"
       >
         <Sparkles size={14} aria-hidden="true" />
-        Likely interview questions (3)
+        {t('card.likelyInterviewQuestions', { count: 3 })}
         <ChevronDown size={13} aria-hidden="true" />
       </button>
     </article>
