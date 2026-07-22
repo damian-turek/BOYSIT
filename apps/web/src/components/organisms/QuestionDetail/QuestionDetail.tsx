@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import Link from 'next/link'
 
+import { Level } from '@/types/question'
 import {
   ArrowLeft,
   Bookmark,
@@ -25,12 +26,9 @@ import {
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 
-import {
-  QuestionDetailData,
-  QuestionDifficulty,
-} from '@/services/questionsApi'
-import { useAuthStore } from '@/store/useAuthStore'
 import { useAuthSessionStore } from '@/store/useAuthSessionStore'
+import { useAuthStore } from '@/store/useAuthStore'
+
 import { cn } from '@/utils/cn'
 
 const categoryIconConfig = {
@@ -44,18 +42,18 @@ const categoryIconConfig = {
   testing: { icon: CheckCircle2, color: 'text-[#14B8A6]' },
 } as const
 
-const gradeConfig: Record<QuestionDifficulty, { label: string; className: string }> = {
-  junior: {
+const gradeConfig: Record<Level, { label: string; className: string }> = {
+  Junior: {
     label: 'Junior',
     className:
       'border-[#A8DDD1] bg-[#DFF3EF] text-[#008A67] dark:border-success-50/30 dark:bg-success-50/15 dark:text-success-50',
   },
-  middle: {
+  Middle: {
     label: 'Mid-level',
     className:
       'border-[#F5C8AA] bg-[#FFF0E6] text-[#A64F21] dark:border-warning-50/30 dark:bg-warning-50/15 dark:text-warning-50',
   },
-  senior: {
+  Senior: {
     label: 'Senior',
     className:
       'border-[#F2B8BA] bg-[#FDE7E8] text-[#9F1B1F] dark:border-alert-50/30 dark:bg-alert-50/15 dark:text-alert-50',
@@ -115,10 +113,7 @@ export const QuestionDetail = ({ question }: QuestionDetailProps) => {
             href="/dashboard/questions"
             className="group flex shrink-0 items-center gap-1.5 text-sm text-gray-60 transition-colors hover:text-gray-100"
           >
-            <ArrowLeft
-              size={15}
-              className="transition-transform group-hover:-translate-x-0.5"
-            />
+            <ArrowLeft size={15} className="transition-transform group-hover:-translate-x-0.5" />
             Questions
           </Link>
           <ChevronRight size={13} className="shrink-0 text-gray-60/50" />

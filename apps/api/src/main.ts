@@ -6,9 +6,17 @@ import { AppModule } from './app.module'
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter())
 
-  app.enableCors()
+  app.setGlobalPrefix('api/v1')
 
-  await app.listen(4000, '0.0.0.0')
+  app.enableCors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+    credentials: true,
+  })
+  app.enableShutdownHooks()
+
+  const port = Number(process.env.PORT || 4000)
+
+  await app.listen(port, '0.0.0.0')
 
   console.log('Server is running on http://localhost:4000')
 }

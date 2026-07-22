@@ -1,67 +1,107 @@
-import { QuestionsProps } from '@/components/organisms/Questions'
+import { FilterItem } from '@/config/questions'
+import { createSupabaseServerClient } from '@/lib/supabase'
+import { Question } from '@/types/question'
 
-export const CATEGORY_THEMES: Record<string, string> = {
-  'JavaScript/TypeScript': '#F0B100',
-  Security: '#FF2056',
-  Backend: '#16A34A',
-  Frontend: '#D946EF',
-  'CSS & HTML': '#00B8DB',
-  Algorithms: '#2B7FFF',
-  Databases: '#FF6900',
-  Performance: '#FE9A00',
-  Testing: '#00BBA7',
-  Architecture: '#615FFF',
-  Concurrency: '#F6339A',
-  'System Design': '#AD46FF',
-  DevOps: '#00BC7D',
-  Terminal: '#00B8DB',
+interface QuestionsPageData {
+  QUESTIONS_DATA: {
+    questionsCount: number
+    questions: Question[]
+  }
+  dbCategories: FilterItem[]
+  dbTechnologies: FilterItem[]
 }
 
-export const getQuestionsPageData = async (searchParams: Record<string, string | undefined>) => {
-  const params = new URLSearchParams()
-  if (searchParams.page) params.append('page', searchParams.page)
-  if (searchParams.search) params.append('search', searchParams.search)
-  if (searchParams.technology) params.append('technology', searchParams.technology)
-  if (searchParams.difficulty) params.append('difficulty', searchParams.difficulty)
+export async function getQuestionsPageData(
+  searchParams: Record<string, string | undefined>,
+): Promise<QuestionsPageData> {
+  const query = new URLSearchParams()
 
-  const backendUrl = process.env.API_URL || 'http://localhost:4000'
+  if (searchParams.search) query.append('search', searchParams.search)
+  if (searchParams.difficulty) query.append('difficulty', searchParams.difficulty)
+  if (searchParams.category) query.append('categories', searchParams.category)
+  if (searchParams.technology) query.append('technologies', searchParams.technology)
+  if (searchParams.page) query.append('page', searchParams.page)
 
-  const res = await fetch(`${backendUrl}/api/questions?${params}`, {
-    next: {
-      revalidate: 60,
-      tags: ['questions'],
-    },
-  })
-  const data = await res.json()
+  try {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL
 
-  const page = () => {
-    const currentPage = Number(searchParams.page ?? 0) || 0
+    const supabase = await createSupabaseServerClient()
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
 
-    if (currentPage > 1) return (currentPage - 1) * 20
+    const headers: Record<string, string> = {}
+    if (session?.access_token) {
+      headers.authorization = `Bearer ${session.access_token}`
+    }
 
-    return currentPage
+    const res = await fetch(`${backendUrl}/api/v1/questions?${query.toString()}`, {
+      cache: 'no-store',
+      headers,
+    })
+
+    if (!res.ok) {
+      const errorBody = await res.text()
+      console.error('Backend responded with error:', res.status, errorBody)
+      throw new Error(`Failed to fetch data from backend api: ${res.status} ${errorBody}`)
+    }
+
+    const result = await res.json()
+
+    if (!result?.meta) {
+      console.error('Unexpected response shape from backend:', JSON.stringify(result))
+      throw new Error('Backend response missing "meta" field')
+    }
+
+    const categoriesMap = new Map<string, FilterItem>()
+    const technologiesMap = new Map<string, FilterItem>()
+
+    const questions: Question[] = (result.data || []).map((q: any) => {
+      if (q.category?.id) {
+        categoriesMap.set(q.category.id, {
+          id: q.category.id,
+          name: q.category.name,
+          slug: q.category.slug,
+        })
+      }
+
+      if (q.technology?.id) {
+        technologiesMap.set(q.technology.id, {
+          id: q.technology.id,
+          name: q.technology.name,
+          slug: q.technology.slug,
+        })
+      }
+
+      return {
+        index: q.id,
+        level: q.difficulty
+          ? q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1)
+          : 'Unknown',
+        question: q.questionText,
+        answer: q.answerText || q.explanation,
+        company: q.company || null,
+        category: q.category
+          ? { name: q.category.name, theme: q.category.theme || '#808080' }
+          : null,
+        technologies: q.technology ? [q.technology.name] : [],
+      }
+    })
+
+    return {
+      QUESTIONS_DATA: {
+        questionsCount: result.meta.total || 0,
+        questions,
+      },
+      dbCategories: Array.from(categoriesMap.values()),
+      dbTechnologies: Array.from(technologiesMap.values()),
+    }
+  } catch (error) {
+    console.error('Error parsing questions page data:', error)
+    return {
+      QUESTIONS_DATA: { questionsCount: 0, questions: [] },
+      dbCategories: [],
+      dbTechnologies: [],
+    }
   }
-
-  const QUESTIONS_DATA = {
-    questions:
-      data?.data?.map((question: any, index: number) => ({
-        index: question.id,
-        pageNumber: page() + index + 1,
-        slug: question.slug,
-        level: question.difficulty
-          ? question.difficulty.charAt(0).toUpperCase() + question.difficulty.slice(1)
-          : '',
-        company: question.company || '',
-        technologies: question.technology ? [question.technology.name] : [],
-        category: {
-          name: question.category?.name || '',
-          theme: CATEGORY_THEMES[question.category?.name] || '#808080',
-        },
-        question: question.questionText,
-        answer: question.answerText,
-      })) ?? [],
-    questionsCount: data?.meta?.totalCount || 0,
-  } satisfies QuestionsProps
-
-  return { QUESTIONS_DATA }
 }

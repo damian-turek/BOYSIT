@@ -7,7 +7,7 @@ import { Input, type InputProps } from '@/components/atoms/inputs/Input'
 
 import EyeIcon from '@/assets/icons/eye.svg'
 
-export type PasswordInputProps = Omit<InputProps, 'endAdornment' | 'type'>
+export type PasswordInputProps = Omit<InputProps, 'endAdornment'>
 
 export const PasswordInput = ({ ...props }: PasswordInputProps) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false)

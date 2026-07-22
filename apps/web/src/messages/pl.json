@@ -104,5 +104,90 @@
       "description": "Stanowisko {role} w firmie {company} zostanie usunięte z trackera.",
       "descriptionFallback": "Ta aplikacja zostanie usunięta z trackera."
     }
+  },
+  "ProfileSettings": {
+    "eyebrow": "Konto",
+    "title": "Ustawienia konta",
+    "description": "Zarządzaj danymi osobowymi, bezpieczeństwem i subskrypcją.",
+    "tabsAriaLabel": "Ustawienia konta",
+    "tabs": {
+      "profile": "Profil",
+      "security": "Bezpieczeństwo",
+      "billing": "Rozliczenia"
+    },
+    "profile": {
+      "statusPreview": "To tylko podgląd frontendu. Zapisywanie profilu zostanie podłączone później.",
+      "personal": {
+        "title": "Dane osobowe",
+        "description": "Zaktualizuj imię i adres e-mail powiązane z kontem.",
+        "nameLabel": "Imię i nazwisko",
+        "namePlaceholder": "Twoje imię i nazwisko",
+        "emailLabel": "Adres e-mail",
+        "emailPlaceholder": "ty@example.com",
+        "emailHint": "Zmiana adresu e-mail nie jest dostępna w tym podglądzie frontendu.",
+        "saveButton": "Zapisz zmiany"
+      },
+      "notifications": {
+        "title": "Powiadomienia",
+        "description": "Wybierz, które wiadomości dotyczące konta chcesz otrzymywać.",
+        "weeklyProgress": {
+          "label": "Tygodniowe podsumowanie postępów",
+          "description": "Otrzymuj cotygodniowy e-mail ze statystykami nauki."
+        },
+        "newQuestions": {
+          "label": "Nowe pytania",
+          "description": "Dostawaj powiadomienia, gdy pojawią się pasujące pytania."
+        },
+        "communityUpdates": {
+          "label": "Aktualności społeczności",
+          "description": "Sporadyczne informacje o produkcie i społeczności."
+        }
+      }
+    },
+    "security": {
+      "statusPreview": "To tylko podgląd frontendu. Zmiana hasła zostanie podłączona później.",
+      "password": {
+        "title": "Zmiana hasła",
+        "description": "Sekcja jest gotowa wizualnie, ale akcja backendowa jest teraz wyłączona.",
+        "currentLabel": "Obecne hasło",
+        "currentPlaceholder": "Hasło",
+        "newLabel": "Nowe hasło",
+        "newPlaceholder": "Nowe hasło",
+        "newHint": "Użyj co najmniej 8 znaków.",
+        "confirmLabel": "Potwierdź nowe hasło",
+        "confirmPlaceholder": "Potwierdź hasło",
+        "submitButton": "Zmień hasło"
+      },
+      "mfa": {
+        "title": "Uwierzytelnianie dwuskładnikowe",
+        "description": "Dodaj kolejny krok weryfikacji podczas logowania.",
+        "disabledTitle": "Uwierzytelnianie dwuskładnikowe nie jest włączone",
+        "disabledDescription": "Konfiguracja MFA będzie dostępna po przygotowaniu obsługi po stronie backendu.",
+        "comingSoon": "Wkrótce"
+      }
+    },
+    "billing": {
+      "plans": {
+        "free": "Plan Free",
+        "pro": "Plan Pro",
+        "admin": "Plan Admin"
+      },
+      "currentPlan": {
+        "title": "Obecny plan",
+        "description": "Subskrypcja kontroluje dostęp do chronionych pytań.",
+        "freeDescription": "Darmowe pytania i podstawowe funkcje konta.",
+        "paidDescription": "Pełny dostęp do chronionych materiałów rekrutacyjnych.",
+        "proAccessUntil": "Dostęp Pro do {date}",
+        "active": "Aktywny",
+        "viewProPlans": "Zobacz plany Pro",
+        "subscriptionManagementSoon": "Zarządzanie subskrypcją będzie dostępne wkrótce"
+      },
+      "history": {
+        "title": "Historia rozliczeń",
+        "description": "Faktury i płatności pojawią się tutaj.",
+        "emptyTitle": "Brak historii rozliczeń",
+        "emptyDescription": "Potwierdzenia będą dostępne po włączeniu integracji płatności."
+      }
+    }
   }
 }

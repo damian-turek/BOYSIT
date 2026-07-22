@@ -104,5 +104,90 @@
       "description": "{role} at {company} will be removed from your tracker.",
       "descriptionFallback": "This application will be removed from your tracker."
     }
+  },
+  "ProfileSettings": {
+    "eyebrow": "Account",
+    "title": "Account settings",
+    "description": "Manage your personal information, security, and subscription.",
+    "tabsAriaLabel": "Account settings",
+    "tabs": {
+      "profile": "Profile",
+      "security": "Security",
+      "billing": "Billing"
+    },
+    "profile": {
+      "statusPreview": "Frontend preview only. Profile saving will be connected later.",
+      "personal": {
+        "title": "Personal information",
+        "description": "Update the name and email associated with your account.",
+        "nameLabel": "Full name",
+        "namePlaceholder": "Your name",
+        "emailLabel": "Email address",
+        "emailPlaceholder": "you@example.com",
+        "emailHint": "Email changes are not available in this frontend preview.",
+        "saveButton": "Save changes"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "description": "Choose which account emails you want to receive.",
+        "weeklyProgress": {
+          "label": "Weekly progress summary",
+          "description": "Receive a weekly email with your practice statistics."
+        },
+        "newQuestions": {
+          "label": "New questions",
+          "description": "Get notified when relevant questions are added."
+        },
+        "communityUpdates": {
+          "label": "Community updates",
+          "description": "Occasional product and community announcements."
+        }
+      }
+    },
+    "security": {
+      "statusPreview": "Frontend preview only. Password changes will be connected later.",
+      "password": {
+        "title": "Change password",
+        "description": "This section is ready visually, backend action is disabled for now.",
+        "currentLabel": "Current password",
+        "currentPlaceholder": "Password",
+        "newLabel": "New password",
+        "newPlaceholder": "New password",
+        "newHint": "Use at least 8 characters.",
+        "confirmLabel": "Confirm new password",
+        "confirmPlaceholder": "Confirm password",
+        "submitButton": "Update password"
+      },
+      "mfa": {
+        "title": "Two-factor authentication",
+        "description": "Add another verification step when signing in.",
+        "disabledTitle": "Two-factor authentication is not enabled",
+        "disabledDescription": "MFA enrollment will be available after the backend flow is configured.",
+        "comingSoon": "Coming soon"
+      }
+    },
+    "billing": {
+      "plans": {
+        "free": "Free plan",
+        "pro": "Pro plan",
+        "admin": "Admin plan"
+      },
+      "currentPlan": {
+        "title": "Current plan",
+        "description": "Your subscription controls access to protected questions.",
+        "freeDescription": "Free questions and basic account features.",
+        "paidDescription": "Full access to protected interview content.",
+        "proAccessUntil": "Pro access until {date}",
+        "active": "Active",
+        "viewProPlans": "View Pro plans",
+        "subscriptionManagementSoon": "Subscription management coming soon"
+      },
+      "history": {
+        "title": "Billing history",
+        "description": "Invoices and payments will appear here.",
+        "emptyTitle": "No billing history yet",
+        "emptyDescription": "Receipts will be available after billing integration is enabled."
+      }
+    }
   }
 }

@@ -4,27 +4,9 @@ import { useState } from 'react'
 
 import Link from 'next/link'
 
-import { Level, Question } from '@/types/question'
-import {
-  Infinity,
-  Bookmark,
-  ChartColumn,
-  ChevronDown,
-  CircleCheck,
-  CodeXml,
-  Component,
-  Cpu,
-  Database,
-  Globe,
-  HelpCircle,
-  Layers,
-  type LucideIcon,
-  Server,
-  Shield,
-  Terminal,
-  Variable,
-  Zap,
-} from 'lucide-react'
+import { CATEGORY_THEMES, ICON_MAP, LEVEL_COLOR_MAP } from '@/config/questions'
+import { Question } from '@/types/question'
+import { Bookmark, ChevronDown, HelpCircle, type LucideIcon } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 
 import { useBookmarksStore } from '@/store/useBookmarksStore'
@@ -32,29 +14,6 @@ import { useBookmarksStore } from '@/store/useBookmarksStore'
 import { cn } from '@/utils/cn'
 
 import { Tag } from '@/components/atoms/Tag'
-
-const iconMap: Record<string, LucideIcon> = {
-  'JavaScript/TypeScript': CodeXml,
-  Security: Shield,
-  'CSS & HTML': Globe,
-  Algorithms: Cpu,
-  Terminal: Terminal,
-  'System Design': Layers,
-  Backend: Variable,
-  Frontend: Component,
-  Performance: Zap,
-  Databases: Database,
-  Testing: CircleCheck,
-  Concurrency: ChartColumn,
-  DevOps: Infinity,
-  Architecture: Server,
-}
-
-const levelColorMap: Record<Level, string> = {
-  Junior: 'bg-success-50/15 text-success-50 border-success-50/30',
-  Middle: 'bg-warning-50/15 text-warning-50 border-warning-50/30',
-  Senior: 'bg-alert-50/15 text-alert-50 border-alert-50/30',
-}
 
 export const QuestionCard = ({
   index,
@@ -71,9 +30,9 @@ export const QuestionCard = ({
   const qId = index.toString()
   const isBookmarked = savedIds.includes(qId)
 
-  const matchedIcon = category ? iconMap[category.name] : undefined
+  const matchedIcon = category ? ICON_MAP[category.name] : undefined
   const SelectedIcon: LucideIcon = matchedIcon || HelpCircle
-  const levelClass = levelColorMap[level]
+  const levelClass = LEVEL_COLOR_MAP[level]
 
   return (
     <div
@@ -95,7 +54,7 @@ export const QuestionCard = ({
           <Tag text={level} className={levelClass} />
           {category && (
             <div className="flex items-center gap-1.5">
-              <SelectedIcon style={{ color: category.theme }} size={16} />
+              <SelectedIcon style={{ color: CATEGORY_THEMES[category.name] }} size={16} />
               <span className="label-font text-gray-60">{category.name}</span>
             </div>
           )}
@@ -132,7 +91,7 @@ export const QuestionCard = ({
         </AnimatePresence>
       </div>
 
-      <div className="relative z-10 flex gap-2 mt-0.5">
+      <div className="relative flex gap-2 mt-0.5">
         <button
           onClick={(e) => {
             e.stopPropagation()

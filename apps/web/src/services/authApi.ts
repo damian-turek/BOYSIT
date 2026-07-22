@@ -17,6 +17,7 @@ type ErrorResponse = {
     code?: string
     message?: string
   }
+  message?: string | string[]
 }
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
@@ -34,23 +35,25 @@ export class AuthApiError extends Error {
 
 export const fetchCurrentUser = async (signal?: AbortSignal): Promise<AuthUserProfile> => {
   const supabase = getSupabaseClient()
-  const { data } = await supabase.auth.getSession()
 
-  const response = await fetch(`${apiBaseUrl}/api/me`, {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  const response = await fetch(`${apiBaseUrl}/api/v1/me`, {
+    credentials: 'include',
     headers: {
       Accept: 'application/json',
-      ...(data.session?.access_token
-        ? { Authorization: `Bearer ${data.session.access_token}` }
-        : {}),
+      ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
     },
     signal,
   })
-
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as ErrorResponse
+    const fallbackMessage = Array.isArray(body.message) ? body.message.join(', ') : body.message
 
     throw new AuthApiError(
-      body.error?.message ?? 'Unable to load the current user',
+      body.error?.message ?? fallbackMessage ?? 'Unable to load the current user',
       response.status,
       body.error?.code,
     )

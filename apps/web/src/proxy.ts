@@ -8,7 +8,7 @@ const handleI18nRouting = createIntlMiddleware({
   defaultLocale: 'en',
 })
 
-export async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const response = handleI18nRouting(request)
 
   const supabase = createServerClient(
@@ -46,5 +46,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/(pl|en)/:path*', '/((?!api|_next|_vercel|.*\\..*).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 }

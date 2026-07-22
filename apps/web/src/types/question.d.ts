@@ -1,8 +1,7 @@
 export type Level = 'Junior' | 'Middle' | 'Senior'
 
-type Category = {
+export type Category = {
   name: string
-  theme: string
 }
 
 export type Question = {
