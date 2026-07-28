@@ -48,6 +48,63 @@
     "inputPlaceholder": "Wyszukaj pytania, tematy, firmy...",
     "filters": "Filtry"
   },
+  "JobTracker": {
+    "title": "Tracker ofert pracy",
+    "description": "Śledź swoje aplikacje i przygotowuj się mądrzej",
+    "addJob": "Dodaj ofertę",
+    "allStatuses": "Wszystkie statusy",
+    "searchPlaceholder": "Szukaj firmy lub stanowiska...",
+    "cancel": "Anuluj",
+    "saveChanges": "Zapisz zmiany",
+    "delete": "Usuń",
+    "defaults": {
+      "remote": "Zdalnie",
+      "noNotes": "Brak notatek."
+    },
+    "statuses": {
+      "wishlist": "Lista życzeń",
+      "applied": "Aplikowano",
+      "phone_screen": "Rozmowa telefoniczna",
+      "technical": "Rozmowa techniczna",
+      "final_round": "Etap finałowy",
+      "offer": "Oferta",
+      "rejected": "Odrzucono"
+    },
+    "card": {
+      "editJob": "Edytuj ofertę",
+      "deleteJob": "Usuń ofertę",
+      "changeStatus": "Zmień status aplikacji",
+      "jobPosting": "Ogłoszenie o pracę",
+      "likelyInterviewQuestions": "Prawdopodobne pytania rekrutacyjne ({count})"
+    },
+    "emptyState": {
+      "title": "Nie znaleziono aplikacji",
+      "description": "Zmień wyszukiwaną frazę lub filtr statusu albo dodaj ofertę, aby zacząć śledzić aplikacje."
+    },
+    "modal": {
+      "editTitle": "Edytuj ofertę",
+      "addTitle": "Dodaj ofertę",
+      "description": "To lokalny stan frontendu do czasu udostępnienia endpointów backendu.",
+      "close": "Zamknij",
+      "company": "Firma",
+      "companyPlaceholder": "Nazwa firmy",
+      "role": "Stanowisko",
+      "rolePlaceholder": "Frontend Engineer",
+      "location": "Lokalizacja",
+      "locationPlaceholder": "Warszawa / Zdalnie",
+      "salary": "Wynagrodzenie",
+      "salaryPlaceholder": "€6,000-8,000/mies.",
+      "jobPostingUrl": "Adres ogłoszenia",
+      "status": "Status",
+      "notes": "Notatki",
+      "notesPlaceholder": "Szczegóły rozmowy, kontekst od rekrutera, kolejne kroki..."
+    },
+    "deleteDialog": {
+      "title": "Usunąć aplikację?",
+      "description": "Stanowisko {role} w firmie {company} zostanie usunięte z trackera.",
+      "descriptionFallback": "Ta aplikacja zostanie usunięta z trackera."
+    }
+  },
   "ProfileSettings": {
     "eyebrow": "Konto",
     "title": "Ustawienia konta",

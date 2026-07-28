@@ -12,6 +12,7 @@ import { useAuthStore } from '@/store/useAuthStore'
 
 import { Button } from '@/components/atoms/Button'
 import { Input } from '@/components/atoms/inputs/Input'
+import { PasswordInput } from '@/components/molecules/PasswordInput'
 
 import CloseIcon from '@/assets/icons/close.svg'
 import GitHubIcon from '@/assets/icons/github.svg'
@@ -237,9 +238,8 @@ export const AuthModal = () => {
                 required
               />
 
-              <Input
+              <PasswordInput
                 label={t('password')}
-                type="password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -247,9 +247,8 @@ export const AuthModal = () => {
               />
 
               {view === 'register' && (
-                <Input
+                <PasswordInput
                   label={t('confirmPassword')}
-                  type="password"
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
