@@ -158,17 +158,25 @@ export const Sidebar = ({ name, nav, upgradeButton }: SidebarProps) => {
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                   className={cn(
-                    'flex gap-3 mx-3 body-medium items-center justify-between rounded-xl transition-colors duration-300 px-3 py-2.5',
+                    'relative flex gap-3 mx-3 body-medium items-center justify-between rounded-xl transition-colors duration-300 px-3 py-2.5',
                     isActive
-                      ? 'bg-primary/10 border border-primary/30 text-primary font-semibold'
+                      ? 'text-primary font-semibold'
                       : 'text-gray-60 hover:text-primary hover:bg-gray-60/5',
                   )}
                 >
-                  <div className="flex gap-3 items-center ">
+                  {isActive && (
+                    <motion.span
+                      layoutId="sidebar-active-link"
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                      className="absolute inset-0 z-0 rounded-xl border border-primary/30 bg-primary/10"
+                      aria-hidden="true"
+                    />
+                  )}
+                  <div className="relative z-10 flex gap-3 items-center">
                     {ComponentIcon && <ComponentIcon size={17} />}
                     {link.label}
                   </div>
-                  {isActive && <ChevronRight size={13} />}
+                  {isActive && <ChevronRight size={13} className="relative z-10" />}
                 </MotionLink>
               )
             })}

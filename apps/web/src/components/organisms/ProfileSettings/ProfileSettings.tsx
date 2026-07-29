@@ -7,8 +7,9 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { AnimatePresence, motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
-import { ProfileSettingsTabs } from '@/components/molecules/ProfileSettingsTabs'
 import { useAuthSessionStore } from '@/store/useAuthSessionStore'
+
+import { ProfileSettingsTabs } from '@/components/molecules/ProfileSettingsTabs'
 
 import { profileSettingsSections } from './constants'
 import { BillingSection } from './sections/BillingSection'
@@ -52,15 +53,18 @@ export const ProfileSettings = ({ locale }: ProfileSettingsProps) => {
   }))
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      className="mx-auto max-w-4xl"
+    >
       <header className="mb-7">
         <p className="mb-2 label-font-spaced font-semibold text-primary uppercase">
           {t('eyebrow')}
         </p>
         <h1 className="title-font text-gray-100">{t('title')}</h1>
-        <p className="mt-1 body-medium text-gray-60">
-          {t('description')}
-        </p>
+        <p className="mt-1 body-medium text-gray-60">{t('description')}</p>
       </header>
 
       <ProfileSettingsTabs
@@ -94,6 +98,6 @@ export const ProfileSettings = ({ locale }: ProfileSettingsProps) => {
           )}
         </motion.div>
       </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }
