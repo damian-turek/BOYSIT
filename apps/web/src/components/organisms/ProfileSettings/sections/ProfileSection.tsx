@@ -1,9 +1,12 @@
 'use client'
 
-import { FormEvent, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
 
+import { AuthApiError, updateCurrentUserProfile } from '@/services/authApi'
 import { Bell, Mail, User } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+
+import { useAuthSessionStore } from '@/store/useAuthSessionStore'
 
 import { Button } from '@/components/atoms/Button'
 import { Switch } from '@/components/atoms/Switch'
@@ -18,32 +21,83 @@ type ProfileSectionProps = {
   email: string
 }
 
-export const ProfileSection = ({
-  initialName,
-  email,
-}: ProfileSectionProps) => {
+const PROFILE_NAME_MAX_LENGTH = 100
+
+type ProfileStatus = {
+  message: string
+  tone: 'success' | 'error'
+}
+
+export const ProfileSection = ({ initialName, email }: ProfileSectionProps) => {
   const t = useTranslations('ProfileSettings.profile')
   const [name, setName] = useState(initialName)
-  const [status, setStatus] = useState<string>()
-  const [notifications, setNotifications] = useState<Record<string, boolean>>(
-    () =>
-      Object.fromEntries(
-        notificationOptions.map((option) => [option.id, true]),
-      ),
+  const [savedName, setSavedName] = useState(initialName.trim())
+  const [nameError, setNameError] = useState<string>()
+  const [status, setStatus] = useState<ProfileStatus>()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const setProfile = useAuthSessionStore((state) => state.setProfile)
+  const [notifications, setNotifications] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(notificationOptions.map((option) => [option.id, true])),
   )
 
-  const handleSave = (event: FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    setName(initialName)
+    setSavedName(initialName.trim())
+  }, [initialName])
+
+  const normalizedName = name.trim()
+  const hasChanges = normalizedName !== savedName
+
+  const handleSave = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setStatus(t('statusPreview'))
+    setNameError(undefined)
+    setStatus(undefined)
+
+    if (!normalizedName) {
+      setNameError(t('personal.nameRequired'))
+      return
+    }
+
+    if (normalizedName.length > PROFILE_NAME_MAX_LENGTH) {
+      setNameError(t('personal.nameTooLong', { max: PROFILE_NAME_MAX_LENGTH }))
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const profile = await updateCurrentUserProfile({
+        name: normalizedName,
+      })
+
+      setProfile(profile)
+      setName(profile.name ?? '')
+      setSavedName(profile.name?.trim() ?? '')
+      setStatus({
+        message: t('status.success'),
+        tone: 'success',
+      })
+    } catch (error) {
+      setStatus({
+        message:
+          error instanceof AuthApiError && error.status === 401
+            ? t('status.sessionExpired')
+            : t('status.error'),
+        tone: 'error',
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <div className="space-y-5">
-      <ProfileSettingsCard
-        title={t('personal.title')}
-        description={t('personal.description')}
-      >
-        <form onSubmit={handleSave} className="space-y-4">
+      <ProfileSettingsCard title={t('personal.title')} description={t('personal.description')}>
+        <form
+          onSubmit={(event) => void handleSave(event)}
+          className="space-y-4"
+          aria-busy={isSubmitting}
+        >
           <ProfileSettingsField
             label={t('personal.nameLabel')}
             icon={User}
@@ -51,7 +105,15 @@ export const ProfileSection = ({
             autoComplete="name"
             value={name}
             placeholder={t('personal.namePlaceholder')}
-            onChange={(event) => setName(event.target.value)}
+            error={nameError}
+            required
+            maxLength={PROFILE_NAME_MAX_LENGTH}
+            disabled={isSubmitting}
+            onChange={(event) => {
+              setName(event.target.value)
+              setNameError(undefined)
+              setStatus(undefined)
+            }}
           />
           <ProfileSettingsField
             label={t('personal.emailLabel')}
@@ -68,9 +130,14 @@ export const ProfileSection = ({
             hint={t('personal.emailHint')}
             className="cursor-not-allowed text-gray-60"
           />
-          <ProfileStatusMessage message={status} />
-          <Button type="submit" size="lg" className="px-4 py-2">
-            {t('personal.saveButton')}
+          <ProfileStatusMessage message={status?.message} tone={status?.tone} />
+          <Button
+            type="submit"
+            size="lg"
+            className="px-4 py-2"
+            disabled={isSubmitting || !hasChanges}
+          >
+            {isSubmitting ? t('personal.savingButton') : t('personal.saveButton')}
           </Button>
         </form>
       </ProfileSettingsCard>
@@ -94,9 +161,7 @@ export const ProfileSection = ({
                     <Bell size={15} aria-hidden="true" />
                   </span>
                   <span className="min-w-0">
-                    <span className="block body-medium font-semibold text-gray-100">
-                      {label}
-                    </span>
+                    <span className="block body-medium font-semibold text-gray-100">{label}</span>
                     <span className="mt-0.5 block body-small text-gray-60">
                       {t(option.descriptionKey)}
                     </span>

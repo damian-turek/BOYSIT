@@ -116,16 +116,23 @@
       "billing": "Rozliczenia"
     },
     "profile": {
-      "statusPreview": "To tylko podgląd frontendu. Zapisywanie profilu zostanie podłączone później.",
+      "status": {
+        "success": "Twój profil został zaktualizowany.",
+        "error": "Nie udało się zaktualizować profilu. Spróbuj ponownie.",
+        "sessionExpired": "Twoja sesja wygasła. Zaloguj się ponownie, aby zapisać zmiany."
+      },
       "personal": {
         "title": "Dane osobowe",
-        "description": "Zaktualizuj imię i adres e-mail powiązane z kontem.",
+        "description": "Zaktualizuj imię i sprawdź adres e-mail powiązany z kontem.",
         "nameLabel": "Imię i nazwisko",
         "namePlaceholder": "Twoje imię i nazwisko",
+        "nameRequired": "Wpisz swoje imię i nazwisko.",
+        "nameTooLong": "Nazwa może mieć maksymalnie {max} znaków.",
         "emailLabel": "Adres e-mail",
         "emailPlaceholder": "ty@example.com",
-        "emailHint": "Zmiana adresu e-mail nie jest dostępna w tym podglądzie frontendu.",
-        "saveButton": "Zapisz zmiany"
+        "emailHint": "Zmiana adresu e-mail nie jest jeszcze obsługiwana.",
+        "saveButton": "Zapisz zmiany",
+        "savingButton": "Zapisywanie..."
       },
       "notifications": {
         "title": "Powiadomienia",

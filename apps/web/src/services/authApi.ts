@@ -33,7 +33,11 @@ export class AuthApiError extends Error {
   }
 }
 
-export const fetchCurrentUser = async (signal?: AbortSignal): Promise<AuthUserProfile> => {
+type UpdateCurrentUserProfileInput = {
+  name: string
+}
+
+const requestCurrentUser = async (init: RequestInit = {}): Promise<AuthUserProfile> => {
   const supabase = getSupabaseClient()
 
   const {
@@ -41,13 +45,15 @@ export const fetchCurrentUser = async (signal?: AbortSignal): Promise<AuthUserPr
   } = await supabase.auth.getSession()
 
   const response = await fetch(createApiUrl('/api/v1/me'), {
+    ...init,
     credentials: 'include',
     headers: {
       Accept: 'application/json',
+      ...init.headers,
       ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
     },
-    signal,
   })
+
   if (!response.ok) {
     const body = (await response.json().catch(() => ({}))) as ErrorResponse
     const fallbackMessage = Array.isArray(body.message) ? body.message.join(', ') : body.message
@@ -62,3 +68,19 @@ export const fetchCurrentUser = async (signal?: AbortSignal): Promise<AuthUserPr
   const body = (await response.json()) as CurrentUserResponse
   return body.data
 }
+
+export const fetchCurrentUser = (signal?: AbortSignal): Promise<AuthUserProfile> =>
+  requestCurrentUser({ signal })
+
+export const updateCurrentUserProfile = (
+  profile: UpdateCurrentUserProfileInput,
+  signal?: AbortSignal,
+): Promise<AuthUserProfile> =>
+  requestCurrentUser({
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(profile),
+    signal,
+  })

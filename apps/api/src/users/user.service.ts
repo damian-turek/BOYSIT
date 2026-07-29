@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common'
+import type { User } from 'database'
+
+import { PrismaService } from '../prisma/prisma.service'
 
 export interface UserProfileResponse {
   data: {
@@ -12,11 +15,9 @@ export interface UserProfileResponse {
 
 @Injectable()
 export class UsersService {
-  formatUserProfile(user: any): UserProfileResponse {
-    if (!user) {
-      throw new Error('User data is missing')
-    }
+  constructor(private readonly prismaService: PrismaService) {}
 
+  formatUserProfile(user: User): UserProfileResponse {
     return {
       data: {
         id: user.id,
@@ -26,5 +27,14 @@ export class UsersService {
         proUntil: user.proUntil ? new Date(user.proUntil).toISOString() : null,
       },
     }
+  }
+
+  async updateProfile(userId: string, name: string): Promise<UserProfileResponse> {
+    const user = await this.prismaService.client.user.update({
+      where: { id: userId },
+      data: { name },
+    })
+
+    return this.formatUserProfile(user)
   }
 }
