@@ -156,18 +156,50 @@
       }
     },
     "security": {
-      "statusPreview": "To tylko podgląd frontendu. Zmiana hasła zostanie podłączona później.",
-      "password": {
-        "title": "Zmiana hasła",
-        "description": "Sekcja jest gotowa wizualnie, ale akcja backendowa jest teraz wyłączona.",
-        "currentLabel": "Obecne hasło",
-        "currentPlaceholder": "Hasło",
-        "newLabel": "Nowe hasło",
-        "newPlaceholder": "Nowe hasło",
-        "newHint": "Użyj co najmniej 8 znaków.",
-        "confirmLabel": "Potwierdź nowe hasło",
-        "confirmPlaceholder": "Potwierdź hasło",
-        "submitButton": "Zmień hasło"
+      "passwordRecovery": {
+        "title": "Resetowanie hasła",
+        "description": "Potwierdź dostęp do adresu konta, zanim ustawisz nowe hasło.",
+        "emailLabel": "Adres e-mail konta",
+        "requestHint": "Na adres konta wyślemy sześciocyfrowy kod odzyskiwania.",
+        "sendCodeButton": "Wyślij kod odzyskiwania",
+        "codeLabel": "Kod odzyskiwania",
+        "codePlaceholder": "000000",
+        "codeHint": "Wpisz sześciocyfrowy kod wysłany na adres {email}.",
+        "verifyButton": "Zweryfikuj kod",
+        "verifyingButton": "Weryfikowanie...",
+        "resendButton": "Wyślij kod ponownie",
+        "resendingButton": "Ponowne wysyłanie...",
+        "cancelButton": "Anuluj",
+        "newPasswordLabel": "Nowe hasło",
+        "newPasswordPlaceholder": "Wpisz nowe hasło",
+        "newPasswordHint": "Użyj co najmniej {min} znaków i nie powtarzaj wcześniejszych haseł.",
+        "confirmPasswordLabel": "Potwierdź nowe hasło",
+        "confirmPasswordPlaceholder": "Wpisz ponownie nowe hasło",
+        "updateButton": "Zaktualizuj hasło",
+        "updatingButton": "Aktualizowanie...",
+        "status": {
+          "loading": "Sprawdzamy metodę logowania...",
+          "providerManaged": "To konto loguje się przez zewnętrznego dostawcę i nie używa hasła aplikacji.",
+          "sendingCode": "Wysyłanie kodu odzyskiwania...",
+          "codeSent": "Kod odzyskiwania został wysłany na adres {email}.",
+          "codeResent": "Nowy kod odzyskiwania został wysłany na adres {email}.",
+          "codeVerified": "Adres został zweryfikowany. Ustaw nowe hasło.",
+          "success": "Hasło zostało zmienione, a pozostałe sesje wylogowane.",
+          "successSessionsWarning": "Hasło zostało zmienione, ale nie udało się automatycznie wylogować części pozostałych sesji."
+        },
+        "errors": {
+          "codeLength": "Wpisz pełny {length}-cyfrowy kod.",
+          "invalidCode": "Kod odzyskiwania jest nieprawidłowy lub wygasł. Poproś o nowy kod.",
+          "passwordTooShort": "Hasło musi zawierać co najmniej {min} znaków.",
+          "passwordTooLong": "Hasło może zawierać maksymalnie {max} znaków.",
+          "passwordMismatch": "Hasła nie są takie same.",
+          "weakPassword": "Supabase odrzucił to hasło jako zbyt słabe. Wybierz silniejsze hasło.",
+          "samePassword": "Wybierz hasło inne niż obecne.",
+          "rateLimit": "Wysłano zbyt wiele żądań odzyskiwania. Poczekaj chwilę i spróbuj ponownie.",
+          "deliveryNotConfigured": "Obecna usługa pocztowa nie może wysłać wiadomości odzyskiwania na ten adres.",
+          "sessionExpired": "Twoja sesja wygasła. Zaloguj się ponownie, aby zresetować hasło.",
+          "generic": "Nie udało się zresetować hasła. Spróbuj ponownie."
+        }
       },
       "mfa": {
         "title": "Uwierzytelnianie dwuskładnikowe",
