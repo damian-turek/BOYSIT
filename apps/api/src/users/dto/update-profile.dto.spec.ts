@@ -14,11 +14,11 @@ const validateProfile = (name: unknown) => {
 }
 
 describe('UpdateProfileDto', () => {
-  it('trims a valid profile name', async () => {
-    const { profile, errors } = validateProfile('  Ada Lovelace  ')
+  it('normalizes a valid international profile name', async () => {
+    const { profile, errors } = validateProfile('  Łukasz   O’Connor-Sato  ')
 
     await expect(errors).resolves.toHaveLength(0)
-    expect(profile.name).toBe('Ada Lovelace')
+    expect(profile.name).toBe('Łukasz O’Connor-Sato')
   })
 
   it('rejects an empty profile name', async () => {
@@ -29,6 +29,18 @@ describe('UpdateProfileDto', () => {
 
   it('rejects a profile name over the maximum length', async () => {
     const { errors } = validateProfile('a'.repeat(PROFILE_NAME_MAX_LENGTH + 1))
+
+    await expect(errors).resolves.not.toHaveLength(0)
+  })
+
+  it('rejects a profile name without a letter', async () => {
+    const { errors } = validateProfile('1234 🚀')
+
+    await expect(errors).resolves.not.toHaveLength(0)
+  })
+
+  it('rejects control characters inside a profile name', async () => {
+    const { errors } = validateProfile('Ada\nLovelace')
 
     await expect(errors).resolves.not.toHaveLength(0)
   })

@@ -21,7 +21,20 @@ type ProfileSectionProps = {
   email: string
 }
 
-const PROFILE_NAME_MAX_LENGTH = 100
+const PROFILE_NAME_MAX_LENGTH = 80
+const profileNameContainsLetter = /\p{L}/u
+
+const normalizeProfileName = (name: string): string =>
+  name
+    .normalize('NFC')
+    .trim()
+    .replace(/\p{Zs}+/gu, ' ')
+
+const containsControlCharacter = (name: string): boolean =>
+  Array.from(name).some((character) => {
+    const codePoint = character.codePointAt(0)
+    return codePoint !== undefined && (codePoint <= 31 || (codePoint >= 127 && codePoint <= 159))
+  })
 
 type ProfileStatus = {
   message: string
@@ -31,7 +44,7 @@ type ProfileStatus = {
 export const ProfileSection = ({ initialName, email }: ProfileSectionProps) => {
   const t = useTranslations('ProfileSettings.profile')
   const [name, setName] = useState(initialName)
-  const [savedName, setSavedName] = useState(initialName.trim())
+  const [savedName, setSavedName] = useState(normalizeProfileName(initialName))
   const [nameError, setNameError] = useState<string>()
   const [status, setStatus] = useState<ProfileStatus>()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -42,10 +55,10 @@ export const ProfileSection = ({ initialName, email }: ProfileSectionProps) => {
 
   useEffect(() => {
     setName(initialName)
-    setSavedName(initialName.trim())
+    setSavedName(normalizeProfileName(initialName))
   }, [initialName])
 
-  const normalizedName = name.trim()
+  const normalizedName = normalizeProfileName(name)
   const hasChanges = normalizedName !== savedName
 
   const handleSave = async (event: FormEvent<HTMLFormElement>) => {
@@ -63,6 +76,16 @@ export const ProfileSection = ({ initialName, email }: ProfileSectionProps) => {
       return
     }
 
+    if (containsControlCharacter(name)) {
+      setNameError(t('personal.nameInvalidCharacters'))
+      return
+    }
+
+    if (!profileNameContainsLetter.test(normalizedName)) {
+      setNameError(t('personal.nameMustContainLetter'))
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
@@ -72,12 +95,17 @@ export const ProfileSection = ({ initialName, email }: ProfileSectionProps) => {
 
       setProfile(profile)
       setName(profile.name ?? '')
-      setSavedName(profile.name?.trim() ?? '')
+      setSavedName(normalizeProfileName(profile.name ?? ''))
       setStatus({
         message: t('status.success'),
         tone: 'success',
       })
     } catch (error) {
+      if (error instanceof AuthApiError && error.status === 400) {
+        setNameError(t('personal.nameInvalid'))
+        return
+      }
+
       setStatus({
         message:
           error instanceof AuthApiError && error.status === 401
@@ -106,6 +134,7 @@ export const ProfileSection = ({ initialName, email }: ProfileSectionProps) => {
             value={name}
             placeholder={t('personal.namePlaceholder')}
             error={nameError}
+            hint={t('personal.nameHint', { max: PROFILE_NAME_MAX_LENGTH })}
             required
             maxLength={PROFILE_NAME_MAX_LENGTH}
             disabled={isSubmitting}
