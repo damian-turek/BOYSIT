@@ -21,7 +21,7 @@ type ProfileSectionProps = {
   email: string
 }
 
-const PROFILE_NAME_MAX_LENGTH = 80
+const PROFILE_NAME_MAX_LENGTH = 50
 const profileNameContainsLetter = /\p{L}/u
 
 const normalizeProfileName = (name: string): string =>

@@ -1,7 +1,7 @@
 import { Transform } from 'class-transformer'
 import { IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator'
 
-export const PROFILE_NAME_MAX_LENGTH = 80
+export const PROFILE_NAME_MAX_LENGTH = 50
 
 const profileNameContainsLetter = /\p{L}/u
 const profileNameContainsNoControlCharacters = /^[^\u0000-\u001f\u007f-\u009f]+$/u
