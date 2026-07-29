@@ -1,3 +1,5 @@
+import { createApiUrl } from '@/config/api'
+
 import { getSupabaseClient } from './supabase'
 
 export type AuthUserProfile = {
@@ -20,8 +22,6 @@ type ErrorResponse = {
   message?: string | string[]
 }
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000'
-
 export class AuthApiError extends Error {
   constructor(
     message: string,
@@ -40,7 +40,7 @@ export const fetchCurrentUser = async (signal?: AbortSignal): Promise<AuthUserPr
     data: { session },
   } = await supabase.auth.getSession()
 
-  const response = await fetch(`${apiBaseUrl}/api/v1/me`, {
+  const response = await fetch(createApiUrl('/api/v1/me'), {
     credentials: 'include',
     headers: {
       Accept: 'application/json',

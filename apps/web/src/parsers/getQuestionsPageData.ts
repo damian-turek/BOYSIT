@@ -1,3 +1,4 @@
+import { createApiUrl } from '@/config/api'
 import { FilterItem } from '@/config/questions'
 import { createSupabaseServerClient } from '@/lib/supabase'
 import { Question } from '@/types/question'
@@ -23,8 +24,6 @@ export async function getQuestionsPageData(
   if (searchParams.page) query.append('page', searchParams.page)
 
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL
-
     const supabase = await createSupabaseServerClient()
     const {
       data: { session },
@@ -35,7 +34,7 @@ export async function getQuestionsPageData(
       headers.authorization = `Bearer ${session.access_token}`
     }
 
-    const res = await fetch(`${backendUrl}/api/v1/questions?${query.toString()}`, {
+    const res = await fetch(createApiUrl(`/api/v1/questions?${query.toString()}`), {
       cache: 'no-store',
       headers,
     })
