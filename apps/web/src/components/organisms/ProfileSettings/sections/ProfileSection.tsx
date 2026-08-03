@@ -156,7 +156,6 @@ export const ProfileSection = ({ initialName, email }: ProfileSectionProps) => {
             placeholder={t('personal.emailPlaceholder')}
             readOnly
             aria-readonly="true"
-            hint={t('personal.emailHint')}
             className="cursor-not-allowed text-gray-60"
           />
           <ProfileStatusMessage message={status?.message} tone={status?.tone} />

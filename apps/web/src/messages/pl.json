@@ -134,7 +134,6 @@
         "nameInvalid": "Wpisz prawidłową nazwę.",
         "emailLabel": "Adres e-mail",
         "emailPlaceholder": "ty@example.com",
-        "emailHint": "Zmiana adresu e-mail nie jest jeszcze obsługiwana.",
         "saveButton": "Zapisz zmiany",
         "savingButton": "Zapisywanie..."
       },
@@ -160,11 +159,11 @@
         "title": "Resetowanie hasła",
         "description": "Potwierdź dostęp do adresu konta, zanim ustawisz nowe hasło.",
         "emailLabel": "Adres e-mail konta",
-        "requestHint": "Na adres konta wyślemy sześciocyfrowy kod odzyskiwania.",
+        "requestHint": "Na adres konta wyślemy ośmioznakowy kod odzyskiwania.",
         "sendCodeButton": "Wyślij kod odzyskiwania",
         "codeLabel": "Kod odzyskiwania",
-        "codePlaceholder": "000000",
-        "codeHint": "Wpisz sześciocyfrowy kod wysłany na adres {email}.",
+        "codePlaceholder": "00000000",
+        "codeHint": "Wpisz ośmioznakowy kod wysłany na adres {email}.",
         "verifyButton": "Zweryfikuj kod",
         "verifyingButton": "Weryfikowanie...",
         "resendButton": "Wyślij kod ponownie",
@@ -188,7 +187,7 @@
           "successSessionsWarning": "Hasło zostało zmienione, ale nie udało się automatycznie wylogować części pozostałych sesji."
         },
         "errors": {
-          "codeLength": "Wpisz pełny {length}-cyfrowy kod.",
+          "codeLength": "Wpisz pełny {length}-znakowy kod.",
           "invalidCode": "Kod odzyskiwania jest nieprawidłowy lub wygasł. Poproś o nowy kod.",
           "passwordTooShort": "Hasło musi zawierać co najmniej {min} znaków.",
           "passwordTooLong": "Hasło może zawierać maksymalnie {max} znaków.",

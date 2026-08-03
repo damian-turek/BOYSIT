@@ -18,7 +18,7 @@ import { ProfileSettingsCard } from '@/components/molecules/ProfileSettingsCard'
 import { ProfileSettingsField } from '@/components/molecules/ProfileSettingsField'
 import { ProfileStatusMessage } from '@/components/molecules/ProfileStatusMessage'
 
-const RECOVERY_OTP_LENGTH = 6
+const RECOVERY_OTP_LENGTH = 8
 const PASSWORD_MIN_LENGTH = 8
 const PASSWORD_MAX_LENGTH = 128
 
@@ -36,7 +36,7 @@ type RecoveryStatus = {
   tone: 'success' | 'error' | 'info'
 }
 
-const normalizeOtp = (otp: string): string => otp.replace(/\D/gu, '').slice(0, RECOVERY_OTP_LENGTH)
+const normalizeOtp = (otp: string): string => otp.replace(/\s/gu, '').slice(0, RECOVERY_OTP_LENGTH)
 
 export const PasswordRecoverySection = () => {
   const t = useTranslations('ProfileSettings.security.passwordRecovery')
@@ -296,7 +296,6 @@ export const PasswordRecoverySection = () => {
               icon={ShieldCheck}
               name="password-recovery-code"
               type="text"
-              inputMode="numeric"
               autoComplete="one-time-code"
               value={otp}
               placeholder={t('codePlaceholder')}

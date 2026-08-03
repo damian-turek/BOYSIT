@@ -1,6 +1,6 @@
 # Supabase Password Recovery OTP Setup
 
-The Security tab resets an email/password user's password through a six-digit recovery OTP. The
+The Security tab resets an email/password user's password through an eight-character recovery OTP. The
 flow stays inside the application:
 
 ```text

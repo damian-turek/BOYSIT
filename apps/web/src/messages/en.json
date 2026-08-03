@@ -134,7 +134,6 @@
         "nameInvalid": "Enter a valid name.",
         "emailLabel": "Email address",
         "emailPlaceholder": "you@example.com",
-        "emailHint": "Email changes are not supported yet.",
         "saveButton": "Save changes",
         "savingButton": "Saving..."
       },
@@ -160,11 +159,11 @@
         "title": "Reset password",
         "description": "Verify access to your account email before choosing a new password.",
         "emailLabel": "Account email",
-        "requestHint": "We will send a six-digit recovery code to your account email.",
+        "requestHint": "We will send an eight-character recovery code to your account email.",
         "sendCodeButton": "Send recovery code",
         "codeLabel": "Recovery code",
-        "codePlaceholder": "000000",
-        "codeHint": "Enter the six-digit code sent to {email}.",
+        "codePlaceholder": "00000000",
+        "codeHint": "Enter the eight-character code sent to {email}.",
         "verifyButton": "Verify code",
         "verifyingButton": "Verifying...",
         "resendButton": "Resend code",
@@ -188,7 +187,7 @@
           "successSessionsWarning": "Your password was updated, but some other sessions could not be signed out automatically."
         },
         "errors": {
-          "codeLength": "Enter the complete {length}-digit code.",
+          "codeLength": "Enter the complete {length}-character code.",
           "invalidCode": "The recovery code is invalid or has expired. Request a new code.",
           "passwordTooShort": "Password must contain at least {min} characters.",
           "passwordTooLong": "Password must contain at most {max} characters.",
