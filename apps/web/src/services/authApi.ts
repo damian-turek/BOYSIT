@@ -1,6 +1,5 @@
 import { createApiUrl } from '@/config/api'
-
-import { getSupabaseClient } from './supabase'
+import { getSupabaseClient } from '@/services/supabaseClient'
 
 export type AuthUserProfile = {
   id: string

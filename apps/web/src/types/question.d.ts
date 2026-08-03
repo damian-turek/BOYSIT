@@ -5,7 +5,7 @@ export type Category = {
 }
 
 export type Question = {
-  index: number
+  index: string
   level: Level
   company?: string
   technologies: string[]

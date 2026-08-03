@@ -4,7 +4,7 @@ import React, { FormEvent, useEffect, useState } from 'react'
 
 import { usePathname, useRouter } from 'next/navigation'
 
-import { getSupabaseClient } from '@/services/supabase'
+import { getSupabaseClient } from '@/services/supabaseClient'
 import { AnimatePresence, motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 

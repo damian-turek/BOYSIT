@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 
 import { AuthApiError, fetchCurrentUser } from '@/services/authApi'
-import { getSupabaseClient } from '@/services/supabase'
+import { getSupabaseClient } from '@/services/supabaseClient'
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js'
 
 import { useAuthSessionStore } from '@/store/useAuthSessionStore'

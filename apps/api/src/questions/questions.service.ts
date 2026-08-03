@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { GetQuestionsDto } from './dto/questions.dto'
 import { QuestionWhereInput } from 'database'
+
 import { PrismaService } from '../prisma/prisma.service'
+import { GetQuestionsDto } from './dto/questions.dto'
 
 @Injectable()
 export class QuestionsService {
@@ -11,7 +12,7 @@ export class QuestionsService {
     const { search, accessLevel, categories, technologies, difficulty, type, page, limit } = query
 
     const where: QuestionWhereInput = {
-      isActive: true
+      isActive: true,
     }
 
     if (search) {
@@ -24,13 +25,13 @@ export class QuestionsService {
 
     if (categories && categories.length > 0) {
       where.category = {
-        slug: { in: categories }
+        slug: { in: categories },
       }
     }
 
     if (technologies && technologies.length > 0) {
       where.technology = {
-        slug: { in: technologies }
+        slug: { in: technologies },
       }
     }
     if (difficulty) where.difficulty = difficulty
@@ -52,9 +53,9 @@ export class QuestionsService {
           category: { select: { id: true, name: true, slug: true } },
           technology: { select: { id: true, name: true, slug: true } },
           questionTags: { select: { tag: true } },
-        }
+        },
       }),
-      this.prisma.client.question.count({ where })
+      this.prisma.client.question.count({ where }),
     ])
 
     return {
@@ -64,7 +65,34 @@ export class QuestionsService {
         page: pageNumber,
         limit: limitNumber,
         totalPages: Math.ceil(total / take),
-      }
+      },
+    }
+  }
+
+  async findSingle(id: string) {
+    const data = await this.prisma.client.question.findUnique({
+      where: { id },
+      include: {
+        category: { select: { id: true, name: true, slug: true } },
+        technology: { select: { id: true, name: true, slug: true } },
+        questionTags: { select: { tag: true } },
+      },
+    })
+
+    if (!data) return null
+
+    const [nextQuestion] = await this.prisma.client.question.findMany({
+      where: { isActive: true },
+      cursor: { id },
+      skip: 1,
+      take: 1,
+      orderBy: { id: 'asc' },
+      select: { id: true, title: true },
+    })
+
+    return {
+      data,
+      nextQuestion: nextQuestion ?? null,
     }
   }
 }

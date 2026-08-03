@@ -1,6 +1,6 @@
 import { createApiUrl } from '@/config/api'
 import { FilterItem } from '@/config/questions'
-import { createSupabaseServerClient } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/services/supabaseServer'
 import { Question } from '@/types/question'
 
 interface QuestionsPageData {
