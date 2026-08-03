@@ -8,12 +8,14 @@ import { PasswordInput } from '@/components/molecules/PasswordInput'
 type ProfileSettingsFieldProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string
   icon: ComponentType<LucideProps>
+  error?: string
   hint?: string
 }
 
 export const ProfileSettingsField = ({
   label,
   icon: Icon,
+  error,
   hint,
   className,
   ...props
@@ -22,6 +24,7 @@ export const ProfileSettingsField = ({
     label,
     labelClassName: 'label-font-spaced font-semibold uppercase',
     leftIcon: Icon,
+    error,
     hint,
     className,
   }
@@ -30,10 +33,5 @@ export const ProfileSettingsField = ({
     return <PasswordInput {...inputProps} {...props} />
   }
 
-  return (
-    <Input
-      {...inputProps}
-      {...props}
-    />
-  )
+  return <Input {...inputProps} {...props} />
 }

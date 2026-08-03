@@ -116,16 +116,26 @@
       "billing": "Billing"
     },
     "profile": {
-      "statusPreview": "Frontend preview only. Profile saving will be connected later.",
+      "status": {
+        "success": "Your profile has been updated.",
+        "error": "We could not update your profile. Please try again.",
+        "sessionExpired": "Your session has expired. Sign in again to save changes."
+      },
       "personal": {
         "title": "Personal information",
-        "description": "Update the name and email associated with your account.",
+        "description": "Update your name and view the email associated with your account.",
         "nameLabel": "Full name",
         "namePlaceholder": "Your name",
+        "nameHint": "Use at least one letter and no more than {max} characters.",
+        "nameRequired": "Enter your name.",
+        "nameTooLong": "Name must be at most {max} characters.",
+        "nameMustContainLetter": "Name must contain at least one letter.",
+        "nameInvalidCharacters": "Name must not contain control characters.",
+        "nameInvalid": "Enter a valid name.",
         "emailLabel": "Email address",
         "emailPlaceholder": "you@example.com",
-        "emailHint": "Email changes are not available in this frontend preview.",
-        "saveButton": "Save changes"
+        "saveButton": "Save changes",
+        "savingButton": "Saving..."
       },
       "notifications": {
         "title": "Notifications",
@@ -145,18 +155,50 @@
       }
     },
     "security": {
-      "statusPreview": "Frontend preview only. Password changes will be connected later.",
-      "password": {
-        "title": "Change password",
-        "description": "This section is ready visually, backend action is disabled for now.",
-        "currentLabel": "Current password",
-        "currentPlaceholder": "Password",
-        "newLabel": "New password",
-        "newPlaceholder": "New password",
-        "newHint": "Use at least 8 characters.",
-        "confirmLabel": "Confirm new password",
-        "confirmPlaceholder": "Confirm password",
-        "submitButton": "Update password"
+      "passwordRecovery": {
+        "title": "Reset password",
+        "description": "Verify access to your account email before choosing a new password.",
+        "emailLabel": "Account email",
+        "requestHint": "We will send an eight-character recovery code to your account email.",
+        "sendCodeButton": "Send recovery code",
+        "codeLabel": "Recovery code",
+        "codePlaceholder": "00000000",
+        "codeHint": "Enter the eight-character code sent to {email}.",
+        "verifyButton": "Verify code",
+        "verifyingButton": "Verifying...",
+        "resendButton": "Resend code",
+        "resendingButton": "Resending...",
+        "cancelButton": "Cancel",
+        "newPasswordLabel": "New password",
+        "newPasswordPlaceholder": "Enter a new password",
+        "newPasswordHint": "Use at least {min} characters and avoid reused passwords.",
+        "confirmPasswordLabel": "Confirm new password",
+        "confirmPasswordPlaceholder": "Enter the new password again",
+        "updateButton": "Update password",
+        "updatingButton": "Updating...",
+        "status": {
+          "loading": "Checking your sign-in method...",
+          "providerManaged": "This account signs in through an external provider and does not use an application password.",
+          "sendingCode": "Sending a recovery code...",
+          "codeSent": "A recovery code was sent to {email}.",
+          "codeResent": "A new recovery code was sent to {email}.",
+          "codeVerified": "Email verified. Choose your new password.",
+          "success": "Your password was updated and other sessions were signed out.",
+          "successSessionsWarning": "Your password was updated, but some other sessions could not be signed out automatically."
+        },
+        "errors": {
+          "codeLength": "Enter the complete {length}-character code.",
+          "invalidCode": "The recovery code is invalid or has expired. Request a new code.",
+          "passwordTooShort": "Password must contain at least {min} characters.",
+          "passwordTooLong": "Password must contain at most {max} characters.",
+          "passwordMismatch": "The passwords do not match.",
+          "weakPassword": "Supabase rejected this password as too weak. Choose a stronger password.",
+          "samePassword": "Choose a password different from your current password.",
+          "rateLimit": "Too many recovery requests were made. Wait a moment and try again.",
+          "deliveryNotConfigured": "The current email service cannot send a recovery message to this address.",
+          "sessionExpired": "Your session has expired. Sign in again to reset your password.",
+          "generic": "We could not reset the password. Please try again."
+        }
       },
       "mfa": {
         "title": "Two-factor authentication",

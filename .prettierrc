@@ -6,6 +6,7 @@
   "tabWidth": 2,
   "useTabs": false,
   "plugins": ["./node_modules/@trivago/prettier-plugin-sort-imports/lib/src/index.js"],
+  "importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"],
   "importOrder": [
     "^react$",
     "^next/(.*)$",

@@ -1,11 +1,18 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common'
-import { FastifyRequest } from 'fastify'
-import { AuthGuard } from '../auth/auth.guard'
-import { UsersService } from './user.service'
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Req,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common'
 
-interface AuthenticatedRequest extends FastifyRequest {
-  user: any
-}
+import { AuthGuard } from '../auth/auth.guard'
+import type { AuthenticatedRequest } from '../auth/authenticated-request'
+import { UpdateProfileDto } from './dto/update-profile.dto'
+import { UsersService } from './user.service'
 
 @Controller('me')
 @UseGuards(AuthGuard)
@@ -14,8 +21,18 @@ export class UsersController {
 
   @Get()
   getProfile(@Req() request: AuthenticatedRequest) {
-    const user = request.user
+    return this.userService.formatUserProfile(request.user)
+  }
 
-    return this.userService.formatUserProfile(user)
+  @Patch()
+  @UsePipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  )
+  updateProfile(@Req() request: AuthenticatedRequest, @Body() profile: UpdateProfileDto) {
+    return this.userService.updateProfile(request.user.id, profile.name)
   }
 }
