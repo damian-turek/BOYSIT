@@ -31,7 +31,6 @@ export class GetQuestionsDto {
   @IsEnum(AccessLevel)
   accessLevel?: AccessLevel;
 
-  // Paginacja z domyślnymi wartościami
   @IsOptional()
   @IsInt()
   @Min(1)

@@ -5,13 +5,13 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
+import { getSupabaseClient } from '@/services/supabaseClient'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
-import { useAuthStore } from '@/store/useAuthStore'
 import { useAuthSessionStore } from '@/store/useAuthSessionStore'
+import { useAuthStore } from '@/store/useAuthStore'
 import { useThemeStore } from '@/store/useThemeStore'
-import { getSupabaseClient } from '@/services/supabase'
 
 import { Button } from '@/components/atoms/Button'
 
@@ -149,13 +149,21 @@ export const Header = ({ name, nav }: HeaderProps) => {
           {profile ? (
             <>
               <span className="body-small text-gray-60">{profile.email}</span>
-              <Button onClick={() => void handleSignOut()} variant="text" className="hover:text-primary!">
+              <Button
+                onClick={() => void handleSignOut()}
+                variant="text"
+                className="hover:text-primary!"
+              >
                 Sign out
               </Button>
             </>
           ) : (
             <>
-              <Button onClick={() => openModal('login')} variant="text" className="hover:text-primary!">
+              <Button
+                onClick={() => openModal('login')}
+                variant="text"
+                className="hover:text-primary!"
+              >
                 {t('login')}
               </Button>
               <Button onClick={() => openModal('register')}>{t('getStarted')} →</Button>
