@@ -1,6 +1,5 @@
+import { getSupabaseClient } from '@/services/supabaseClient'
 import type { Session } from '@supabase/supabase-js'
-
-import { getSupabaseClient } from './supabase'
 
 export class PasswordRecoveryError extends Error {
   constructor(
