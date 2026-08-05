@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
+import { getSupabaseClient } from '@/services/supabaseClient'
 import {
   BookOpen,
   Briefcase,
@@ -21,8 +22,9 @@ import {
   X,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
+import { useAuthSessionStore } from '@/store/useAuthSessionStore'
 import { useThemeStore } from '@/store/useThemeStore'
 
 import { cn } from '@/utils/cn'
@@ -58,11 +60,43 @@ const MotionLink = motion.create(Link)
 
 export const Sidebar = ({ name, nav, upgradeButton }: SidebarProps) => {
   const [isOpen, setIsOpen] = useState(false)
+  const [isSigningOut, setIsSigningOut] = useState(false)
+  const [logoutError, setLogoutError] = useState(false)
   const isDark = useThemeStore((state) => state.isDark)
   const toggleTheme = useThemeStore((state) => state.toggleTheme)
+  const clearAuth = useAuthSessionStore((state) => state.clear)
+  const locale = useLocale()
   const pathname = usePathname()
+  const router = useRouter()
   const cleanedPathname = pathname ? pathname.replace(/^\/[a-z]{2}(\/|$)/, '/').toLowerCase() : '/'
   const t = useTranslations('Sidebar')
+
+  const handleSignOut = async () => {
+    if (isSigningOut) {
+      return
+    }
+
+    setIsSigningOut(true)
+    setLogoutError(false)
+
+    try {
+      const supabase = getSupabaseClient()
+      const { error } = await supabase.auth.signOut({ scope: 'local' })
+
+      if (error) {
+        throw error
+      }
+
+      clearAuth()
+      setIsOpen(false)
+      router.replace(`/${locale}`)
+      router.refresh()
+    } catch {
+      setLogoutError(true)
+    } finally {
+      setIsSigningOut(false)
+    }
+  }
 
   useEffect(() => {
     if (isOpen) {
@@ -218,10 +252,17 @@ export const Sidebar = ({ name, nav, upgradeButton }: SidebarProps) => {
             variant="text"
             icon={LogOut}
             iconOnly
+            disabled={isSigningOut}
+            onClick={() => void handleSignOut()}
             className={`hover:[&_svg_path]:stroke-primary! ${isDark ? '[&_svg_path]:stroke-primary' : ''}`}
           >
-            {t('logout')}
+            {isSigningOut ? t('loggingOut') : t('logout')}
           </Button>
+          {logoutError && (
+            <p className="body-small px-1 text-red-500" role="alert">
+              {t('logoutError')}
+            </p>
+          )}
         </div>
       </aside>
     </>

@@ -1,7 +1,10 @@
 import type { User } from 'database'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type { SupabaseAdminService } from '../auth/supabase-admin.service'
+import type { SupabaseEmailOtpService } from '../auth/supabase-email-otp.service'
 import type { PrismaService } from '../prisma/prisma.service'
+import type { AccountDeletionRateLimitService } from './account-deletion-rate-limit.service'
 import { UsersService } from './user.service'
 
 const user: User = {
@@ -17,19 +20,51 @@ const user: User = {
 
 describe('UsersService', () => {
   const update = vi.fn()
+  const deleteUserRecord = vi.fn()
+  const deleteAuthUser = vi.fn()
+  const ensureAdminConfigured = vi.fn()
+  const sendAccountDeletionCode = vi.fn()
+  const verifyAccountDeletionCode = vi.fn()
+  const consumeDeletionCodeRequest = vi.fn()
+  const clearDeletionCodeRequests = vi.fn()
   const prismaService = {
     client: {
       user: {
         update,
+        delete: deleteUserRecord,
       },
     },
   } as unknown as PrismaService
+  const supabaseAdminService = {
+    deleteUser: deleteAuthUser,
+    ensureConfigured: ensureAdminConfigured,
+  } as unknown as SupabaseAdminService
+  const supabaseEmailOtpService = {
+    sendAccountDeletionCode,
+    verifyAccountDeletionCode,
+  } as unknown as SupabaseEmailOtpService
+  const accountDeletionRateLimitService = {
+    consume: consumeDeletionCodeRequest,
+    clear: clearDeletionCodeRequests,
+  } as unknown as AccountDeletionRateLimitService
 
   let service: UsersService
 
   beforeEach(() => {
     update.mockReset()
-    service = new UsersService(prismaService)
+    deleteUserRecord.mockReset()
+    deleteAuthUser.mockReset()
+    ensureAdminConfigured.mockReset()
+    sendAccountDeletionCode.mockReset()
+    verifyAccountDeletionCode.mockReset()
+    consumeDeletionCodeRequest.mockReset()
+    clearDeletionCodeRequests.mockReset()
+    service = new UsersService(
+      prismaService,
+      supabaseAdminService,
+      supabaseEmailOtpService,
+      accountDeletionRateLimitService,
+    )
   })
 
   it('updates only the authenticated user and returns the public profile', async () => {
@@ -68,5 +103,67 @@ describe('UsersService', () => {
         proUntil: proUntil.toISOString(),
       },
     })
+  })
+
+  it('rate-limits and sends an account deletion code to the authenticated user email', async () => {
+    sendAccountDeletionCode.mockResolvedValue(undefined)
+
+    await expect(service.requestAccountDeletionCode(user)).resolves.toEqual({
+      data: {
+        resendAfterSeconds: 60,
+      },
+    })
+
+    expect(ensureAdminConfigured).toHaveBeenCalledOnce()
+    expect(consumeDeletionCodeRequest).toHaveBeenCalledWith(user.id)
+    expect(sendAccountDeletionCode).toHaveBeenCalledWith(user.email)
+  })
+
+  it('verifies the email code before deleting both user records', async () => {
+    verifyAccountDeletionCode.mockResolvedValue(undefined)
+    deleteAuthUser.mockResolvedValue(undefined)
+    deleteUserRecord.mockResolvedValue(user)
+
+    await expect(service.deleteAccount(user, '12345678')).resolves.toBeUndefined()
+
+    expect(ensureAdminConfigured).toHaveBeenCalledOnce()
+    expect(verifyAccountDeletionCode).toHaveBeenCalledWith(
+      user.email,
+      '12345678',
+      user.authProviderId,
+    )
+    expect(deleteAuthUser).toHaveBeenCalledWith(user.authProviderId)
+    expect(deleteUserRecord).toHaveBeenCalledWith({
+      where: { id: user.id },
+    })
+    expect(clearDeletionCodeRequests).toHaveBeenCalledWith(user.id)
+    expect(verifyAccountDeletionCode.mock.invocationCallOrder[0]).toBeLessThan(
+      deleteAuthUser.mock.invocationCallOrder[0],
+    )
+    expect(deleteAuthUser.mock.invocationCallOrder[0]).toBeLessThan(
+      deleteUserRecord.mock.invocationCallOrder[0],
+    )
+  })
+
+  it('does not delete application data when Supabase rejects account deletion', async () => {
+    verifyAccountDeletionCode.mockResolvedValue(undefined)
+    deleteAuthUser.mockRejectedValue(new Error('Supabase is unavailable'))
+
+    await expect(service.deleteAccount(user, '12345678')).rejects.toThrow('Supabase is unavailable')
+    expect(deleteUserRecord).not.toHaveBeenCalled()
+  })
+
+  it('does not delete either user record when the email code is invalid', async () => {
+    verifyAccountDeletionCode.mockRejectedValue(
+      Object.assign(new Error('Invalid account deletion code'), {
+        status: 400,
+      }),
+    )
+
+    await expect(service.deleteAccount(user, '00000000')).rejects.toMatchObject({
+      status: 400,
+    })
+    expect(deleteAuthUser).not.toHaveBeenCalled()
+    expect(deleteUserRecord).not.toHaveBeenCalled()
   })
 })

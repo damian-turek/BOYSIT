@@ -77,6 +77,13 @@ export const AuthModal = () => {
       provider,
       options: {
         redirectTo,
+        ...(provider === 'google'
+          ? {
+              queryParams: {
+                prompt: 'select_account',
+              },
+            }
+          : {}),
       },
     })
 

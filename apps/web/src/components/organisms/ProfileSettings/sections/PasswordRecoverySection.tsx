@@ -56,9 +56,8 @@ export const PasswordRecoverySection = () => {
   const [status, setStatus] = useState<RecoveryStatus>()
   const [isResending, setIsResending] = useState(false)
 
-  const providers = session?.user.app_metadata.providers
-  const primaryProvider = session?.user.app_metadata.provider
-  const canRecoverPassword = providers?.includes('email') ?? primaryProvider === 'email'
+  const canRecoverPassword =
+    session?.user.identities?.some((identity) => identity.provider === 'email') ?? false
   const email = session?.user.email ?? profile?.email ?? ''
   const isSessionLoading = !initialized || loading
   const isBusy = step === 'requesting' || step === 'verifying' || step === 'updating' || isResending

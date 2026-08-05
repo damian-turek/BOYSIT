@@ -28,7 +28,9 @@
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "darkMode": "Dark mode",
-    "logout": "Log out"
+    "logout": "Log out",
+    "loggingOut": "Logging out...",
+    "logoutError": "Could not log out. Please try again."
   },
   "ActivityCalendar": {
     "days": "M,T,W,T,F,S,S",
@@ -151,6 +153,36 @@
         "communityUpdates": {
           "label": "Community updates",
           "description": "Occasional product and community announcements."
+        }
+      },
+      "deleteAccount": {
+        "title": "Delete account",
+        "description": "Permanently delete your account and all data associated with it.",
+        "openButton": "Delete account",
+        "dialogTitle": "Delete your account?",
+        "dialogDescription": "This action is permanent. Your profile and all associated application data will be deleted and cannot be recovered.",
+        "sendCodeHint": "We will send a verification code to {email}. Entering the code is required before the account can be deleted.",
+        "sendCodeButton": "Send verification code",
+        "sendingButton": "Sending code...",
+        "codeLabel": "Verification code",
+        "codePlaceholder": "Enter the code",
+        "codeHint": "Enter the verification code sent to {email}.",
+        "resendButton": "Resend code",
+        "resendCountdownButton": "Resend in {seconds}s",
+        "cancelButton": "Cancel",
+        "confirmButton": "Delete account permanently",
+        "deletingButton": "Deleting account...",
+        "status": {
+          "codeSent": "A verification code was sent to {email}."
+        },
+        "errors": {
+          "codeLength": "Enter the complete verification code from the email.",
+          "invalidCode": "The verification code is invalid or has expired. Request a new code.",
+          "rateLimit": "Too many verification codes were requested. Wait before trying again.",
+          "delivery": "We could not send the verification code. Please try again.",
+          "notConfigured": "Account deletion is not fully configured on the server.",
+          "sessionExpired": "Your session has expired. Sign in again before deleting your account.",
+          "generic": "We could not delete your account. Please try again."
         }
       }
     },
