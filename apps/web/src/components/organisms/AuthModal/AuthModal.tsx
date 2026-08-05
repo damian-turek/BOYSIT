@@ -69,7 +69,9 @@ export const AuthModal = () => {
     const supabase = getSupabaseClient()
 
     const redirectTo =
-      typeof window !== 'undefined' ? `${window.location.origin}${dashboardPath}` : undefined
+      typeof window !== 'undefined'
+        ? `${window.location.origin}/${locale}/auth/callback`
+        : undefined
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
