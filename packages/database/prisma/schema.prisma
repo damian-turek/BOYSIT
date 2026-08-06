@@ -261,6 +261,10 @@ model JobApplication {
   @@index([appliedAt])
   @@index([followUpAt])
   @@index([userId, status])
+  @@index([userId, updatedAt])
+  @@index([userId, appliedAt])
+  @@index([userId, followUpAt])
+  @@index([userId, company])
   @@map("job_applications")
 }
 
@@ -290,5 +294,6 @@ model JobApplicationStatusEvent {
   @@index([jobApplicationId])
   @@index([toStatus])
   @@index([createdAt])
+  @@index([jobApplicationId, createdAt])
   @@map("job_application_status_events")
 }

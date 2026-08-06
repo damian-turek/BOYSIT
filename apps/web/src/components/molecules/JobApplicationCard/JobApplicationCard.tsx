@@ -1,20 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { JOB_APPLICATION_STATUSES, JOB_STATUS_CONFIG } from '@/constants/job-tracker'
+import type { JobApplication, JobApplicationStatus } from '@/types/job-tracker'
 import {
   CalendarDays,
   ChevronDown,
   CircleDollarSign,
   ExternalLink,
+  History,
   MapPin,
   Pencil,
   Sparkles,
   Trash2,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
-import { JOB_APPLICATION_STATUSES, JOB_STATUS_CONFIG } from '@/constants/job-tracker'
-import type { JobApplication, JobApplicationStatus } from '@/types/job-tracker'
 import { cn } from '@/utils/cn'
 
 import { Tag } from '@/components/atoms/Tag'
@@ -22,8 +23,10 @@ import { Tag } from '@/components/atoms/Tag'
 type JobApplicationCardProps = {
   application: JobApplication
   onEdit: (application: JobApplication) => void
-  onDelete: (applicationId: number) => void
-  onStatusChange: (applicationId: number, status: JobApplicationStatus) => void
+  onDelete: (applicationId: string) => void
+  onHistory: (application: JobApplication) => void
+  onStatusChange: (applicationId: string, status: JobApplicationStatus) => void
+  isStatusUpdating?: boolean
 }
 
 const getInitials = (company: string) =>
@@ -38,12 +41,27 @@ export const JobApplicationCard = ({
   application,
   onEdit,
   onDelete,
+  onHistory,
   onStatusChange,
+  isStatusUpdating = false,
 }: JobApplicationCardProps) => {
   const t = useTranslations('JobTracker')
+  const locale = useLocale()
   const [isStatusOpen, setIsStatusOpen] = useState(false)
   const statusRef = useRef<HTMLDivElement>(null)
   const status = JOB_STATUS_CONFIG[application.status]
+  const technologies = [
+    ...application.technologies.map((technology) => technology.name),
+    ...application.customTechnologies,
+  ].filter(
+    (technology, index, values) =>
+      values.findIndex((value) => value.toLowerCase() === technology.toLowerCase()) === index,
+  )
+
+  const formatDate = (value: string) =>
+    new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeZone: 'UTC' }).format(
+      new Date(value),
+    )
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -101,6 +119,7 @@ export const JobApplicationCard = ({
             )}
             aria-expanded={isStatusOpen}
             aria-label={t('card.changeStatus')}
+            disabled={isStatusUpdating}
             onClick={() => setIsStatusOpen((current) => !current)}
           >
             <span className={`size-1.5 rounded-full ${status.dotClassName}`} />
@@ -139,9 +158,7 @@ export const JobApplicationCard = ({
                           setIsStatusOpen(false)
                         }}
                       >
-                        <span
-                          className={`size-1.5 rounded-full ${statusConfig.dotClassName}`}
-                        />
+                        <span className={`size-1.5 rounded-full ${statusConfig.dotClassName}`} />
                         <span className="truncate">{t(`statuses.${statusId}`)}</span>
                       </button>
                     )
@@ -151,21 +168,32 @@ export const JobApplicationCard = ({
             )}
           </AnimatePresence>
         </div>
-        <span className="inline-flex items-center gap-1">
-          <MapPin size={13} aria-hidden="true" />
-          {application.location}
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <CircleDollarSign size={13} aria-hidden="true" />
-          {application.salary}
-        </span>
-        {application.date && (
+        {application.location && (
+          <span className="inline-flex items-center gap-1">
+            <MapPin size={13} aria-hidden="true" />
+            {application.location}
+          </span>
+        )}
+        {application.salary && (
+          <span className="inline-flex items-center gap-1">
+            <CircleDollarSign size={13} aria-hidden="true" />
+            {application.salary}
+          </span>
+        )}
+        {application.appliedAt && (
           <span className="ml-auto inline-flex items-center gap-1">
             <CalendarDays size={13} aria-hidden="true" />
-            {application.date}
+            {t('card.applied', { date: formatDate(application.appliedAt) })}
           </span>
         )}
       </div>
+
+      {application.followUpAt && (
+        <p className="mb-3 inline-flex items-center gap-1.5 body-small font-semibold text-primary">
+          <CalendarDays size={13} aria-hidden="true" />
+          {t('card.followUp', { date: formatDate(application.followUpAt) })}
+        </p>
+      )}
 
       {application.jobUrl && (
         <a
@@ -179,28 +207,44 @@ export const JobApplicationCard = ({
         </a>
       )}
 
-      <div className="mb-3 flex flex-wrap gap-1.5">
-        {application.technologies.map((technology) => (
-          <Tag
-            key={technology}
-            text={technology}
-            className="rounded-lg border-gray-60/20 bg-white text-gray-60"
-          />
-        ))}
-      </div>
+      {technologies.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          {technologies.map((technology) => (
+            <Tag
+              key={technology}
+              text={technology}
+              className="rounded-lg border-gray-60/20 bg-white text-gray-60"
+            />
+          ))}
+        </div>
+      )}
 
       <p className="mb-3 min-h-[45px] overflow-hidden rounded-xl border border-[var(--color-gray-10)] bg-gray-05 px-3 py-2 body-medium text-gray-60 line-clamp-2">
-        {application.note}
+        {application.note || t('defaults.noNotes')}
       </p>
 
-      <button
-        type="button"
-        className="mt-auto inline-flex items-center gap-2 body-small font-semibold text-primary transition-colors hover:text-primary/80"
-      >
-        <Sparkles size={14} aria-hidden="true" />
-        {t('card.likelyInterviewQuestions', { count: 3 })}
-        <ChevronDown size={13} aria-hidden="true" />
-      </button>
+      <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2">
+        <button
+          type="button"
+          className="inline-flex items-center gap-2 body-small font-semibold text-primary transition-colors hover:text-primary/80"
+          onClick={() => onHistory(application)}
+        >
+          <History size={14} aria-hidden="true" />
+          {t('card.statusHistory')}
+        </button>
+        <button
+          type="button"
+          disabled
+          className="inline-flex items-center gap-2 body-small font-semibold text-gray-60 opacity-60"
+          title={t('card.comingSoon')}
+        >
+          <Sparkles size={14} aria-hidden="true" />
+          {t('card.likelyInterviewQuestions')}
+          <span className="rounded-md bg-gray-60/10 px-1.5 py-0.5 text-[10px] uppercase">
+            {t('card.comingSoon')}
+          </span>
+        </button>
+      </div>
     </article>
   )
 }

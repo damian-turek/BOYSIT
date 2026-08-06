@@ -1,261 +1,379 @@
 'use client'
 
-import { FormEvent, useEffect, useId, useMemo, useState } from 'react'
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+  useTransition,
+} from 'react'
 
-import { AlertTriangle, Briefcase, Plus, Save, Search, SearchX, X } from 'lucide-react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+
+import { JOB_APPLICATION_STATUSES, JOB_TRACKER_STATS } from '@/constants/job-tracker'
+import {
+  createJobApplication,
+  deleteJobApplication,
+  fetchJobApplications,
+  fetchJobTechnologyOptions,
+  updateJobApplication,
+} from '@/services/jobTrackerApi'
+import type {
+  JobApplication,
+  JobApplicationInput,
+  JobApplicationSort,
+  JobApplicationStatus,
+  JobTechnology,
+  JobTrackerStats,
+  PaginationMeta,
+} from '@/types/job-tracker'
+import {
+  AlertTriangle,
+  Briefcase,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Search,
+  SearchX,
+} from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
-import { JOB_APPLICATION_STATUSES, JOB_TRACKER_STATS } from '@/constants/job-tracker'
-import type { JobApplication, JobApplicationStatus } from '@/types/job-tracker'
 import { Button } from '@/components/atoms/Button'
 import { Input } from '@/components/atoms/inputs/Input'
 import { JobApplicationCard } from '@/components/molecules/JobApplicationCard'
 import { JobTrackerStatCard } from '@/components/molecules/JobTrackerStatCard'
 
-type JobApplicationFormState = {
-  company: string
-  role: string
-  location: string
-  salary: string
-  jobUrl: string
-  status: JobApplicationStatus
-  note: string
+import { JobApplicationFormModal } from './JobApplicationFormModal'
+import { JobStatusHistoryDialog } from './JobStatusHistoryDialog'
+
+const PAGE_SIZE = 12
+
+const EMPTY_STATS: JobTrackerStats = {
+  wishlist: 0,
+  applied: 0,
+  phone_screen: 0,
+  technical: 0,
+  final_round: 0,
+  offer: 0,
+  rejected: 0,
 }
 
-type JobApplicationPayload = Omit<JobApplication, 'id' | 'date' | 'technologies'>
-
-const emptyJobForm: JobApplicationFormState = {
-  company: '',
-  role: '',
-  location: '',
-  salary: '',
-  jobUrl: '',
-  status: 'wishlist',
-  note: '',
+const EMPTY_META: PaginationMeta = {
+  page: 1,
+  limit: PAGE_SIZE,
+  total: 0,
+  totalPages: 0,
 }
 
-const initialApplications: JobApplication[] = [
-  {
-    id: 1,
-    company: 'Allegro',
-    role: 'Senior Frontend Engineer',
-    location: 'Warsaw, Poland',
-    status: 'technical',
-    salary: '€6,000-8,000/mo',
-    date: '2026-06-01',
-    jobUrl: 'https://allegro.pl/praca',
-    note: 'Had first call with HR. Technical interview scheduled for next week.',
-    technologies: ['React', 'TypeScript', 'JavaScript'],
-  },
-  {
-    id: 2,
-    company: 'JetBrains',
-    role: 'Full Stack Developer',
-    location: 'Remote (EU)',
-    status: 'phone_screen',
-    salary: '€5,000-7,000/mo',
-    date: '2026-05-28',
-    jobUrl: 'https://www.jetbrains.com/careers',
-    note: 'Applied via referral. Got a response in 3 days.',
-    technologies: ['React', 'Python', 'PostgreSQL'],
-  },
-  {
-    id: 3,
-    company: 'Revolut',
-    role: 'Backend Engineer',
-    location: 'Krakow, Poland',
-    status: 'applied',
-    salary: '€7,000-10,000/mo',
-    date: '2026-06-05',
-    jobUrl: 'https://www.revolut.com/careers',
-    note: 'Applied online. No response yet.',
-    technologies: ['Python', 'PostgreSQL', 'System Design'],
-  },
-  {
-    id: 4,
-    company: 'Booking.com',
-    role: 'Mid Frontend Developer',
-    location: 'Amsterdam, Netherlands',
-    status: 'final_round',
-    salary: '€5,500-7,500/mo',
-    date: '2026-05-15',
-    jobUrl: 'https://careers.booking.com',
-    note: 'Three rounds done. Final presentation next Friday.',
-    technologies: ['JavaScript', 'React', 'TypeScript'],
-  },
-  {
-    id: 5,
-    company: 'CD Projekt Red',
-    role: 'Frontend Engineer',
-    location: 'Warsaw, Poland',
-    status: 'wishlist',
-    salary: '',
-    date: '',
-    jobUrl: 'https://www.cdprojektred.com/en/jobs',
-    note: 'Interesting role. Need to tailor my CV.',
-    technologies: ['React', 'TypeScript'],
-  },
-  {
-    id: 6,
-    company: 'Yandex',
-    role: 'Senior Software Engineer',
-    location: 'Remote',
-    status: 'rejected',
-    salary: '',
-    date: '2026-05-10',
-    jobUrl: '',
-    note: 'Rejected after technical interview.',
-    technologies: ['JavaScript', 'System Design'],
-  },
+const JOB_APPLICATION_SORTS: JobApplicationSort[] = [
+  'updated_desc',
+  'applied_desc',
+  'follow_up_asc',
+  'company_asc',
 ]
+
+const isStatus = (value: string | null): value is JobApplicationStatus =>
+  Boolean(value && JOB_APPLICATION_STATUSES.includes(value as JobApplicationStatus))
+
+const isSort = (value: string | null): value is JobApplicationSort =>
+  Boolean(value && JOB_APPLICATION_SORTS.includes(value as JobApplicationSort))
+
+const parsePage = (value: string | null): number => {
+  const page = Number(value)
+  return Number.isInteger(page) && page > 0 ? page : 1
+}
+
+type JobTrackerNotice = {
+  message: string
+  tone: 'success' | 'error'
+}
 
 export const JobTracker = () => {
   const t = useTranslations('JobTracker')
-  const [applications, setApplications] = useState(initialApplications)
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<JobApplicationStatus | 'all'>('all')
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [form, setForm] = useState<JobApplicationFormState>(emptyJobForm)
-  const [editingApplicationId, setEditingApplicationId] = useState<number | null>(null)
-  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null)
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const [isNavigating, startTransition] = useTransition()
+  const queryString = searchParams.toString()
+  const search = searchParams.get('search')?.trim() ?? ''
+  const statusParam = searchParams.get('status')
+  const sortParam = searchParams.get('sort')
+  const statusFilter = isStatus(statusParam) ? statusParam : undefined
+  const sort = isSort(sortParam) ? sortParam : 'updated_desc'
+  const page = parsePage(searchParams.get('page'))
 
-  const pendingDeleteApplication =
-    applications.find((application) => application.id === pendingDeleteId) ?? null
+  const [searchInput, setSearchInput] = useState(search)
+  const [applications, setApplications] = useState<JobApplication[]>([])
+  const [stats, setStats] = useState<JobTrackerStats>(EMPTY_STATS)
+  const [meta, setMeta] = useState<PaginationMeta>(EMPTY_META)
+  const [technologyOptions, setTechnologyOptions] = useState<JobTechnology[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
+  const [notice, setNotice] = useState<JobTrackerNotice>()
+  const [reloadKey, setReloadKey] = useState(0)
+  const [formApplication, setFormApplication] = useState<JobApplication | null>(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [formError, setFormError] = useState<string>()
+  const [pendingDelete, setPendingDelete] = useState<JobApplication | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [historyApplication, setHistoryApplication] = useState<JobApplication | null>(null)
+  const [updatingStatusIds, setUpdatingStatusIds] = useState<Set<string>>(new Set())
 
-  const filteredApplications = useMemo(() => {
-    const query = search.trim().toLowerCase()
+  const updateQuery = useCallback(
+    (updates: Record<string, string | null>) => {
+      const params = new URLSearchParams(queryString)
 
-    return applications.filter((application) => {
-      const matchesStatus =
-        statusFilter === 'all' || application.status === statusFilter
-      const matchesSearch =
-        !query ||
-        [application.company, application.role, application.location, application.note]
-          .join(' ')
-          .toLowerCase()
-          .includes(query)
+      for (const [key, value] of Object.entries(updates)) {
+        if (value) params.set(key, value)
+        else params.delete(key)
+      }
 
-      return matchesStatus && matchesSearch
-    })
-  }, [applications, search, statusFilter])
+      const nextQuery = params.toString()
+      startTransition(() => {
+        router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false })
+      })
+    },
+    [pathname, queryString, router],
+  )
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  useEffect(() => {
+    setSearchInput(search)
+  }, [search])
 
-    if (!form.company.trim() || !form.role.trim()) return
+  useEffect(() => {
+    if (searchInput.trim() === search) return
 
-    const applicationPayload: JobApplicationPayload = {
-      company: form.company.trim(),
-      role: form.role.trim(),
-      location: form.location.trim() || t('defaults.remote'),
-      salary: form.salary.trim(),
-      status: form.status,
-      jobUrl: form.jobUrl.trim(),
-      note: form.note.trim() || t('defaults.noNotes'),
-    }
+    const timer = window.setTimeout(() => {
+      updateQuery({ search: searchInput.trim() || null, page: null })
+    }, 350)
 
-    if (editingApplicationId) {
-      setApplications((current) =>
-        current.map((application) =>
-          application.id === editingApplicationId
-            ? { ...application, ...applicationPayload }
-            : application,
-        ),
-      )
-    } else {
-      setApplications((current) => [
-        {
-          id: Date.now(),
-          ...applicationPayload,
-          date: new Date().toISOString().slice(0, 10),
-          technologies: ['Research'],
-        },
-        ...current,
-      ])
-    }
+    return () => window.clearTimeout(timer)
+  }, [search, searchInput, updateQuery])
 
-    setForm(emptyJobForm)
-    setEditingApplicationId(null)
-    setIsModalOpen(false)
-  }
+  useEffect(() => {
+    const controller = new AbortController()
+    setIsLoading(true)
+    setLoadError(false)
 
-  const handleOpenCreateModal = () => {
-    setEditingApplicationId(null)
-    setForm(emptyJobForm)
-    setIsModalOpen(true)
-  }
-
-  const handleEditApplication = (application: JobApplication) => {
-    setEditingApplicationId(application.id)
-    setForm({
-      company: application.company,
-      role: application.role,
-      location: application.location,
-      salary: application.salary,
-      jobUrl: application.jobUrl,
-      status: application.status,
-      note: application.note,
-    })
-    setIsModalOpen(true)
-  }
-
-  const handleConfirmDelete = () => {
-    if (!pendingDeleteId) return
-
-    setApplications((current) =>
-      current.filter((application) => application.id !== pendingDeleteId),
+    void fetchJobApplications(
+      {
+        search: search || undefined,
+        status: statusFilter,
+        sort,
+        page,
+        limit: PAGE_SIZE,
+      },
+      controller.signal,
     )
-    setPendingDeleteId(null)
+      .then((result) => {
+        setApplications(result.data)
+        setStats(result.stats)
+        setMeta(result.meta)
+
+        if (result.meta.totalPages > 0 && page > result.meta.totalPages) {
+          updateQuery({ page: String(result.meta.totalPages) })
+        }
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === 'AbortError') return
+        setLoadError(true)
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false)
+      })
+
+    return () => controller.abort()
+  }, [page, reloadKey, search, sort, statusFilter, updateQuery])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    void fetchJobTechnologyOptions(controller.signal)
+      .then(setTechnologyOptions)
+      .catch((error: unknown) => {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) {
+          setTechnologyOptions([])
+        }
+      })
+
+    return () => controller.abort()
+  }, [])
+
+  const openCreateForm = () => {
+    setFormApplication(null)
+    setFormError(undefined)
+    setIsFormOpen(true)
   }
 
-  const handleStatusChange = (
-    applicationId: number,
-    status: JobApplicationStatus,
-  ) => {
+  const openEditForm = (application: JobApplication) => {
+    setFormApplication(application)
+    setFormError(undefined)
+    setIsFormOpen(true)
+  }
+
+  const closeForm = () => {
+    if (isSaving) return
+    setIsFormOpen(false)
+    setFormApplication(null)
+    setFormError(undefined)
+  }
+
+  const handleSave = async (input: JobApplicationInput) => {
+    setIsSaving(true)
+    setFormError(undefined)
+
+    try {
+      if (formApplication) {
+        await updateJobApplication(formApplication.id, input)
+        setNotice({ message: t('notices.updated'), tone: 'success' })
+      } else {
+        await createJobApplication(input)
+        setNotice({ message: t('notices.created'), tone: 'success' })
+      }
+
+      setIsFormOpen(false)
+      setFormApplication(null)
+      setReloadKey((current) => current + 1)
+    } catch {
+      setFormError(t('errors.save'))
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleStatusChange = async (applicationId: string, nextStatus: JobApplicationStatus) => {
+    const previous = applications.find((application) => application.id === applicationId)
+    if (!previous || previous.status === nextStatus || updatingStatusIds.has(applicationId)) return
+
+    setNotice(undefined)
+    setUpdatingStatusIds((current) => new Set(current).add(applicationId))
     setApplications((current) =>
       current.map((application) =>
-        application.id === applicationId ? { ...application, status } : application,
+        application.id === applicationId ? { ...application, status: nextStatus } : application,
       ),
     )
+    setStats((current) => ({
+      ...current,
+      [previous.status]: Math.max(0, current[previous.status] - 1),
+      [nextStatus]: current[nextStatus] + 1,
+    }))
+
+    try {
+      const updated = await updateJobApplication(applicationId, { status: nextStatus })
+      setApplications((current) =>
+        current.map((application) => (application.id === applicationId ? updated : application)),
+      )
+      setNotice({ message: t('notices.statusUpdated'), tone: 'success' })
+      setReloadKey((current) => current + 1)
+    } catch {
+      setApplications((current) =>
+        current.map((application) => (application.id === applicationId ? previous : application)),
+      )
+      setStats((current) => ({
+        ...current,
+        [previous.status]: current[previous.status] + 1,
+        [nextStatus]: Math.max(0, current[nextStatus] - 1),
+      }))
+      setNotice({ message: t('errors.status'), tone: 'error' })
+    } finally {
+      setUpdatingStatusIds((current) => {
+        const next = new Set(current)
+        next.delete(applicationId)
+        return next
+      })
+    }
   }
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false)
-    setEditingApplicationId(null)
-    setForm(emptyJobForm)
+  const handleDelete = async () => {
+    if (!pendingDelete || isDeleting) return
+
+    setIsDeleting(true)
+
+    try {
+      await deleteJobApplication(pendingDelete.id)
+      setNotice({ message: t('notices.deleted'), tone: 'success' })
+      setPendingDelete(null)
+
+      if (applications.length === 1 && page > 1) {
+        updateQuery({ page: String(page - 1) })
+      } else {
+        setReloadKey((current) => current + 1)
+      }
+    } catch {
+      setNotice({ message: t('errors.delete'), tone: 'error' })
+    } finally {
+      setIsDeleting(false)
+    }
   }
 
   return (
     <>
-      <JobTrackerHeader onAddJob={handleOpenCreateModal} />
-      <JobTrackerStats applications={applications} />
+      <JobTrackerHeader onAddJob={openCreateForm} />
+      <JobTrackerStats stats={stats} />
       <JobTrackerFilters
-        search={search}
+        search={searchInput}
         statusFilter={statusFilter}
-        onSearchChange={setSearch}
-        onStatusChange={setStatusFilter}
+        sort={sort}
+        disabled={isNavigating}
+        onSearchChange={setSearchInput}
+        onStatusChange={(value) => updateQuery({ status: value ?? null, page: null })}
+        onSortChange={(value) => updateQuery({ sort: value, page: null })}
       />
-      <JobApplicationsGrid
-        applications={filteredApplications}
-        onEdit={handleEditApplication}
-        onDelete={setPendingDeleteId}
-        onStatusChange={handleStatusChange}
-      />
-      <AddJobModal
-        isOpen={isModalOpen}
-        form={form}
-        mode={editingApplicationId ? 'edit' : 'create'}
-        onClose={handleCloseModal}
-        onSubmit={handleSubmit}
-        onFormChange={setForm}
+
+      {notice && (
+        <p
+          className={`mb-4 body-medium ${notice.tone === 'error' ? 'text-alert-50' : 'text-gray-60'}`}
+          role={notice.tone === 'error' ? 'alert' : 'status'}
+        >
+          {notice.message}
+        </p>
+      )}
+
+      {isLoading && applications.length === 0 ? (
+        <JobApplicationsSkeleton label={t('loading')} />
+      ) : loadError ? (
+        <JobTrackerError onRetry={() => setReloadKey((current) => current + 1)} />
+      ) : (
+        <>
+          <JobApplicationsGrid
+            applications={applications}
+            updatingStatusIds={updatingStatusIds}
+            onEdit={openEditForm}
+            onDelete={(id) =>
+              setPendingDelete(applications.find((application) => application.id === id) ?? null)
+            }
+            onHistory={setHistoryApplication}
+            onStatusChange={handleStatusChange}
+          />
+          <JobTrackerPagination
+            meta={meta}
+            disabled={isLoading || isNavigating}
+            onPageChange={(nextPage) => updateQuery({ page: String(nextPage) })}
+          />
+        </>
+      )}
+
+      <JobApplicationFormModal
+        isOpen={isFormOpen}
+        application={formApplication}
+        technologyOptions={technologyOptions}
+        isSaving={isSaving}
+        error={formError}
+        onClose={closeForm}
+        onSubmit={handleSave}
       />
       <DeleteJobDialog
-        isOpen={Boolean(pendingDeleteId)}
-        company={pendingDeleteApplication?.company}
-        role={pendingDeleteApplication?.role}
-        onCancel={() => setPendingDeleteId(null)}
-        onConfirm={handleConfirmDelete}
+        application={pendingDelete}
+        isDeleting={isDeleting}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={() => void handleDelete()}
+      />
+      <JobStatusHistoryDialog
+        application={historyApplication}
+        onClose={() => setHistoryApplication(null)}
       />
     </>
   )
@@ -271,12 +389,8 @@ const JobTrackerHeader = ({ onAddJob }: { onAddJob: () => void }) => {
           <Briefcase size={22} aria-hidden="true" />
         </span>
         <div>
-          <h1 className="text-[25px] leading-8 font-bold text-gray-100">
-            {t('title')}
-          </h1>
-          <p className="body-medium text-gray-60">
-            {t('description')}
-          </p>
+          <h1 className="text-[25px] leading-8 font-bold text-gray-100">{t('title')}</h1>
+          <p className="body-medium text-gray-60">{t('description')}</p>
         </div>
       </div>
       <Button icon={Plus} size="lg" className="px-5 py-3" onClick={onAddJob}>
@@ -286,7 +400,7 @@ const JobTrackerHeader = ({ onAddJob }: { onAddJob: () => void }) => {
   )
 }
 
-const JobTrackerStats = ({ applications }: { applications: JobApplication[] }) => {
+const JobTrackerStats = ({ stats }: { stats: JobTrackerStats }) => {
   const t = useTranslations('JobTracker')
 
   return (
@@ -295,7 +409,7 @@ const JobTrackerStats = ({ applications }: { applications: JobApplication[] }) =
         <JobTrackerStatCard
           key={status.id}
           label={t(`statuses.${status.id}`)}
-          value={applications.filter((application) => application.status === status.id).length}
+          value={stats[status.id]}
           tone={status.tone}
         />
       ))}
@@ -303,21 +417,29 @@ const JobTrackerStats = ({ applications }: { applications: JobApplication[] }) =
   )
 }
 
+type JobTrackerFiltersProps = {
+  search: string
+  statusFilter?: JobApplicationStatus
+  sort: JobApplicationSort
+  disabled: boolean
+  onSearchChange: Dispatch<SetStateAction<string>>
+  onStatusChange: (value?: JobApplicationStatus) => void
+  onSortChange: (value: JobApplicationSort) => void
+}
+
 const JobTrackerFilters = ({
   search,
   statusFilter,
+  sort,
+  disabled,
   onSearchChange,
   onStatusChange,
-}: {
-  search: string
-  statusFilter: JobApplicationStatus | 'all'
-  onSearchChange: (value: string) => void
-  onStatusChange: (value: JobApplicationStatus | 'all') => void
-}) => {
+  onSortChange,
+}: JobTrackerFiltersProps) => {
   const t = useTranslations('JobTracker')
 
   return (
-    <section className="mb-8 grid grid-cols-1 gap-3 lg:grid-cols-[1fr_150px]">
+    <section className="mb-8 grid grid-cols-1 gap-3 lg:grid-cols-[1fr_170px_190px]">
       <div className="relative">
         <Search
           size={15}
@@ -328,14 +450,19 @@ const JobTrackerFilters = ({
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder={t('searchPlaceholder')}
+          maxLength={100}
           className="pl-10"
         />
       </div>
 
       <select
-        value={statusFilter}
+        value={statusFilter ?? 'all'}
+        disabled={disabled}
+        aria-label={t('filterByStatus')}
         onChange={(event) =>
-          onStatusChange(event.target.value as JobApplicationStatus | 'all')
+          onStatusChange(
+            event.target.value === 'all' ? undefined : (event.target.value as JobApplicationStatus),
+          )
         }
         className="h-11 rounded-xl border border-gray-60/20 bg-gray-60/5 px-3 font-mono text-[13px] leading-5 text-gray-100 focus:border-primary/60 focus:outline-hidden"
       >
@@ -346,21 +473,41 @@ const JobTrackerFilters = ({
           </option>
         ))}
       </select>
+
+      <select
+        value={sort}
+        disabled={disabled}
+        aria-label={t('sort.label')}
+        onChange={(event) => onSortChange(event.target.value as JobApplicationSort)}
+        className="h-11 rounded-xl border border-gray-60/20 bg-gray-60/5 px-3 font-mono text-[13px] leading-5 text-gray-100 focus:border-primary/60 focus:outline-hidden"
+      >
+        {JOB_APPLICATION_SORTS.map((sortId) => (
+          <option key={sortId} value={sortId}>
+            {t(`sort.${sortId}`)}
+          </option>
+        ))}
+      </select>
     </section>
   )
 }
 
+type JobApplicationsGridProps = {
+  applications: JobApplication[]
+  updatingStatusIds: Set<string>
+  onEdit: (application: JobApplication) => void
+  onDelete: (applicationId: string) => void
+  onHistory: (application: JobApplication) => void
+  onStatusChange: (applicationId: string, status: JobApplicationStatus) => void
+}
+
 const JobApplicationsGrid = ({
   applications,
+  updatingStatusIds,
   onEdit,
   onDelete,
+  onHistory,
   onStatusChange,
-}: {
-  applications: JobApplication[]
-  onEdit: (application: JobApplication) => void
-  onDelete: (applicationId: number) => void
-  onStatusChange: (applicationId: number, status: JobApplicationStatus) => void
-}) => {
+}: JobApplicationsGridProps) => {
   const t = useTranslations('JobTracker')
 
   if (applications.length === 0) {
@@ -387,19 +534,16 @@ const JobApplicationsGrid = ({
             initial={{ opacity: 0, y: 14, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}
-            transition={{
-              opacity: { duration: 0.18 },
-              layout: { duration: 0.22, ease: 'easeInOut' },
-              y: { duration: 0.22, ease: 'easeOut' },
-              scale: { duration: 0.18, ease: 'easeOut' },
-            }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
             className="h-full"
           >
             <JobApplicationCard
               application={application}
               onEdit={onEdit}
               onDelete={onDelete}
+              onHistory={onHistory}
               onStatusChange={onStatusChange}
+              isStatusUpdating={updatingStatusIds.has(application.id)}
             />
           </motion.div>
         ))}
@@ -408,247 +552,109 @@ const JobApplicationsGrid = ({
   )
 }
 
-const AddJobModal = ({
-  isOpen,
-  form,
-  mode,
-  onClose,
-  onSubmit,
-  onFormChange,
-}: {
-  isOpen: boolean
-  form: JobApplicationFormState
-  mode: 'create' | 'edit'
-  onClose: () => void
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void
-  onFormChange: (form: JobApplicationFormState) => void
-}) => {
+const JobApplicationsSkeleton = ({ label }: { label: string }) => (
+  <div className="grid grid-cols-1 gap-5 lg:grid-cols-2" aria-busy="true" aria-label={label}>
+    {Array.from({ length: 4 }, (_, index) => (
+      <div
+        key={index}
+        className="h-72 animate-pulse rounded-xl border border-[var(--color-gray-10)] bg-gray-60/5"
+      />
+    ))}
+  </div>
+)
+
+const JobTrackerError = ({ onRetry }: { onRetry: () => void }) => {
   const t = useTranslations('JobTracker')
-  const titleId = useId()
-  const descriptionId = useId()
-  const statusId = useId()
-  const notesId = useId()
-
-  useEffect(() => {
-    if (!isOpen) return
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onClose])
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            className="fixed inset-0 z-50 bg-black/40"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
-          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
-            <motion.form
-              onSubmit={onSubmit}
-              initial={{ opacity: 0, y: 16, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.98 }}
-              transition={{ duration: 0.18 }}
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={titleId}
-              aria-describedby={descriptionId}
-              className="my-auto w-full max-w-2xl rounded-xl border border-[var(--color-gray-10)] bg-white p-5 shadow-2xl"
-            >
-              <div className="mb-5 flex items-start justify-between gap-4">
-                <div>
-                  <h2 id={titleId} className="body-large text-gray-100">
-                    {mode === 'edit' ? t('modal.editTitle') : t('modal.addTitle')}
-                  </h2>
-                  <p id={descriptionId} className="body-small text-gray-60">
-                    {t('modal.description')}
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="text"
-                  icon={X}
-                  iconOnly
-                  aria-label={t('modal.close')}
-                  onClick={onClose}
-                />
-              </div>
+    <section
+      className="rounded-xl border border-alert-50/30 bg-alert-50/5 px-4 py-10 text-center"
+      role="alert"
+    >
+      <AlertTriangle className="mx-auto mb-3 text-alert-50" aria-hidden="true" />
+      <h2 className="body-large text-gray-100">{t('errors.loadTitle')}</h2>
+      <p className="body-medium mt-1 text-gray-60">{t('errors.load')}</p>
+      <Button className="mt-4" onClick={onRetry}>
+        {t('retry')}
+      </Button>
+    </section>
+  )
+}
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Input
-                  id="job-company"
-                  name="company"
-                  autoComplete="organization"
-                  label={t('modal.company')}
-                  value={form.company}
-                  onChange={(event) =>
-                    onFormChange({ ...form, company: event.target.value })
-                  }
-                  required
-                  placeholder={t('modal.companyPlaceholder')}
-                />
-                <Input
-                  id="job-role"
-                  name="role"
-                  autoComplete="organization-title"
-                  label={t('modal.role')}
-                  value={form.role}
-                  onChange={(event) =>
-                    onFormChange({ ...form, role: event.target.value })
-                  }
-                  required
-                  placeholder={t('modal.rolePlaceholder')}
-                />
-                <Input
-                  id="job-location"
-                  name="location"
-                  autoComplete="address-level2"
-                  label={t('modal.location')}
-                  value={form.location}
-                  onChange={(event) =>
-                    onFormChange({ ...form, location: event.target.value })
-                  }
-                  placeholder={t('modal.locationPlaceholder')}
-                />
-                <Input
-                  id="job-salary"
-                  name="salary"
-                  autoComplete="off"
-                  label={t('modal.salary')}
-                  value={form.salary}
-                  onChange={(event) =>
-                    onFormChange({ ...form, salary: event.target.value })
-                  }
-                  placeholder={t('modal.salaryPlaceholder')}
-                />
-                <Input
-                  id="job-url"
-                  name="jobUrl"
-                  autoComplete="url"
-                  label={t('modal.jobPostingUrl')}
-                  type="url"
-                  value={form.jobUrl}
-                  onChange={(event) =>
-                    onFormChange({ ...form, jobUrl: event.target.value })
-                  }
-                  placeholder="https://company.com/jobs/frontend"
-                  className="truncate"
-                />
-                <div className="flex flex-col gap-1.5">
-                  <label htmlFor={statusId} className="label-font text-gray-60 select-none">
-                    {t('modal.status')}
-                  </label>
-                  <select
-                    id={statusId}
-                    name="status"
-                    value={form.status}
-                    onChange={(event) =>
-                      onFormChange({
-                        ...form,
-                        status: event.target.value as JobApplicationStatus,
-                      })
-                    }
-                    className="h-11 w-full rounded-xl border border-gray-60/20 bg-gray-65/5 px-4 body-medium text-gray-100 transition-colors duration-200 focus:border-primary/60 focus:outline-hidden dark:bg-gray-10/20"
-                  >
-                    {JOB_APPLICATION_STATUSES.map((status) => (
-                      <option key={status} value={status}>
-                        {t(`statuses.${status}`)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex flex-col gap-1.5 sm:col-span-2">
-                  <label htmlFor={notesId} className="label-font text-gray-60 select-none">
-                    {t('modal.notes')}
-                  </label>
-                  <textarea
-                    id={notesId}
-                    name="note"
-                    autoComplete="off"
-                    value={form.note}
-                    onChange={(event) =>
-                      onFormChange({ ...form, note: event.target.value })
-                    }
-                    placeholder={t('modal.notesPlaceholder')}
-                    rows={4}
-                    className="min-h-28 w-full resize-y rounded-xl border border-gray-60/20 bg-gray-65/5 px-4 py-3 body-medium text-gray-100 transition-colors duration-200 placeholder:text-gray-60/50 focus:border-primary/60 focus:outline-hidden dark:bg-gray-10/20"
-                  />
-                </div>
-              </div>
+const JobTrackerPagination = ({
+  meta,
+  disabled,
+  onPageChange,
+}: {
+  meta: PaginationMeta
+  disabled: boolean
+  onPageChange: (page: number) => void
+}) => {
+  const t = useTranslations('JobTracker')
 
-              <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                <Button type="button" variant="secondary" onClick={onClose}>
-                  {t('cancel')}
-                </Button>
-                <Button
-                  type="submit"
-                  icon={mode === 'edit' ? Save : Plus}
-                  className="w-full sm:w-fit"
-                >
-                  {mode === 'edit' ? t('saveChanges') : t('addJob')}
-                </Button>
-              </div>
-            </motion.form>
-          </div>
-        </>
-      )}
-    </AnimatePresence>
+  if (meta.totalPages <= 1) return null
+
+  return (
+    <nav className="mt-8 flex items-center justify-center gap-3" aria-label={t('pagination.label')}>
+      <Button
+        variant="secondary"
+        icon={ChevronLeft}
+        disabled={disabled || meta.page <= 1}
+        onClick={() => onPageChange(meta.page - 1)}
+      >
+        {t('pagination.previous')}
+      </Button>
+      <span className="body-medium text-gray-60">
+        {t('pagination.page', { page: meta.page, total: meta.totalPages })}
+      </span>
+      <Button
+        variant="secondary"
+        disabled={disabled || meta.page >= meta.totalPages}
+        onClick={() => onPageChange(meta.page + 1)}
+      >
+        {t('pagination.next')}
+        <ChevronRight size={16} aria-hidden="true" />
+      </Button>
+    </nav>
   )
 }
 
 const DeleteJobDialog = ({
-  isOpen,
-  company,
-  role,
+  application,
+  isDeleting,
   onCancel,
   onConfirm,
 }: {
-  isOpen: boolean
-  company?: string
-  role?: string
+  application: JobApplication | null
+  isDeleting: boolean
   onCancel: () => void
   onConfirm: () => void
 }) => {
   const t = useTranslations('JobTracker')
-  const titleId = useId()
-  const descriptionId = useId()
+  const titleId = `delete-job-${application?.id ?? 'dialog'}`
+  const descriptionId = `${titleId}-description`
 
   useEffect(() => {
-    if (!isOpen) return
+    if (!application) return
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onCancel()
-      }
+      if (event.key === 'Escape' && !isDeleting) onCancel()
     }
 
     document.addEventListener('keydown', handleKeyDown)
-
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isOpen, onCancel])
+  }, [application, isDeleting, onCancel])
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      {application && (
         <>
           <motion.div
             className="fixed inset-0 z-50 bg-black/40"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onCancel}
+            onClick={isDeleting ? undefined : onCancel}
           />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
@@ -659,35 +665,34 @@ const DeleteJobDialog = ({
               initial={{ opacity: 0, y: 12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="w-full max-w-md rounded-xl border border-[var(--color-gray-10)] bg-white p-5 shadow-2xl"
+              className="w-full max-w-md rounded-xl border border-[var(--color-gray-10)] bg-white p-5 shadow-2xl dark:bg-[var(--color-gray-05)]"
             >
               <div className="mb-4 flex gap-3">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-alert-50/10 text-alert-50">
                   <AlertTriangle size={20} aria-hidden="true" />
                 </span>
-                <div className="min-w-0">
+                <div>
                   <h2 id={titleId} className="body-large text-gray-100">
                     {t('deleteDialog.title')}
                   </h2>
                   <p id={descriptionId} className="body-medium mt-1 text-gray-60">
-                    {company && role
-                      ? t('deleteDialog.description', { role, company })
-                      : t('deleteDialog.descriptionFallback')}
+                    {t('deleteDialog.description', {
+                      role: application.role,
+                      company: application.company,
+                    })}
                   </p>
                 </div>
               </div>
-
               <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                <Button type="button" variant="secondary" onClick={onCancel}>
+                <Button variant="secondary" disabled={isDeleting} onClick={onCancel}>
                   {t('cancel')}
                 </Button>
                 <Button
-                  type="button"
                   className="bg-alert-50 hover:bg-alert-50/90"
+                  disabled={isDeleting}
                   onClick={onConfirm}
                 >
-                  {t('delete')}
+                  {isDeleting ? t('deleteDialog.deleting') : t('delete')}
                 </Button>
               </div>
             </motion.div>
