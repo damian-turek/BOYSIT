@@ -53,10 +53,20 @@
     "description": "Track your applications & prep smarter",
     "addJob": "Add job",
     "allStatuses": "All statuses",
+    "filterByStatus": "Filter by application status",
     "searchPlaceholder": "Search company or role...",
     "cancel": "Cancel",
     "saveChanges": "Save changes",
     "delete": "Delete",
+    "retry": "Try again",
+    "loading": "Loading job applications",
+    "sort": {
+      "label": "Sort applications",
+      "updated_desc": "Recently updated",
+      "applied_desc": "Newest applications",
+      "follow_up_asc": "Upcoming follow-up",
+      "company_asc": "Company A–Z"
+    },
     "defaults": {
       "remote": "Remote",
       "noNotes": "No notes yet."
@@ -75,7 +85,11 @@
       "deleteJob": "Delete job",
       "changeStatus": "Change application status",
       "jobPosting": "Job posting",
-      "likelyInterviewQuestions": "Likely interview questions ({count})"
+      "likelyInterviewQuestions": "Likely interview questions",
+      "comingSoon": "Coming soon",
+      "statusHistory": "Status history",
+      "applied": "Applied {date}",
+      "followUp": "Follow up {date}"
     },
     "emptyState": {
       "title": "No applications found",
@@ -84,7 +98,7 @@
     "modal": {
       "editTitle": "Edit job",
       "addTitle": "Add job",
-      "description": "This is local frontend state until backend endpoints exist.",
+      "description": "Save the position, timeline and technologies in your private tracker.",
       "close": "Close",
       "company": "Company",
       "companyPlaceholder": "Company name",
@@ -96,13 +110,52 @@
       "salaryPlaceholder": "€6,000-8,000/mo",
       "jobPostingUrl": "Job posting URL",
       "status": "Status",
+      "appliedAt": "Application date",
+      "appliedAtHint": "Filled automatically when the application leaves Wishlist.",
+      "followUpAt": "Follow-up date",
+      "technologies": "Technologies",
+      "noTechnologies": "No catalog technologies are available.",
+      "customTechnologies": "Other technologies",
+      "customTechnologiesHint": "Separate up to 10 technologies with commas.",
       "notes": "Notes",
-      "notesPlaceholder": "Interview details, recruiter context, next steps..."
+      "notesPlaceholder": "Interview details, recruiter context, next steps...",
+      "saving": "Saving..."
     },
     "deleteDialog": {
       "title": "Delete job application?",
       "description": "{role} at {company} will be removed from your tracker.",
-      "descriptionFallback": "This application will be removed from your tracker."
+      "descriptionFallback": "This application will be removed from your tracker.",
+      "deleting": "Deleting..."
+    },
+    "history": {
+      "title": "Status history",
+      "description": "{role} at {company}",
+      "created": "Created as {status}",
+      "changed": "{from} → {to}",
+      "empty": "No status changes have been recorded yet.",
+      "loading": "Loading history...",
+      "error": "We could not load the status history.",
+      "loadMore": "Load more",
+      "close": "Close"
+    },
+    "pagination": {
+      "label": "Job applications pages",
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {page} of {total}"
+    },
+    "notices": {
+      "created": "Job application added.",
+      "updated": "Job application updated.",
+      "deleted": "Job application deleted.",
+      "statusUpdated": "Application status updated."
+    },
+    "errors": {
+      "loadTitle": "Could not load job applications",
+      "load": "Check the connection and try again.",
+      "save": "The job application could not be saved.",
+      "delete": "The job application could not be deleted.",
+      "status": "The status could not be updated. The previous status was restored."
     }
   },
   "ProfileSettings": {

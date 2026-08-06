@@ -53,10 +53,20 @@
     "description": "Śledź swoje aplikacje i przygotowuj się mądrzej",
     "addJob": "Dodaj ofertę",
     "allStatuses": "Wszystkie statusy",
+    "filterByStatus": "Filtruj według statusu aplikacji",
     "searchPlaceholder": "Szukaj firmy lub stanowiska...",
     "cancel": "Anuluj",
     "saveChanges": "Zapisz zmiany",
     "delete": "Usuń",
+    "retry": "Spróbuj ponownie",
+    "loading": "Ładowanie aplikacji",
+    "sort": {
+      "label": "Sortuj aplikacje",
+      "updated_desc": "Ostatnio zaktualizowane",
+      "applied_desc": "Najnowsze aplikacje",
+      "follow_up_asc": "Najbliższy kontakt",
+      "company_asc": "Firma A–Z"
+    },
     "defaults": {
       "remote": "Zdalnie",
       "noNotes": "Brak notatek."
@@ -75,7 +85,11 @@
       "deleteJob": "Usuń ofertę",
       "changeStatus": "Zmień status aplikacji",
       "jobPosting": "Ogłoszenie o pracę",
-      "likelyInterviewQuestions": "Prawdopodobne pytania rekrutacyjne ({count})"
+      "likelyInterviewQuestions": "Prawdopodobne pytania rekrutacyjne",
+      "comingSoon": "Wkrótce",
+      "statusHistory": "Historia statusów",
+      "applied": "Aplikowano {date}",
+      "followUp": "Kontakt {date}"
     },
     "emptyState": {
       "title": "Nie znaleziono aplikacji",
@@ -84,7 +98,7 @@
     "modal": {
       "editTitle": "Edytuj ofertę",
       "addTitle": "Dodaj ofertę",
-      "description": "To lokalny stan frontendu do czasu udostępnienia endpointów backendu.",
+      "description": "Zapisz stanowisko, terminy i technologie w prywatnym trackerze.",
       "close": "Zamknij",
       "company": "Firma",
       "companyPlaceholder": "Nazwa firmy",
@@ -96,13 +110,52 @@
       "salaryPlaceholder": "€6,000-8,000/mies.",
       "jobPostingUrl": "Adres ogłoszenia",
       "status": "Status",
+      "appliedAt": "Data aplikacji",
+      "appliedAtHint": "Uzupełniana automatycznie po opuszczeniu Listy życzeń.",
+      "followUpAt": "Data kontaktu",
+      "technologies": "Technologie",
+      "noTechnologies": "Brak dostępnych technologii w katalogu.",
+      "customTechnologies": "Inne technologie",
+      "customTechnologiesHint": "Oddziel maksymalnie 10 technologii przecinkami.",
       "notes": "Notatki",
-      "notesPlaceholder": "Szczegóły rozmowy, kontekst od rekrutera, kolejne kroki..."
+      "notesPlaceholder": "Szczegóły rozmowy, kontekst od rekrutera, kolejne kroki...",
+      "saving": "Zapisywanie..."
     },
     "deleteDialog": {
       "title": "Usunąć aplikację?",
       "description": "Stanowisko {role} w firmie {company} zostanie usunięte z trackera.",
-      "descriptionFallback": "Ta aplikacja zostanie usunięta z trackera."
+      "descriptionFallback": "Ta aplikacja zostanie usunięta z trackera.",
+      "deleting": "Usuwanie..."
+    },
+    "history": {
+      "title": "Historia statusów",
+      "description": "{role} w {company}",
+      "created": "Utworzono ze statusem {status}",
+      "changed": "{from} → {to}",
+      "empty": "Nie zapisano jeszcze żadnych zmian statusu.",
+      "loading": "Ładowanie historii...",
+      "error": "Nie udało się wczytać historii statusów.",
+      "loadMore": "Wczytaj więcej",
+      "close": "Zamknij"
+    },
+    "pagination": {
+      "label": "Strony aplikacji",
+      "previous": "Poprzednia",
+      "next": "Następna",
+      "page": "Strona {page} z {total}"
+    },
+    "notices": {
+      "created": "Dodano aplikację.",
+      "updated": "Zaktualizowano aplikację.",
+      "deleted": "Usunięto aplikację.",
+      "statusUpdated": "Zaktualizowano status aplikacji."
+    },
+    "errors": {
+      "loadTitle": "Nie udało się wczytać aplikacji",
+      "load": "Sprawdź połączenie i spróbuj ponownie.",
+      "save": "Nie udało się zapisać aplikacji.",
+      "delete": "Nie udało się usunąć aplikacji.",
+      "status": "Nie udało się zmienić statusu. Przywrócono poprzednią wartość."
     }
   },
   "ProfileSettings": {
