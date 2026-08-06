@@ -17,6 +17,7 @@ type ErrorResponse = {
   error?: {
     code?: string
     message?: string
+    retryAfterSeconds?: number
   }
   message?: string | string[]
 }
@@ -26,6 +27,7 @@ export class AuthApiError extends Error {
     message: string,
     public readonly status: number,
     public readonly code?: string,
+    public readonly retryAfterSeconds?: number,
   ) {
     super(message)
     this.name = 'AuthApiError'
@@ -36,14 +38,24 @@ type UpdateCurrentUserProfileInput = {
   name: string
 }
 
-const requestCurrentUser = async (init: RequestInit = {}): Promise<AuthUserProfile> => {
+type DeleteCurrentUserAccountInput = {
+  code: string
+}
+
+type AccountDeletionCodeResponse = {
+  data: {
+    resendAfterSeconds: number
+  }
+}
+
+const requestAuthenticatedApi = async (path: string, init: RequestInit = {}): Promise<Response> => {
   const supabase = getSupabaseClient()
 
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  const response = await fetch(createApiUrl('/api/v1/me'), {
+  const response = await fetch(createApiUrl(path), {
     ...init,
     credentials: 'include',
     headers: {
@@ -61,9 +73,15 @@ const requestCurrentUser = async (init: RequestInit = {}): Promise<AuthUserProfi
       body.error?.message ?? fallbackMessage ?? 'Unable to load the current user',
       response.status,
       body.error?.code,
+      body.error?.retryAfterSeconds,
     )
   }
 
+  return response
+}
+
+const requestCurrentUser = async (init: RequestInit = {}): Promise<AuthUserProfile> => {
+  const response = await requestAuthenticatedApi('/api/v1/me', init)
   const body = (await response.json()) as CurrentUserResponse
   return body.data
 }
@@ -83,3 +101,24 @@ export const updateCurrentUserProfile = (
     body: JSON.stringify(profile),
     signal,
   })
+
+export const deleteCurrentUserAccount = async (
+  input: DeleteCurrentUserAccountInput,
+): Promise<void> => {
+  await requestAuthenticatedApi('/api/v1/me', {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(input),
+  })
+}
+
+export const requestAccountDeletionCode = async (): Promise<number> => {
+  const response = await requestAuthenticatedApi('/api/v1/me/deletion-code', {
+    method: 'POST',
+  })
+  const body = (await response.json()) as AccountDeletionCodeResponse
+
+  return body.data.resendAfterSeconds
+}

@@ -28,7 +28,9 @@
     "openMenu": "Otwórz menu",
     "closeMenu": "Zamknij menu",
     "darkMode": "Motyw ciemny",
-    "logout": "Wyloguj się"
+    "logout": "Wyloguj się",
+    "loggingOut": "Wylogowywanie...",
+    "logoutError": "Nie udało się wylogować. Spróbuj ponownie."
   },
   "ActivityCalendar": {
     "days": "P,W,Ś,C,P,S,N",
@@ -204,6 +206,36 @@
         "communityUpdates": {
           "label": "Aktualności społeczności",
           "description": "Sporadyczne informacje o produkcie i społeczności."
+        }
+      },
+      "deleteAccount": {
+        "title": "Usuń konto",
+        "description": "Trwale usuń swoje konto i wszystkie powiązane z nim dane.",
+        "openButton": "Usuń konto",
+        "dialogTitle": "Usunąć konto?",
+        "dialogDescription": "Ta operacja jest nieodwracalna. Twój profil i wszystkie powiązane dane aplikacji zostaną usunięte bez możliwości odzyskania.",
+        "sendCodeHint": "Wyślemy kod weryfikacyjny na adres {email}. Wprowadzenie kodu jest wymagane przed usunięciem konta.",
+        "sendCodeButton": "Wyślij kod weryfikacyjny",
+        "sendingButton": "Wysyłanie kodu...",
+        "codeLabel": "Kod weryfikacyjny",
+        "codePlaceholder": "Wpisz kod",
+        "codeHint": "Wpisz kod weryfikacyjny wysłany na adres {email}.",
+        "resendButton": "Wyślij kod ponownie",
+        "resendCountdownButton": "Wyślij ponownie za {seconds}s",
+        "cancelButton": "Anuluj",
+        "confirmButton": "Usuń konto na zawsze",
+        "deletingButton": "Usuwanie konta...",
+        "status": {
+          "codeSent": "Kod weryfikacyjny został wysłany na adres {email}."
+        },
+        "errors": {
+          "codeLength": "Wpisz pełny kod weryfikacyjny z wiadomości e-mail.",
+          "invalidCode": "Kod weryfikacyjny jest nieprawidłowy lub wygasł. Poproś o nowy kod.",
+          "rateLimit": "Wysłano zbyt wiele próśb o kod. Poczekaj przed kolejną próbą.",
+          "delivery": "Nie udało się wysłać kodu weryfikacyjnego. Spróbuj ponownie.",
+          "notConfigured": "Usuwanie konta nie jest w pełni skonfigurowane na serwerze.",
+          "sessionExpired": "Twoja sesja wygasła. Zaloguj się ponownie przed usunięciem konta.",
+          "generic": "Nie udało się usunąć konta. Spróbuj ponownie."
         }
       }
     },

@@ -15,6 +15,7 @@ import { ProfileSettingsField } from '@/components/molecules/ProfileSettingsFiel
 import { ProfileStatusMessage } from '@/components/molecules/ProfileStatusMessage'
 
 import { notificationOptions } from '../constants'
+import { DeleteAccountSection } from './DeleteAccountSection'
 
 type ProfileSectionProps = {
   initialName: string
@@ -211,6 +212,8 @@ export const ProfileSection = ({ initialName, email }: ProfileSectionProps) => {
           })}
         </div>
       </ProfileSettingsCard>
+
+      <DeleteAccountSection email={email} />
     </div>
   )
 }
