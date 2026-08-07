@@ -1,7 +1,11 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common'
-import { PrismaService } from '../prisma/prisma.service'
-import { createServerClient, parseCookieHeader, type CookieMethodsServer } from '@supabase/ssr'
 import { Reflector } from '@nestjs/core'
+import { type CookieMethodsServer, createServerClient, parseCookieHeader } from '@supabase/ssr'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
+import type { FastifyRequest } from 'fastify'
+
+import { PrismaService } from '../prisma/prisma.service'
+import type { AuthenticatingRequest } from './authenticated-request'
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -11,14 +15,14 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest()
-
+    const request = context.switchToHttp().getRequest<AuthenticatingRequest>()
     const supabase = this.createSupabaseClient(request)
+    const bearerToken = this.extractBearerToken(request)
 
     const {
       data: { user: supabaseUser },
       error,
-    } = await supabase.auth.getUser()
+    } = bearerToken ? await supabase.auth.getUser(bearerToken) : await supabase.auth.getUser()
 
     if (error || !supabaseUser) {
       throw new UnauthorizedException(error?.message || 'Invalid or missing session')
@@ -26,7 +30,7 @@ export class AuthGuard implements CanActivate {
 
     const dbUser = await this.ensureDbUser(supabaseUser)
 
-    request['user'] = dbUser
+    request.user = dbUser
 
     const requiredPlans = this.reflector.getAllAndOverride<string[]>('plans', [
       context.getHandler(),
@@ -42,15 +46,8 @@ export class AuthGuard implements CanActivate {
     return true
   }
 
-  /**
-   * Zwraca istniejącego usera z bazy powiązanego z Supabase Auth,
-   * a jeśli nie istnieje - tworzy go (lazy sync, bo nie ma webhooków Supabase).
-   */
-  private async ensureDbUser(supabaseUser: {
-    id: string
-    email?: string
-    user_metadata?: Record<string, any>
-  }) {
+  // Synchronize on demand because Supabase Auth webhooks are not configured.
+  private async ensureDbUser(supabaseUser: Pick<SupabaseUser, 'id' | 'email' | 'user_metadata'>) {
     const existing = await this.prismaService.client.user.findUnique({
       where: { authProviderId: supabaseUser.id },
     })
@@ -73,13 +70,13 @@ export class AuthGuard implements CanActivate {
         },
       })
     } catch {
-      // Race condition: inny równoległy request już utworzył tego usera.
+      // Another concurrent first request may have created the user already.
       const createdConcurrently = await this.prismaService.client.user.findUnique({
         where: { authProviderId: supabaseUser.id },
       })
       if (createdConcurrently) return createdConcurrently
 
-      // Email już istnieje w bazie (np. konto stworzone wcześniej bez auth_provider_id) - dowiąż je.
+      // Link a legacy email-only database row to its Supabase identity.
       const byEmail = await this.prismaService.client.user.findUnique({
         where: { email: supabaseUser.email },
       })
@@ -94,42 +91,27 @@ export class AuthGuard implements CanActivate {
     }
   }
 
-  private createSupabaseClient(request: any) {
-    const rawCookieHeader: string = request.headers?.cookie || request.raw?.headers?.cookie || ''
+  private createSupabaseClient(request: FastifyRequest) {
+    const rawCookieHeader = request.headers.cookie ?? request.raw.headers.cookie ?? ''
 
     const parsedCookies: { name: string; value: string }[] = rawCookieHeader
       ? parseCookieHeader(rawCookieHeader).filter(
-        (cookie): cookie is { name: string; value: string } => typeof cookie.value === 'string',
-      )
+          (cookie): cookie is { name: string; value: string } => typeof cookie.value === 'string',
+        )
       : []
-
-    const bearerToken = this.extractBearerToken(request)
 
     const cookieMethods: CookieMethodsServer = {
       getAll: () => parsedCookies,
       setAll: () => {},
     }
 
-    const supabase = createServerClient(
-      process.env.SUPABASE_URL || '',
-      process.env.SUPABASE_ANON_KEY || '',
-      { cookies: cookieMethods },
-    )
-
-    if (bearerToken) {
-      return {
-        auth: {
-          getUser: () => supabase.auth.getUser(bearerToken),
-        },
-      } as ReturnType<typeof createServerClient>
-    }
-
-    return supabase
+    return createServerClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_ANON_KEY || '', {
+      cookies: cookieMethods,
+    })
   }
 
-  private extractBearerToken(request: any): string | undefined {
-    const headers = request.headers || request.raw?.headers
-    const authHeader = headers?.authorization
+  private extractBearerToken(request: FastifyRequest): string | undefined {
+    const authHeader = request.headers.authorization ?? request.raw.headers.authorization
 
     if (!authHeader || typeof authHeader !== 'string') return undefined
 

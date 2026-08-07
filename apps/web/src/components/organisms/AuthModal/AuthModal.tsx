@@ -106,14 +106,11 @@ export const AuthModal = () => {
     }
 
     setIsSubmitting(true)
-    console.log('x')
     const supabase = getSupabaseClient()
 
-    console.log('x')
     const redirectTo =
       typeof window !== 'undefined' ? `${window.location.origin}${dashboardPath}` : undefined
 
-    console.log('x')
     const result =
       view === 'login'
         ? await supabase.auth.signInWithPassword({
@@ -131,14 +128,12 @@ export const AuthModal = () => {
             },
           })
 
-    console.log('x')
     if (result.error) {
       setStatusMessage(result.error.message)
       setIsSubmitting(false)
       return
     }
 
-    console.log('x')
     if (result.data.session) {
       closeModal()
       router.replace(dashboardPath)
@@ -146,14 +141,12 @@ export const AuthModal = () => {
       return
     }
 
-    console.log('x')
     if (view === 'register') {
       setStatusMessage('Check your email to confirm the account before logging in.')
     } else {
       setStatusMessage('Sign-in completed, but no active session was created.')
     }
 
-    console.log('x')
     setIsSubmitting(false)
   }
 

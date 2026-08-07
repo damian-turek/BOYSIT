@@ -1,7 +1,10 @@
+import { Logger } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 
 import { AppModule } from './app.module'
+
+const logger = new Logger('Bootstrap')
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, new FastifyAdapter())
@@ -23,9 +26,11 @@ async function bootstrap() {
 
   await app.listen(port, '0.0.0.0')
 
-  console.log('Server is running on http://localhost:4000')
+  logger.log(`API is listening on port ${port}`)
 }
 
-bootstrap()
-  .then((r) => console.log('Bootstrap completed', r))
-  .catch((e) => console.error('Bootstrap failed', e))
+void bootstrap().catch((error: unknown) => {
+  const trace = error instanceof Error ? error.stack : undefined
+  logger.error('API bootstrap failed', trace)
+  process.exitCode = 1
+})
