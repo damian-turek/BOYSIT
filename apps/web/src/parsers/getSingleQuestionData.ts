@@ -1,3 +1,5 @@
+import { cookies } from 'next/headers'
+
 import { createApiUrl } from '@/config/api'
 import { Level } from '@/types/question'
 
@@ -12,7 +14,15 @@ type QuestionTag = {
 }
 
 export async function getQuestionsSinglePageData(searchParams?: string) {
-  const res = await fetch(createApiUrl(`/api/v1/questions/${searchParams}`), {})
+  const cookieStore = await cookies()
+  const cookieHeader = cookieStore.toString()
+
+  const res = await fetch(createApiUrl(`/api/v1/questions/${searchParams}`), {
+    headers: {
+      Cookie: cookieHeader,
+    },
+    cache: 'no-store',
+  })
 
   if (!res.ok) {
     const errorBody = await res.text()
