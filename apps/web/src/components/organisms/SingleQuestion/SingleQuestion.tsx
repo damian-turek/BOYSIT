@@ -1,8 +1,10 @@
 'use client'
 
+import Link from 'next/link'
+
 import { CATEGORY_THEMES, ICON_MAP, LEVEL_COLOR_MAP } from '@/config/questions'
 import { Question } from '@/types/question'
-import { Bookmark, HelpCircle, LucideIcon, Share2 } from 'lucide-react'
+import { Bookmark, ChevronRight, HelpCircle, LucideIcon, Share2 } from 'lucide-react'
 
 import { useBookmarksStore } from '@/store/useBookmarksStore'
 
@@ -24,6 +26,7 @@ export const SingleQuestion = ({
   question,
   answer,
   index,
+  nextQuestion,
 }: SingleQuestionProps) => {
   const levelClass = LEVEL_COLOR_MAP[level]
   const matchedIcon = category ? ICON_MAP[category.name] : undefined
@@ -84,6 +87,15 @@ export const SingleQuestion = ({
       <div className="p-8 rounded-2xl bg-primary/5 border border-primary/20 flex flex-col gap-3">
         <p className="text-gray-100 body-large">Answer:</p>
         <p className="text-gray-100 body-font" dangerouslySetInnerHTML={{ __html: answer }} />
+      </div>
+      <div className="flex w-full justify-end mt-6">
+        <Link
+          className="body-font max-w-100 p-6 rounded-2xl bg-primary/5 border border-primary/20 text-gray-100 flex items-center gap-3 hover:bg-primary/10 transform transition ease-in-out duration-150"
+          href={`/dashboard/questions/${nextQuestion.id}`}
+        >
+          {nextQuestion.name}
+          <ChevronRight />
+        </Link>
       </div>
     </section>
   )
