@@ -56,6 +56,14 @@
     "addJob": "Dodaj ofertę",
     "allStatuses": "Wszystkie statusy",
     "filterByStatus": "Filtruj według statusu aplikacji",
+    "followUpFilters": {
+      "label": "Kontakt",
+      "all": "Wszystkie aplikacje",
+      "overdue": "Zaległe",
+      "today": "Dzisiaj",
+      "next_7_days": "Następne 7 dni",
+      "none": "Bez daty"
+    },
     "searchPlaceholder": "Szukaj firmy lub stanowiska...",
     "cancel": "Anuluj",
     "saveChanges": "Zapisz zmiany",
@@ -91,7 +99,9 @@
       "comingSoon": "Wkrótce",
       "statusHistory": "Historia statusów",
       "applied": "Aplikowano {date}",
-      "followUp": "Kontakt {date}"
+      "followUp": "Kontakt {date}",
+      "followUpOverdue": "Zaległy · {date}",
+      "followUpToday": "Kontakt dzisiaj · {date}"
     },
     "emptyState": {
       "title": "Nie znaleziono aplikacji",

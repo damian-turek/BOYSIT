@@ -1,10 +1,14 @@
 import { NotFoundException } from '@nestjs/common'
 import { JobApplicationStatus } from 'database'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { PrismaService } from '../prisma/prisma.service'
 import { CreateJobApplicationDto } from './dto/create-job-application.dto'
-import { JobApplicationSort, ListJobApplicationsDto } from './dto/list-job-applications.dto'
+import {
+  JobApplicationFollowUpFilter,
+  JobApplicationSort,
+  ListJobApplicationsDto,
+} from './dto/list-job-applications.dto'
 import { JobApplicationsService } from './job-applications.service'
 
 const userId = '6ac9a588-2637-4527-a183-4ba6dde1da65'
@@ -72,6 +76,10 @@ describe('JobApplicationsService', () => {
     service = new JobApplicationsService(prismaService)
   })
 
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('scopes list data and statistics to the authenticated user', async () => {
     transaction.mockResolvedValueOnce([[application], 1])
     groupApplications.mockResolvedValueOnce([
@@ -96,6 +104,93 @@ describe('JobApplicationsService', () => {
     expect(result.data[0]).toMatchObject({ id: applicationId, company: 'Acme' })
     expect(result.stats.wishlist).toBe(1)
     expect(result.stats.offer).toBe(0)
+  })
+
+  it.each([
+    [JobApplicationFollowUpFilter.overdue, { lt: new Date('2026-08-11T00:00:00.000Z') }],
+    [
+      JobApplicationFollowUpFilter.today,
+      {
+        gte: new Date('2026-08-11T00:00:00.000Z'),
+        lt: new Date('2026-08-12T00:00:00.000Z'),
+      },
+    ],
+    [
+      JobApplicationFollowUpFilter.next7Days,
+      {
+        gte: new Date('2026-08-12T00:00:00.000Z'),
+        lt: new Date('2026-08-19T00:00:00.000Z'),
+      },
+    ],
+    [JobApplicationFollowUpFilter.none, null],
+  ])('filters active applications by %s follow-up dates', async (followUp, followUpAt) => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-08-11T14:30:00.000Z'))
+    transaction.mockResolvedValueOnce([[application], 1])
+    groupApplications.mockResolvedValueOnce([])
+
+    await service.findAll(
+      userId,
+      Object.assign(new ListJobApplicationsDto(), {
+        followUp,
+      }),
+    )
+
+    expect(findManyApplications).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          userId,
+          AND: [
+            {
+              status: {
+                notIn: [JobApplicationStatus.offer, JobApplicationStatus.rejected],
+              },
+              followUpAt,
+            },
+          ],
+        },
+      }),
+    )
+  })
+
+  it('combines follow-up, status, and search filters within the user scope', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-08-11T14:30:00.000Z'))
+    transaction.mockResolvedValueOnce([[application], 1])
+    groupApplications.mockResolvedValueOnce([])
+
+    await service.findAll(
+      userId,
+      Object.assign(new ListJobApplicationsDto(), {
+        search: 'Acme',
+        status: JobApplicationStatus.technical,
+        followUp: JobApplicationFollowUpFilter.today,
+      }),
+    )
+
+    expect(findManyApplications).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          userId,
+          status: JobApplicationStatus.technical,
+          OR: expect.arrayContaining([
+            { company: { contains: 'Acme', mode: 'insensitive' } },
+            { role: { contains: 'Acme', mode: 'insensitive' } },
+          ]),
+          AND: [
+            {
+              status: {
+                notIn: [JobApplicationStatus.offer, JobApplicationStatus.rejected],
+              },
+              followUpAt: {
+                gte: new Date('2026-08-11T00:00:00.000Z'),
+                lt: new Date('2026-08-12T00:00:00.000Z'),
+              },
+            },
+          ],
+        }),
+      }),
+    )
   })
 
   it('creates an initial status event and validates catalog technologies', async () => {

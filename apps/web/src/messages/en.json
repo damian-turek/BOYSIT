@@ -56,6 +56,14 @@
     "addJob": "Add job",
     "allStatuses": "All statuses",
     "filterByStatus": "Filter by application status",
+    "followUpFilters": {
+      "label": "Follow-up",
+      "all": "All applications",
+      "overdue": "Overdue",
+      "today": "Today",
+      "next_7_days": "Next 7 days",
+      "none": "No date"
+    },
     "searchPlaceholder": "Search company or role...",
     "cancel": "Cancel",
     "saveChanges": "Save changes",
@@ -91,7 +99,9 @@
       "comingSoon": "Coming soon",
       "statusHistory": "Status history",
       "applied": "Applied {date}",
-      "followUp": "Follow up {date}"
+      "followUp": "Follow up {date}",
+      "followUpOverdue": "Overdue · {date}",
+      "followUpToday": "Due today · {date}"
     },
     "emptyState": {
       "title": "No applications found",

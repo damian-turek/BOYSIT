@@ -9,6 +9,8 @@ export type JobApplicationStatus =
 
 export type JobApplicationSort = 'updated_desc' | 'applied_desc' | 'follow_up_asc' | 'company_asc'
 
+export type JobApplicationFollowUpFilter = 'overdue' | 'today' | 'next_7_days' | 'none'
+
 export type JobTrackerStatTone = 'blue' | 'purple' | 'amber' | 'orange' | 'green' | 'rose'
 
 export type JobTechnology = {

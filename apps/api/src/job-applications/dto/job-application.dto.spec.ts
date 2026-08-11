@@ -4,7 +4,11 @@ import { JobApplicationStatus } from 'database'
 import { describe, expect, it } from 'vitest'
 
 import { CreateJobApplicationDto } from './create-job-application.dto'
-import { JobApplicationSort, ListJobApplicationsDto } from './list-job-applications.dto'
+import {
+  JobApplicationFollowUpFilter,
+  JobApplicationSort,
+  ListJobApplicationsDto,
+} from './list-job-applications.dto'
 import { UpdateJobApplicationDto } from './update-job-application.dto'
 
 describe('job application DTOs', () => {
@@ -53,6 +57,7 @@ describe('job application DTOs', () => {
     const dto = plainToInstance(ListJobApplicationsDto, {
       search: '  Acme ',
       status: JobApplicationStatus.technical,
+      followUp: JobApplicationFollowUpFilter.next7Days,
       sort: JobApplicationSort.followUpAsc,
       page: '2',
       limit: '12',
@@ -61,9 +66,19 @@ describe('job application DTOs', () => {
     await expect(validate(dto)).resolves.toHaveLength(0)
     expect(dto).toMatchObject({
       search: 'Acme',
+      followUp: JobApplicationFollowUpFilter.next7Days,
       page: 2,
       limit: 12,
     })
+  })
+
+  it('rejects an unknown follow-up filter', async () => {
+    const dto = plainToInstance(ListJobApplicationsDto, {
+      followUp: 'later',
+    })
+
+    const errors = await validate(dto)
+    expect(errors.some((error) => error.property === 'followUp')).toBe(true)
   })
 
   it('rejects more than ten custom technologies', async () => {
