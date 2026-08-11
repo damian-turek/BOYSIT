@@ -29,6 +29,23 @@ type JobApplicationCardProps = {
   isStatusUpdating?: boolean
 }
 
+type FollowUpTiming = 'overdue' | 'today' | 'upcoming' | 'inactive'
+
+const getFollowUpTiming = (application: JobApplication, now = new Date()): FollowUpTiming => {
+  if (application.status === 'offer' || application.status === 'rejected') return 'inactive'
+
+  const followUpTime = new Date(application.followUpAt ?? '').getTime()
+  if (Number.isNaN(followUpTime)) return 'inactive'
+
+  const startOfToday = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  const startOfTomorrow = startOfToday + 24 * 60 * 60 * 1_000
+
+  if (followUpTime < startOfToday) return 'overdue'
+  if (followUpTime < startOfTomorrow) return 'today'
+
+  return 'upcoming'
+}
+
 const getInitials = (company: string) =>
   company
     .split(/\s+/)
@@ -50,6 +67,7 @@ export const JobApplicationCard = ({
   const [isStatusOpen, setIsStatusOpen] = useState(false)
   const statusRef = useRef<HTMLDivElement>(null)
   const status = JOB_STATUS_CONFIG[application.status]
+  const followUpTiming = application.followUpAt ? getFollowUpTiming(application) : undefined
   const technologies = [
     ...application.technologies.map((technology) => technology.name),
     ...application.customTechnologies,
@@ -189,9 +207,21 @@ export const JobApplicationCard = ({
       </div>
 
       {application.followUpAt && (
-        <p className="mb-3 inline-flex items-center gap-1.5 body-small font-semibold text-primary">
+        <p
+          className={cn(
+            'mb-3 inline-flex w-fit items-center gap-1.5 rounded-lg border px-2.5 py-1 body-small font-semibold',
+            followUpTiming === 'overdue' && 'border-alert-50/25 bg-alert-50/10 text-alert-100',
+            followUpTiming === 'today' && 'border-warning-50/25 bg-warning-50/10 text-warning-100',
+            followUpTiming === 'upcoming' && 'border-primary/25 bg-primary/10 text-primary',
+            followUpTiming === 'inactive' && 'border-gray-60/20 bg-gray-60/5 text-gray-60',
+          )}
+        >
           <CalendarDays size={13} aria-hidden="true" />
-          {t('card.followUp', { date: formatDate(application.followUpAt) })}
+          {followUpTiming === 'overdue'
+            ? t('card.followUpOverdue', { date: formatDate(application.followUpAt) })
+            : followUpTiming === 'today'
+              ? t('card.followUpToday', { date: formatDate(application.followUpAt) })
+              : t('card.followUp', { date: formatDate(application.followUpAt) })}
         </p>
       )}
 

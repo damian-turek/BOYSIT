@@ -4,6 +4,7 @@ import { JobApplicationStatus, Prisma } from 'database'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateJobApplicationDto } from './dto/create-job-application.dto'
 import {
+  JobApplicationFollowUpFilter,
   JobApplicationSort,
   ListJobApplicationsDto,
   ListStatusEventsDto,
@@ -36,6 +37,7 @@ export class JobApplicationsService {
     const where: Prisma.JobApplicationWhereInput = {
       userId,
       ...(query.status ? { status: query.status } : {}),
+      ...(query.followUp ? { AND: [this.getFollowUpWhere(query.followUp)] } : {}),
       ...(query.search
         ? {
             OR: [
@@ -298,6 +300,48 @@ export class JobApplicationsService {
       case JobApplicationSort.updatedDesc:
       default:
         return [{ updatedAt: 'desc' }, { id: 'asc' }]
+    }
+  }
+
+  private getFollowUpWhere(
+    filter: JobApplicationFollowUpFilter,
+    now = new Date(),
+  ): Prisma.JobApplicationWhereInput {
+    const startOfToday = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+    )
+    const startOfTomorrow = new Date(startOfToday)
+    startOfTomorrow.setUTCDate(startOfTomorrow.getUTCDate() + 1)
+    const endOfNextSevenDays = new Date(startOfToday)
+    endOfNextSevenDays.setUTCDate(endOfNextSevenDays.getUTCDate() + 8)
+
+    const activeApplication = {
+      status: {
+        notIn: [JobApplicationStatus.offer, JobApplicationStatus.rejected],
+      },
+    } satisfies Prisma.JobApplicationWhereInput
+
+    switch (filter) {
+      case JobApplicationFollowUpFilter.overdue:
+        return {
+          ...activeApplication,
+          followUpAt: { lt: startOfToday },
+        }
+      case JobApplicationFollowUpFilter.today:
+        return {
+          ...activeApplication,
+          followUpAt: { gte: startOfToday, lt: startOfTomorrow },
+        }
+      case JobApplicationFollowUpFilter.next7Days:
+        return {
+          ...activeApplication,
+          followUpAt: { gte: startOfTomorrow, lt: endOfNextSevenDays },
+        }
+      case JobApplicationFollowUpFilter.none:
+        return {
+          ...activeApplication,
+          followUpAt: null,
+        }
     }
   }
 
