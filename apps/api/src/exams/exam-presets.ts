@@ -10,6 +10,13 @@ export type ExamPresetSlug =
 
 export type ExamCategory = 'mixed' | 'frontend' | 'backend' | 'system_design'
 export type ExamDisplayDifficulty = 'introductory' | 'intermediate' | 'advanced'
+export type ExamTopic =
+  | 'javascript'
+  | 'typescript'
+  | 'react'
+  | 'node'
+  | 'databases'
+  | 'architecture'
 
 export type ExamQuestionFilter = {
   categorySlugs?: readonly string[]
@@ -25,6 +32,7 @@ export type ExamPreset = {
   displayDifficulty: ExamDisplayDifficulty
   questionCount: number
   durationMinutes: number
+  topics: readonly ExamTopic[]
   questionFilter: ExamQuestionFilter
 }
 
@@ -36,6 +44,7 @@ export const EXAM_PRESETS = [
     displayDifficulty: 'introductory',
     questionCount: 8,
     durationMinutes: 10,
+    topics: ['javascript', 'typescript', 'databases'],
     questionFilter: {
       difficulties: [Difficulty.junior],
     },
@@ -47,6 +56,7 @@ export const EXAM_PRESETS = [
     displayDifficulty: 'introductory',
     questionCount: 10,
     durationMinutes: 15,
+    topics: ['javascript', 'typescript', 'react'],
     questionFilter: {
       categorySlugs: ['frontend'],
       difficulties: [Difficulty.junior],
@@ -59,6 +69,7 @@ export const EXAM_PRESETS = [
     displayDifficulty: 'intermediate',
     questionCount: 25,
     durationMinutes: 35,
+    topics: ['javascript', 'typescript'],
     questionFilter: {
       technologySlugs: ['javascript', 'typescript'],
       difficulties: [Difficulty.middle],
@@ -71,6 +82,7 @@ export const EXAM_PRESETS = [
     displayDifficulty: 'intermediate',
     questionCount: 20,
     durationMinutes: 30,
+    topics: ['react', 'javascript', 'typescript'],
     questionFilter: {
       technologySlugs: ['react'],
       difficulties: [Difficulty.middle],
@@ -83,6 +95,7 @@ export const EXAM_PRESETS = [
     displayDifficulty: 'intermediate',
     questionCount: 25,
     durationMinutes: 40,
+    topics: ['node', 'databases', 'architecture'],
     questionFilter: {
       categorySlugs: ['backend', 'databases'],
       difficulties: [Difficulty.middle],
@@ -95,6 +108,7 @@ export const EXAM_PRESETS = [
     displayDifficulty: 'advanced',
     questionCount: 15,
     durationMinutes: 45,
+    topics: ['architecture', 'databases'],
     questionFilter: {
       difficulties: [Difficulty.senior],
       questionTypes: [QuestionType.system_design],
