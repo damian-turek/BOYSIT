@@ -59,6 +59,12 @@ enum ExamSessionStatus {
   expired
 }
 
+enum Assessment {
+  know
+  partial
+  dont_know
+}
+
 model User {
   id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email          String   @unique
@@ -188,7 +194,8 @@ model Attempt {
   userId     String @map("user_id") @db.Uuid
   questionId String @map("question_id") @db.Uuid
 
-  userAnswer String? @map("user_answer")
+  userAnswer String?     @map("user_answer")
+  assessment Assessment?
   score      Int?
   feedback   String?
 
@@ -196,6 +203,8 @@ model Attempt {
 
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  examSessionQuestion ExamSessionQuestion?
 
   @@index([userId])
   @@index([questionId])
@@ -335,8 +344,9 @@ model ExamSession {
 }
 
 model ExamSessionQuestion {
-  sessionId  String @map("session_id") @db.Uuid
-  questionId String @map("question_id") @db.Uuid
+  sessionId  String  @map("session_id") @db.Uuid
+  questionId String  @map("question_id") @db.Uuid
+  attemptId  String? @unique @map("attempt_id") @db.Uuid
   position   Int
 
   userAnswer String?   @map("user_answer")
@@ -344,6 +354,7 @@ model ExamSessionQuestion {
 
   session  ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   question Question    @relation(fields: [questionId], references: [id], onDelete: Restrict)
+  attempt  Attempt?    @relation(fields: [attemptId], references: [id], onDelete: SetNull)
 
   @@id([sessionId, questionId])
   @@unique([sessionId, position])
