@@ -160,6 +160,87 @@
       "status": "The status could not be updated. The previous status was restored."
     }
   },
+  "Exam": {
+    "title": "Exam simulator",
+    "prototypeBadge": "UI preview",
+    "description": "Choose a focused interview exam and practice under a clear time limit.",
+    "access": {
+      "checkingTitle": "Checking your access",
+      "checkingDescription": "Your available exam catalogue will appear in a moment.",
+      "freeTitle": "Free preview mode",
+      "freeDescription": "Preview exams contain free questions only. Pro exam cards stay visible so you can explore the full format without accessing protected questions.",
+      "proTitle": "Full exam access",
+      "proDescription": "Your plan can use both free questions and the full Pro question pool when exam sessions are connected.",
+      "freePool": "Free questions only",
+      "fullPool": "Full question pool"
+    },
+    "library": {
+      "title": "Choose an exam",
+      "description": "Start with a short warm-up or pick a focused technical track."
+    },
+    "filters": {
+      "label": "Filter exams",
+      "all": "All",
+      "mixed": "Mixed",
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "system_design": "System design"
+    },
+    "accessLabels": {
+      "free": "Free preview",
+      "pro": "Pro"
+    },
+    "card": {
+      "questions": "{count} questions",
+      "minutes": "{count} min",
+      "freeQuestionPool": "Free question pool",
+      "fullQuestionPool": "Full question pool",
+      "checkingAccess": "Checking access",
+      "proRequired": "Pro required",
+      "startPreview": "Start free preview",
+      "startExam": "Start exam"
+    },
+    "difficulty": {
+      "introductory": "Intro",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "topics": {
+      "javascript": "JavaScript",
+      "typescript": "TypeScript",
+      "react": "React",
+      "node": "Node.js",
+      "databases": "Databases",
+      "architecture": "Architecture"
+    },
+    "exams": {
+      "warmup": {
+        "title": "Interview warm-up",
+        "description": "A short mixed set that introduces the exam format without pressure."
+      },
+      "frontendBasics": {
+        "title": "Frontend basics",
+        "description": "Core browser, JavaScript, TypeScript and React fundamentals."
+      },
+      "javascript": {
+        "title": "JavaScript deep dive",
+        "description": "A focused test of language mechanics, async code and runtime behavior."
+      },
+      "react": {
+        "title": "React interview",
+        "description": "Components, hooks, rendering, state and frontend architecture."
+      },
+      "backend": {
+        "title": "Backend fundamentals",
+        "description": "APIs, Node.js, databases, reliability and backend design decisions."
+      },
+      "systemDesign": {
+        "title": "System design challenge",
+        "description": "Architecture trade-offs, scalability and distributed system fundamentals."
+      }
+    },
+    "runnerPending": "{exam} is selected. The interactive exam runner will be connected in the next stage."
+  },
   "ProfileSettings": {
     "eyebrow": "Account",
     "title": "Account settings",

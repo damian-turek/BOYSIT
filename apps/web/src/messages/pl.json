@@ -160,6 +160,87 @@
       "status": "Nie udało się zmienić statusu. Przywrócono poprzednią wartość."
     }
   },
+  "Exam": {
+    "title": "Symulator egzaminu",
+    "prototypeBadge": "Podgląd UI",
+    "description": "Wybierz egzamin rekrutacyjny i ćwicz w jasno określonym limicie czasu.",
+    "access": {
+      "checkingTitle": "Sprawdzanie dostępu",
+      "checkingDescription": "Za chwilę pojawi się dostępny katalog egzaminów.",
+      "freeTitle": "Tryb bezpłatnego podglądu",
+      "freeDescription": "Egzaminy podglądowe zawierają wyłącznie bezpłatne pytania. Karty Pro pozostają widoczne, aby pokazać pełny format bez udostępniania chronionych pytań.",
+      "proTitle": "Pełny dostęp do egzaminów",
+      "proDescription": "Twój plan będzie mógł korzystać z bezpłatnych pytań i pełnej puli Pro po podłączeniu sesji egzaminacyjnych.",
+      "freePool": "Tylko bezpłatne pytania",
+      "fullPool": "Pełna pula pytań"
+    },
+    "library": {
+      "title": "Wybierz egzamin",
+      "description": "Zacznij od krótkiej rozgrzewki albo wybierz techniczną ścieżkę."
+    },
+    "filters": {
+      "label": "Filtruj egzaminy",
+      "all": "Wszystkie",
+      "mixed": "Mieszane",
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "system_design": "Projektowanie systemów"
+    },
+    "accessLabels": {
+      "free": "Bezpłatny podgląd",
+      "pro": "Pro"
+    },
+    "card": {
+      "questions": "Liczba pytań: {count}",
+      "minutes": "{count} min",
+      "freeQuestionPool": "Pula bezpłatnych pytań",
+      "fullQuestionPool": "Pełna pula pytań",
+      "checkingAccess": "Sprawdzanie dostępu",
+      "proRequired": "Wymagany plan Pro",
+      "startPreview": "Uruchom bezpłatny podgląd",
+      "startExam": "Rozpocznij egzamin"
+    },
+    "difficulty": {
+      "introductory": "Wprowadzenie",
+      "intermediate": "Średni",
+      "advanced": "Zaawansowany"
+    },
+    "topics": {
+      "javascript": "JavaScript",
+      "typescript": "TypeScript",
+      "react": "React",
+      "node": "Node.js",
+      "databases": "Bazy danych",
+      "architecture": "Architektura"
+    },
+    "exams": {
+      "warmup": {
+        "title": "Rozgrzewka rekrutacyjna",
+        "description": "Krótki mieszany zestaw, który bez presji przedstawia format egzaminu."
+      },
+      "frontendBasics": {
+        "title": "Podstawy frontendu",
+        "description": "Najważniejsze podstawy przeglądarki, JavaScriptu, TypeScriptu i Reacta."
+      },
+      "javascript": {
+        "title": "JavaScript — dogłębnie",
+        "description": "Skupiony test mechanizmów języka, kodu asynchronicznego i działania środowiska."
+      },
+      "react": {
+        "title": "Rozmowa techniczna z React",
+        "description": "Komponenty, hooki, renderowanie, stan i architektura frontendu."
+      },
+      "backend": {
+        "title": "Podstawy backendu",
+        "description": "API, Node.js, bazy danych, niezawodność i decyzje projektowe backendu."
+      },
+      "systemDesign": {
+        "title": "Wyzwanie z projektowania systemów",
+        "description": "Kompromisy architektoniczne, skalowanie i podstawy systemów rozproszonych."
+      }
+    },
+    "runnerPending": "Wybrano: {exam}. Interaktywny tryb egzaminu zostanie podłączony w następnym etapie."
+  },
   "ProfileSettings": {
     "eyebrow": "Konto",
     "title": "Ustawienia konta",

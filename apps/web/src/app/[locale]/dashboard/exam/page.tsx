@@ -1,18 +1,15 @@
-import { getDashboardData } from '@/parsers/getDashboardData'
-import { LangProps } from '@/types/lang'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 
-type PageProps = {
-  params: Promise<{ locale: LangProps }>
-}
+import { ExamHub } from '@/components/organisms/ExamHub'
 
 export const metadata: Metadata = {
-  title: 'Exam',
+  title: 'Exam simulator',
 }
 
-export default async function ExamPage({ params }: PageProps) {
-  const { locale } = await params
-  const { WELCOME_SECTION_DATA } = getDashboardData()
-
-  return <main className="dashboard-container">x</main>
+export default function ExamPage() {
+  return (
+    <main className="dashboard-container max-w-[1120px]">
+      <ExamHub />
+    </main>
+  )
 }
