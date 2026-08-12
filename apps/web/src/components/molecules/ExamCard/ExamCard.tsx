@@ -1,7 +1,7 @@
 'use client'
 
 import type { LucideIcon } from 'lucide-react'
-import { Clock3, Gauge, LockKeyhole, Play, ShieldCheck } from 'lucide-react'
+import { Clock3, Gauge, LoaderCircle, LockKeyhole, Play, ShieldCheck } from 'lucide-react'
 import { motion } from 'motion/react'
 
 import { cn } from '@/utils/cn'
@@ -21,9 +21,11 @@ export type ExamCardProps = {
   difficultyLabel: string
   actionLabel: string
   topics: string[]
+  availabilityLabel?: string
   icon: LucideIcon
   tone: ExamCardTone
   isLocked: boolean
+  isBusy?: boolean
   onStart: () => void
 }
 
@@ -63,9 +65,11 @@ export const ExamCard = ({
   difficultyLabel,
   actionLabel,
   topics,
+  availabilityLabel,
   icon: Icon,
   tone,
   isLocked,
+  isBusy = false,
   onStart,
 }: ExamCardProps) => {
   const toneClasses = toneClassNames[tone]
@@ -77,6 +81,7 @@ export const ExamCard = ({
       animate={{ opacity: 1, y: 0 }}
       whileHover={isLocked ? undefined : { y: -3 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
+      aria-busy={isBusy}
       className={cn(
         'relative flex h-full flex-col overflow-hidden rounded-xl border border-[var(--color-gray-10)] bg-gray-05 p-5 transition-colors',
         toneClasses.border,
@@ -136,11 +141,15 @@ export const ExamCard = ({
         ))}
       </div>
 
+      {availabilityLabel && (
+        <p className="mb-3 body-small font-medium text-gray-60">{availabilityLabel}</p>
+      )}
+
       <Button
         className="mt-auto w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         variant={isLocked ? 'secondary' : 'primary'}
-        icon={isLocked ? LockKeyhole : Play}
-        disabled={isLocked}
+        icon={isBusy ? LoaderCircle : isLocked ? LockKeyhole : Play}
+        disabled={isLocked || isBusy}
         onClick={onStart}
       >
         {actionLabel}

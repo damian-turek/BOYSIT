@@ -162,7 +162,7 @@
   },
   "Exam": {
     "title": "Symulator egzaminu",
-    "prototypeBadge": "Podgląd UI",
+    "modeBadge": "Tryb egzaminu",
     "description": "Wybierz egzamin rekrutacyjny i ćwicz w jasno określonym limicie czasu.",
     "access": {
       "checkingTitle": "Sprawdzanie dostępu",
@@ -170,13 +170,14 @@
       "freeTitle": "Tryb bezpłatnego podglądu",
       "freeDescription": "Egzaminy podglądowe zawierają wyłącznie bezpłatne pytania. Karty Pro pozostają widoczne, aby pokazać pełny format bez udostępniania chronionych pytań.",
       "proTitle": "Pełny dostęp do egzaminów",
-      "proDescription": "Twój plan będzie mógł korzystać z bezpłatnych pytań i pełnej puli Pro po podłączeniu sesji egzaminacyjnych.",
+      "proDescription": "Twój plan może korzystać z bezpłatnych pytań i pełnej puli Pro.",
       "freePool": "Tylko bezpłatne pytania",
       "fullPool": "Pełna pula pytań"
     },
     "library": {
       "title": "Wybierz egzamin",
-      "description": "Zacznij od krótkiej rozgrzewki albo wybierz techniczną ścieżkę."
+      "description": "Zacznij od krótkiej rozgrzewki albo wybierz techniczną ścieżkę.",
+      "loading": "Ładowanie katalogu egzaminów"
     },
     "filters": {
       "label": "Filtruj egzaminy",
@@ -195,10 +196,13 @@
       "minutes": "{count} min",
       "freeQuestionPool": "Pula bezpłatnych pytań",
       "fullQuestionPool": "Pełna pula pytań",
-      "checkingAccess": "Sprawdzanie dostępu",
       "proRequired": "Wymagany plan Pro",
+      "questionsUnavailable": "Za mało pytań",
+      "availableQuestions": "Obecnie dostępnych jest {available} z {required} wymaganych pytań",
+      "continueExam": "Kontynuuj egzamin",
       "startPreview": "Uruchom bezpłatny podgląd",
-      "startExam": "Rozpocznij egzamin"
+      "startExam": "Rozpocznij egzamin",
+      "starting": "Uruchamianie egzaminu"
     },
     "difficulty": {
       "introductory": "Wprowadzenie",
@@ -213,12 +217,99 @@
       "databases": "Bazy danych",
       "architecture": "Architektura"
     },
+    "actions": {
+      "retry": "Spróbuj ponownie"
+    },
+    "errors": {
+      "catalog": "Nie udało się wczytać katalogu egzaminów.",
+      "start": "Nie udało się rozpocząć egzaminu.",
+      "session": "Nie udało się wczytać sesji egzaminacyjnej.",
+      "saveAnswer": "Nie udało się zapisać odpowiedzi.",
+      "submit": "Nie udało się oddać egzaminu.",
+      "result": "Nie udało się wczytać wyniku egzaminu.",
+      "assessment": "Nie udało się zapisać samooceny.",
+      "complete": "Nie udało się zakończyć przeglądu."
+    },
+    "session": {
+      "loading": "Ładowanie sesji egzaminacyjnej",
+      "loadErrorTitle": "Nie można otworzyć tego egzaminu"
+    },
+    "runner": {
+      "eyebrow": "Trwający egzamin",
+      "progress": "Odpowiedzi: {answered} z {total}",
+      "questionNumber": "Pytanie {current} z {total}",
+      "answerLabel": "Twoja odpowiedź",
+      "answerPlaceholder": "Wpisz odpowiedź. Zostanie zapisana automatycznie.",
+      "saving": "Zapisywanie...",
+      "saved": "Zapisano",
+      "saveFailed": "Błąd zapisu",
+      "previous": "Poprzednie",
+      "next": "Następne pytanie",
+      "submit": "Oddaj egzamin",
+      "submitting": "Oddawanie...",
+      "submitConfirm": "Oddać egzamin? Po tej operacji nie będzie można edytować odpowiedzi.",
+      "navigationLabel": "Nawigacja po pytaniach egzaminacyjnych",
+      "navigationTitle": "Pytania",
+      "goToQuestion": "Przejdź do pytania {number}",
+      "noQuestions": "Ta sesja egzaminacyjna nie zawiera pytań."
+    },
+    "questionTypes": {
+      "theory": "Teoria",
+      "practical": "Praktyka",
+      "code": "Kod",
+      "system_design": "Projektowanie systemów",
+      "troubleshooting": "Rozwiązywanie problemów"
+    },
+    "questionDifficulty": {
+      "junior": "Junior",
+      "middle": "Middle",
+      "senior": "Senior"
+    },
+    "assessment": {
+      "know": "Wiedziałem",
+      "partial": "Wiedziałem częściowo",
+      "dont_know": "Nie wiedziałem"
+    },
+    "review": {
+      "loading": "Ładowanie przeglądu egzaminu",
+      "loadErrorTitle": "Nie udało się wczytać przeglądu",
+      "eyebrow": "Przejrzyj swoje odpowiedzi",
+      "completedEyebrow": "Przegląd zakończony",
+      "description": "Porównaj odpowiedzi z odpowiedziami wzorcowymi i oceń swoją wiedzę.",
+      "completedDescription": "Twoje samooceny zostały zapisane. Poniżej możesz ponownie przejrzeć odpowiedzi.",
+      "submittedAt": "Oddano {date}",
+      "backToCatalog": "Wróć do egzaminów",
+      "summaryLabel": "Podsumowanie wyniku egzaminu",
+      "summary": {
+        "total": "Pytania",
+        "answered": "Odpowiedzi",
+        "know": "Wiedziałem",
+        "partial": "Częściowo",
+        "dontKnow": "Nie wiedziałem"
+      },
+      "questionsTitle": "Przegląd pytań",
+      "questionsDescription": "Otwórz pytanie, porównaj odpowiedź i zapisz samoocenę.",
+      "questionNumber": "Pytanie {number}",
+      "prompt": "Pytanie",
+      "yourAnswer": "Twoja odpowiedź",
+      "noAnswer": "Nie przesłano odpowiedzi.",
+      "referenceAnswer": "Odpowiedź wzorcowa",
+      "noReferenceAnswer": "Brak odpowiedzi wzorcowej.",
+      "explanation": "Wyjaśnienie",
+      "codeSnippet": "Kod wzorcowy",
+      "assessmentPrompt": "Jak dobrze znałeś odpowiedź?",
+      "completeTitle": "Zakończ przegląd",
+      "completeReady": "Wszystkie pytania zostały ocenione. Możesz zakończyć przegląd.",
+      "completeRemaining": "Oceń jeszcze {count} pytań, aby zakończyć.",
+      "completeAction": "Zakończ przegląd",
+      "completing": "Kończenie..."
+    },
     "exams": {
       "warmup": {
         "title": "Rozgrzewka rekrutacyjna",
         "description": "Krótki mieszany zestaw, który bez presji przedstawia format egzaminu."
       },
-      "frontendBasics": {
+      "frontend-basics": {
         "title": "Podstawy frontendu",
         "description": "Najważniejsze podstawy przeglądarki, JavaScriptu, TypeScriptu i Reacta."
       },
@@ -234,12 +325,11 @@
         "title": "Podstawy backendu",
         "description": "API, Node.js, bazy danych, niezawodność i decyzje projektowe backendu."
       },
-      "systemDesign": {
+      "system-design": {
         "title": "Wyzwanie z projektowania systemów",
         "description": "Kompromisy architektoniczne, skalowanie i podstawy systemów rozproszonych."
       }
-    },
-    "runnerPending": "Wybrano: {exam}. Interaktywny tryb egzaminu zostanie podłączony w następnym etapie."
+    }
   },
   "ProfileSettings": {
     "eyebrow": "Konto",

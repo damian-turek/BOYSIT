@@ -162,7 +162,7 @@
   },
   "Exam": {
     "title": "Exam simulator",
-    "prototypeBadge": "UI preview",
+    "modeBadge": "Exam mode",
     "description": "Choose a focused interview exam and practice under a clear time limit.",
     "access": {
       "checkingTitle": "Checking your access",
@@ -170,13 +170,14 @@
       "freeTitle": "Free preview mode",
       "freeDescription": "Preview exams contain free questions only. Pro exam cards stay visible so you can explore the full format without accessing protected questions.",
       "proTitle": "Full exam access",
-      "proDescription": "Your plan can use both free questions and the full Pro question pool when exam sessions are connected.",
+      "proDescription": "Your plan can use both free questions and the full Pro question pool.",
       "freePool": "Free questions only",
       "fullPool": "Full question pool"
     },
     "library": {
       "title": "Choose an exam",
-      "description": "Start with a short warm-up or pick a focused technical track."
+      "description": "Start with a short warm-up or pick a focused technical track.",
+      "loading": "Loading the exam catalogue"
     },
     "filters": {
       "label": "Filter exams",
@@ -195,10 +196,13 @@
       "minutes": "{count} min",
       "freeQuestionPool": "Free question pool",
       "fullQuestionPool": "Full question pool",
-      "checkingAccess": "Checking access",
       "proRequired": "Pro required",
+      "questionsUnavailable": "Not enough questions",
+      "availableQuestions": "{available} of {required} required questions are currently available",
+      "continueExam": "Continue exam",
       "startPreview": "Start free preview",
-      "startExam": "Start exam"
+      "startExam": "Start exam",
+      "starting": "Starting exam"
     },
     "difficulty": {
       "introductory": "Intro",
@@ -213,12 +217,99 @@
       "databases": "Databases",
       "architecture": "Architecture"
     },
+    "actions": {
+      "retry": "Try again"
+    },
+    "errors": {
+      "catalog": "The exam catalogue could not be loaded.",
+      "start": "The exam could not be started.",
+      "session": "The exam session could not be loaded.",
+      "saveAnswer": "Your answer could not be saved.",
+      "submit": "The exam could not be submitted.",
+      "result": "The exam result could not be loaded.",
+      "assessment": "The assessment could not be saved.",
+      "complete": "The review could not be completed."
+    },
+    "session": {
+      "loading": "Loading the exam session",
+      "loadErrorTitle": "Unable to open this exam"
+    },
+    "runner": {
+      "eyebrow": "Active exam",
+      "progress": "Answered {answered} of {total}",
+      "questionNumber": "Question {current} of {total}",
+      "answerLabel": "Your answer",
+      "answerPlaceholder": "Write your answer here. It is saved automatically.",
+      "saving": "Saving...",
+      "saved": "Saved",
+      "saveFailed": "Save failed",
+      "previous": "Previous",
+      "next": "Next question",
+      "submit": "Submit exam",
+      "submitting": "Submitting...",
+      "submitConfirm": "Submit this exam? You will not be able to edit your answers afterwards.",
+      "navigationLabel": "Exam question navigation",
+      "navigationTitle": "Questions",
+      "goToQuestion": "Go to question {number}",
+      "noQuestions": "This exam session does not contain any questions."
+    },
+    "questionTypes": {
+      "theory": "Theory",
+      "practical": "Practical",
+      "code": "Code",
+      "system_design": "System design",
+      "troubleshooting": "Troubleshooting"
+    },
+    "questionDifficulty": {
+      "junior": "Junior",
+      "middle": "Middle",
+      "senior": "Senior"
+    },
+    "assessment": {
+      "know": "I knew it",
+      "partial": "Partially knew",
+      "dont_know": "Did not know"
+    },
+    "review": {
+      "loading": "Loading the exam review",
+      "loadErrorTitle": "Unable to load the review",
+      "eyebrow": "Review your answers",
+      "completedEyebrow": "Review completed",
+      "description": "Compare your answers with the reference answers and assess your understanding.",
+      "completedDescription": "Your assessments are saved. You can revisit every answer below.",
+      "submittedAt": "Submitted {date}",
+      "backToCatalog": "Back to exams",
+      "summaryLabel": "Exam result summary",
+      "summary": {
+        "total": "Questions",
+        "answered": "Answered",
+        "know": "Knew",
+        "partial": "Partial",
+        "dontKnow": "Did not know"
+      },
+      "questionsTitle": "Question review",
+      "questionsDescription": "Open a question to compare your response and record a self-assessment.",
+      "questionNumber": "Question {number}",
+      "prompt": "Question",
+      "yourAnswer": "Your answer",
+      "noAnswer": "No answer was submitted.",
+      "referenceAnswer": "Reference answer",
+      "noReferenceAnswer": "No reference answer is available.",
+      "explanation": "Explanation",
+      "codeSnippet": "Reference code",
+      "assessmentPrompt": "How well did you know this?",
+      "completeTitle": "Finish the review",
+      "completeReady": "Every question is assessed. You can finish the review.",
+      "completeRemaining": "Assess {count} more questions to finish.",
+      "completeAction": "Complete review",
+      "completing": "Completing..."
+    },
     "exams": {
       "warmup": {
         "title": "Interview warm-up",
         "description": "A short mixed set that introduces the exam format without pressure."
       },
-      "frontendBasics": {
+      "frontend-basics": {
         "title": "Frontend basics",
         "description": "Core browser, JavaScript, TypeScript and React fundamentals."
       },
@@ -234,12 +325,11 @@
         "title": "Backend fundamentals",
         "description": "APIs, Node.js, databases, reliability and backend design decisions."
       },
-      "systemDesign": {
+      "system-design": {
         "title": "System design challenge",
         "description": "Architecture trade-offs, scalability and distributed system fundamentals."
       }
-    },
-    "runnerPending": "{exam} is selected. The interactive exam runner will be connected in the next stage."
+    }
   },
   "ProfileSettings": {
     "eyebrow": "Account",

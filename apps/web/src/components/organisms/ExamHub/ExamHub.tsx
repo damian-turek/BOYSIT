@@ -1,7 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
+import { usePathname, useRouter } from 'next/navigation'
+
+import { fetchExamCatalog, startExam } from '@/services/examApi'
+import type { ExamCatalogItem, ExamCategory, ExamSlug } from '@/types/exam'
 import type { LucideIcon } from 'lucide-react'
 import {
   Blocks,
@@ -12,6 +16,7 @@ import {
   Crown,
   Database,
   Layers3,
+  RefreshCw,
   ShieldCheck,
   Sparkles,
 } from 'lucide-react'
@@ -22,115 +27,87 @@ import { useAuthSessionStore } from '@/store/useAuthSessionStore'
 
 import { cn } from '@/utils/cn'
 
+import { Button } from '@/components/atoms/Button'
 import type { ExamCardTone } from '@/components/molecules/ExamCard'
 import { ExamCard } from '@/components/molecules/ExamCard'
 
-type ExamCategory = 'all' | 'mixed' | 'frontend' | 'backend' | 'system_design'
-type ExamAccess = 'free' | 'pro'
-type ExamDifficulty = 'introductory' | 'intermediate' | 'advanced'
+type ExamFilterCategory = 'all' | ExamCategory
 
-type ExamDefinition = {
-  id: 'warmup' | 'frontendBasics' | 'javascript' | 'react' | 'backend' | 'systemDesign'
-  category: Exclude<ExamCategory, 'all'>
-  access: ExamAccess
-  difficulty: ExamDifficulty
-  questionCount: number
-  durationMinutes: number
-  topicKeys: Array<'javascript' | 'typescript' | 'react' | 'node' | 'databases' | 'architecture'>
+type ExamVisual = {
   icon: LucideIcon
   tone: ExamCardTone
 }
 
-const EXAM_CATEGORIES: ExamCategory[] = ['all', 'mixed', 'frontend', 'backend', 'system_design']
-
-// Presentation-only definitions until the exam API owns templates and question selection.
-const EXAMS: ExamDefinition[] = [
-  {
-    id: 'warmup',
-    category: 'mixed',
-    access: 'free',
-    difficulty: 'introductory',
-    questionCount: 8,
-    durationMinutes: 10,
-    topicKeys: ['javascript', 'typescript', 'databases'],
-    icon: Sparkles,
-    tone: 'blue',
-  },
-  {
-    id: 'frontendBasics',
-    category: 'frontend',
-    access: 'free',
-    difficulty: 'introductory',
-    questionCount: 10,
-    durationMinutes: 15,
-    topicKeys: ['javascript', 'typescript', 'react'],
-    icon: Code2,
-    tone: 'green',
-  },
-  {
-    id: 'javascript',
-    category: 'frontend',
-    access: 'pro',
-    difficulty: 'intermediate',
-    questionCount: 25,
-    durationMinutes: 35,
-    topicKeys: ['javascript', 'typescript'],
-    icon: Braces,
-    tone: 'amber',
-  },
-  {
-    id: 'react',
-    category: 'frontend',
-    access: 'pro',
-    difficulty: 'intermediate',
-    questionCount: 20,
-    durationMinutes: 30,
-    topicKeys: ['react', 'javascript', 'typescript'],
-    icon: Blocks,
-    tone: 'purple',
-  },
-  {
-    id: 'backend',
-    category: 'backend',
-    access: 'pro',
-    difficulty: 'intermediate',
-    questionCount: 25,
-    durationMinutes: 40,
-    topicKeys: ['node', 'databases', 'architecture'],
-    icon: Database,
-    tone: 'green',
-  },
-  {
-    id: 'systemDesign',
-    category: 'system_design',
-    access: 'pro',
-    difficulty: 'advanced',
-    questionCount: 15,
-    durationMinutes: 45,
-    topicKeys: ['architecture', 'databases'],
-    icon: Layers3,
-    tone: 'purple',
-  },
+const EXAM_CATEGORIES: ExamFilterCategory[] = [
+  'all',
+  'mixed',
+  'frontend',
+  'backend',
+  'system_design',
 ]
+
+const EXAM_VISUALS: Record<ExamSlug, ExamVisual> = {
+  warmup: { icon: Sparkles, tone: 'blue' },
+  'frontend-basics': { icon: Code2, tone: 'green' },
+  javascript: { icon: Braces, tone: 'amber' },
+  react: { icon: Blocks, tone: 'purple' },
+  backend: { icon: Database, tone: 'green' },
+  'system-design': { icon: Layers3, tone: 'purple' },
+}
 
 export const ExamHub = () => {
   const t = useTranslations('Exam')
+  const router = useRouter()
+  const pathname = usePathname()
   const profile = useAuthSessionStore((state) => state.profile)
   const initialized = useAuthSessionStore((state) => state.initialized)
-  const loading = useAuthSessionStore((state) => state.loading)
-  const [category, setCategory] = useState<ExamCategory>('all')
-  const [selectedExamId, setSelectedExamId] = useState<ExamDefinition['id']>()
+  const authLoading = useAuthSessionStore((state) => state.loading)
+  const [category, setCategory] = useState<ExamFilterCategory>('all')
+  const [catalog, setCatalog] = useState<ExamCatalogItem[]>([])
+  const [catalogLoading, setCatalogLoading] = useState(true)
+  const [retryKey, setRetryKey] = useState(0)
+  const [startingSlug, setStartingSlug] = useState<ExamSlug>()
+  const [error, setError] = useState<string>()
   const hasProAccess = profile?.plan === 'pro' || profile?.plan === 'admin'
-  const isAccessLoading = !initialized || loading
+  const isAccessLoading = !initialized || authLoading || catalogLoading
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    setCatalogLoading(true)
+    setError(undefined)
+
+    fetchExamCatalog(controller.signal)
+      .then(setCatalog)
+      .catch((requestError: unknown) => {
+        if (requestError instanceof DOMException && requestError.name === 'AbortError') return
+        setError(requestError instanceof Error ? requestError.message : t('errors.catalog'))
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setCatalogLoading(false)
+      })
+
+    return () => controller.abort()
+  }, [retryKey, t])
 
   const visibleExams = useMemo(
-    () => EXAMS.filter((exam) => category === 'all' || exam.category === category),
-    [category],
+    () => catalog.filter((exam) => category === 'all' || exam.category === category),
+    [catalog, category],
   )
 
-  const handleStart = (exam: ExamDefinition) => {
-    if (isAccessLoading || (exam.access === 'pro' && !hasProAccess)) return
-    setSelectedExamId(exam.id)
+  const handleStart = async (exam: ExamCatalogItem) => {
+    if (!exam.canStart || startingSlug) return
+
+    setStartingSlug(exam.slug)
+    setError(undefined)
+
+    try {
+      const session = await startExam(exam.slug)
+      router.push(`${pathname.replace(/\/$/, '')}/${session.sessionId}`)
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : t('errors.start'))
+      setStartingSlug(undefined)
+    }
   }
 
   return (
@@ -144,7 +121,7 @@ export const ExamHub = () => {
             <div className="mb-1 flex flex-wrap items-center gap-2">
               <h1 className="text-[25px] leading-8 font-bold text-gray-100">{t('title')}</h1>
               <span className="rounded-md border border-primary/25 bg-primary/10 px-2 py-0.5 label-font font-semibold text-primary">
-                {t('prototypeBadge')}
+                {t('modeBadge')}
               </span>
             </div>
             <p className="body-medium max-w-2xl text-gray-60">{t('description')}</p>
@@ -202,6 +179,22 @@ export const ExamHub = () => {
         </span>
       </section>
 
+      {error && (
+        <div
+          className="flex flex-col gap-3 rounded-xl border border-alert-50/25 bg-alert-50/5 px-4 py-3 text-gray-100 sm:flex-row sm:items-center sm:justify-between"
+          role="alert"
+        >
+          <p className="body-medium">{error}</p>
+          <Button
+            variant="secondary"
+            icon={RefreshCw}
+            onClick={() => setRetryKey((value) => value + 1)}
+          >
+            {t('actions.retry')}
+          </Button>
+        </div>
+      )}
+
       <section aria-labelledby="exam-library-title">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -234,57 +227,66 @@ export const ExamHub = () => {
           </div>
         </div>
 
-        <motion.div layout className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-          <AnimatePresence mode="popLayout">
-            {visibleExams.map((exam) => {
-              const isLocked = isAccessLoading || (exam.access === 'pro' && !hasProAccess)
+        {catalogLoading ? (
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3" aria-live="polite">
+            {Array.from({ length: 6 }, (_, index) => (
+              <div
+                key={index}
+                className="h-[365px] animate-pulse rounded-xl border border-[var(--color-gray-10)] bg-gray-05"
+              />
+            ))}
+            <span className="sr-only">{t('library.loading')}</span>
+          </div>
+        ) : (
+          <motion.div layout className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+            <AnimatePresence mode="popLayout">
+              {visibleExams.map((exam) => {
+                const visual = EXAM_VISUALS[exam.slug]
+                const isBusy = startingSlug === exam.slug
+                const actionKey = exam.activeSessionId
+                  ? 'card.continueExam'
+                  : exam.lockReason === 'pro_required'
+                    ? 'card.proRequired'
+                    : exam.lockReason === 'insufficient_questions'
+                      ? 'card.questionsUnavailable'
+                      : exam.access === 'free'
+                        ? 'card.startPreview'
+                        : 'card.startExam'
 
-              return (
-                <ExamCard
-                  key={exam.id}
-                  title={t(`exams.${exam.id}.title`)}
-                  description={t(`exams.${exam.id}.description`)}
-                  accessLabel={t(`accessLabels.${exam.access}`)}
-                  questionPoolLabel={t(
-                    exam.access === 'free' ? 'card.freeQuestionPool' : 'card.fullQuestionPool',
-                  )}
-                  questionCountLabel={t('card.questions', { count: exam.questionCount })}
-                  durationLabel={t('card.minutes', { count: exam.durationMinutes })}
-                  difficultyLabel={t(`difficulty.${exam.difficulty}`)}
-                  actionLabel={t(
-                    isAccessLoading
-                      ? 'card.checkingAccess'
-                      : isLocked
-                        ? 'card.proRequired'
-                        : exam.access === 'free'
-                          ? 'card.startPreview'
-                          : 'card.startExam',
-                  )}
-                  topics={exam.topicKeys.map((topic) => t(`topics.${topic}`))}
-                  icon={exam.icon}
-                  tone={exam.tone}
-                  isLocked={isLocked}
-                  onStart={() => handleStart(exam)}
-                />
-              )
-            })}
-          </AnimatePresence>
-        </motion.div>
-      </section>
-
-      <AnimatePresence>
-        {selectedExamId && (
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="rounded-xl border border-primary/25 bg-primary/5 px-4 py-3 body-medium text-gray-100"
-            role="status"
-          >
-            {t('runnerPending', { exam: t(`exams.${selectedExamId}.title`) })}
-          </motion.p>
+                return (
+                  <ExamCard
+                    key={exam.slug}
+                    title={t(`exams.${exam.slug}.title`)}
+                    description={t(`exams.${exam.slug}.description`)}
+                    accessLabel={t(`accessLabels.${exam.access}`)}
+                    questionPoolLabel={t(
+                      exam.access === 'free' ? 'card.freeQuestionPool' : 'card.fullQuestionPool',
+                    )}
+                    questionCountLabel={t('card.questions', { count: exam.questionCount })}
+                    durationLabel={t('card.minutes', { count: exam.durationMinutes })}
+                    difficultyLabel={t(`difficulty.${exam.displayDifficulty}`)}
+                    actionLabel={isBusy ? t('card.starting') : t(actionKey)}
+                    availabilityLabel={
+                      exam.lockReason === 'insufficient_questions'
+                        ? t('card.availableQuestions', {
+                            available: exam.availableQuestionCount,
+                            required: exam.questionCount,
+                          })
+                        : undefined
+                    }
+                    topics={exam.topics.map((topic) => t(`topics.${topic}`))}
+                    icon={visual.icon}
+                    tone={visual.tone}
+                    isLocked={!exam.canStart}
+                    isBusy={isBusy}
+                    onStart={() => handleStart(exam)}
+                  />
+                )
+              })}
+            </AnimatePresence>
+          </motion.div>
         )}
-      </AnimatePresence>
+      </section>
     </div>
   )
 }
