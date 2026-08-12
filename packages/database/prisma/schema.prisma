@@ -52,6 +52,13 @@ enum JobApplicationStatus {
   rejected
 }
 
+enum ExamSessionStatus {
+  in_progress
+  review
+  completed
+  expired
+}
+
 model User {
   id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email          String   @unique
@@ -67,6 +74,7 @@ model User {
   bookmarks       Bookmark[]
   subscriptions   Subscription[]
   jobApplications JobApplication[]
+  examSessions    ExamSession[]
 
   @@map("users")
 }
@@ -137,9 +145,10 @@ model Question {
   category   Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   technology Technology? @relation(fields: [technologyId], references: [id], onDelete: SetNull)
 
-  attempts     Attempt[]
-  bookmarks    Bookmark[]
-  questionTags QuestionTag[]
+  attempts             Attempt[]
+  bookmarks            Bookmark[]
+  questionTags         QuestionTag[]
+  examSessionQuestions ExamSessionQuestion[]
 
   @@index([categoryId])
   @@index([technologyId])
@@ -296,4 +305,48 @@ model JobApplicationStatusEvent {
   @@index([createdAt])
   @@index([jobApplicationId, createdAt])
   @@map("job_application_status_events")
+}
+
+model ExamSession {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  examSlug        String            @map("exam_slug")
+  status          ExamSessionStatus @default(in_progress)
+  questionCount   Int               @map("question_count")
+  durationMinutes Int               @map("duration_minutes")
+
+  startedAt   DateTime  @default(now()) @map("started_at")
+  expiresAt   DateTime  @map("expires_at")
+  submittedAt DateTime? @map("submitted_at")
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  questions ExamSessionQuestion[]
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+  @@map("exam_sessions")
+}
+
+model ExamSessionQuestion {
+  sessionId  String @map("session_id") @db.Uuid
+  questionId String @map("question_id") @db.Uuid
+  position   Int
+
+  userAnswer String?   @map("user_answer")
+  savedAt    DateTime? @map("saved_at")
+
+  session  ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question Question    @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@id([sessionId, questionId])
+  @@unique([sessionId, position])
+  @@index([questionId])
+  @@map("exam_session_questions")
 }
