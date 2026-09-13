@@ -1,7 +1,6 @@
 import { IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator'
 
 export class CreateCheckoutSessionDto {
-  /** Internal plan identifier, e.g. "pro_monthly" - see stripe-plans.ts */
   @IsString()
   @IsNotEmpty()
   planId!: string

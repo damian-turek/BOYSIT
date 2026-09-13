@@ -11,16 +11,12 @@ export class DashboardService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async getOverview(userId: string) {
-    // All of these are independent reads - fire them together instead of
-    // awaiting one at a time (this used to be fully mocked frontend data,
-    // so there was no querying at all here before).
     const [
       categoryGroups,
       totalQuestions,
       totalCategories,
       totalUsers,
       totalTechnologies,
-      codingChallengesCount,
       jobTrackerActiveCount,
       technologyGroups,
     ] = await Promise.all([
@@ -33,7 +29,6 @@ export class DashboardService {
       this.prismaService.client.category.count({ where: { isActive: true } }),
       this.prismaService.client.user.count(),
       this.prismaService.client.technology.count({ where: { isActive: true } }),
-      this.prismaService.client.question.count({ where: { isActive: true, questionType: 'code' } }),
       this.prismaService.client.jobApplication.count({
         where: {
           userId,
@@ -99,7 +94,6 @@ export class DashboardService {
         },
         practiceTools: {
           questions: totalQuestions,
-          codingChallenges: codingChallengesCount,
           jobTrackerActive: jobTrackerActiveCount,
         },
         questionsBank: {

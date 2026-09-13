@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto'
+
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { SubscriptionStatus, User, UserPlan } from 'database'
@@ -7,6 +9,17 @@ import { PrismaService } from '../prisma/prisma.service'
 import { CreateCheckoutSessionDto } from './dto/checkout-session.dto'
 import { STRIPE_CLIENT } from './stripe.constants'
 import { findPlanById, findPlanByPriceId } from './stripe-plans'
+
+export type InvoiceSummary = {
+  id: string
+  number: string | null
+  amountPaid: number
+  currency: string
+  status: Stripe.Invoice.Status | null
+  created: string
+  hostedInvoiceUrl: string | null
+  invoicePdf: string | null
+}
 
 // past_due keeps access during Stripe's payment-retry grace period.
 const ACTIVE_SUBSCRIPTION_STATUSES: Stripe.Subscription.Status[] = ['trialing', 'active', 'past_due']
@@ -57,12 +70,21 @@ export class StripeService {
     const returnUrl = `${appUrl}${dto.returnPath}`
     const separator = returnUrl.includes('?') ? '&' : '?'
 
+    // Automatic tax requires Stripe Tax to be turned on (with an origin
+    // address set) in the Stripe Dashboard first - until then, leave it off
+    // via env so checkout doesn't start failing. Billing address collection
+    // is safe to always request; it's what automatic tax uses to work out
+    // the right VAT rate once enabled.
+    const automaticTaxEnabled = this.configService.get<string>('STRIPE_AUTOMATIC_TAX_ENABLED') === 'true'
+
     const session = await this.stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price: plan.priceId, quantity: 1 }],
       success_url: `${returnUrl}${separator}checkout=success`,
       cancel_url: `${returnUrl}${separator}checkout=cancelled`,
       client_reference_id: user.id,
+      billing_address_collection: 'required',
+      ...(automaticTaxEnabled ? { automatic_tax: { enabled: true } } : {}),
       ...(existingSubscription?.stripeCustomerId
         ? { customer: existingSubscription.stripeCustomerId }
         : { customer_email: user.email }),
@@ -80,9 +102,62 @@ export class StripeService {
   }
 
   /**
-   * Single entry point for the webhook controller. Keeps the User.plan /
-   * User.proUntil fields (and the Subscription row) in sync with Stripe.
+   * Stripe's hosted "Customer Portal" - lets an existing subscriber cancel,
+   * change plan, or update their card without us building any of that UI.
+   * The return URL is always our own trusted APP_URL, never client input.
    */
+  async createBillingPortalSession(user: User) {
+    const existingSubscription = await this.prismaService.client.subscription.findFirst({
+      where: { userId: user.id, stripeCustomerId: { not: null } },
+      orderBy: { createdAt: 'desc' },
+      select: { stripeCustomerId: true },
+    })
+
+    if (!existingSubscription?.stripeCustomerId) {
+      throw new BadRequestException(
+        'No Stripe customer found for this account yet - subscribe to a plan first.',
+      )
+    }
+
+    const appUrl = (this.configService.get<string>('APP_URL') ?? 'http://localhost:3000').replace(
+      /\/+$/,
+      '',
+    )
+
+    const portalSession = await this.stripe.billingPortal.sessions.create({
+      customer: existingSubscription.stripeCustomerId,
+      return_url: `${appUrl}/dashboard/profile`,
+    })
+
+    return portalSession
+  }
+
+  async listInvoices(user: User): Promise<InvoiceSummary[]> {
+    const existingSubscription = await this.prismaService.client.subscription.findFirst({
+      where: { userId: user.id, stripeCustomerId: { not: null } },
+      orderBy: { createdAt: 'desc' },
+      select: { stripeCustomerId: true },
+    })
+
+    if (!existingSubscription?.stripeCustomerId) return []
+
+    const invoices = await this.stripe.invoices.list({
+      customer: existingSubscription.stripeCustomerId,
+      limit: 12,
+    })
+
+    return invoices.data.map((invoice) => ({
+      id: invoice.id ?? invoice.number ?? randomUUID(),
+      number: invoice.number,
+      amountPaid: invoice.amount_paid,
+      currency: invoice.currency,
+      status: invoice.status,
+      created: new Date(invoice.created * 1000).toISOString(),
+      hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
+      invoicePdf: invoice.invoice_pdf ?? null,
+    }))
+  }
+
   async handleWebhookEvent(event: Stripe.Event): Promise<void> {
     this.logger.log(`Received Stripe webhook event: ${event.type} (${event.id})`)
 

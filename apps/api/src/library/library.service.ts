@@ -41,9 +41,7 @@ const FOR_YOU_LIMIT = 4
 export class LibraryService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  /** Aggregated payload for the "My Library" dashboard widget. */
   async getLibrary(userId: string, plan: UserPlan) {
-    // Independent reads - run them together instead of one after another.
     const [savedItems, lastSeenItems] = await Promise.all([
       this.getSavedItems(userId),
       this.getLastSeenItems(userId),

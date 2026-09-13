@@ -320,13 +320,15 @@
         "proAccessUntil": "Pro access until {date}",
         "active": "Active",
         "viewProPlans": "View Pro plans",
-        "subscriptionManagementSoon": "Subscription management coming soon"
+        "manageSubscription": "Manage subscription",
+        "manageSubscriptionError": "Could not open the billing portal. Please try again."
       },
       "history": {
         "title": "Billing history",
         "description": "Invoices and payments will appear here.",
         "emptyTitle": "No billing history yet",
-        "emptyDescription": "Receipts will be available after billing integration is enabled."
+        "emptyDescription": "Receipts will be available after billing integration is enabled.",
+        "viewInvoice": "View invoice"
       }
     }
   }

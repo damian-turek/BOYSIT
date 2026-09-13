@@ -95,8 +95,6 @@ export class QuestionsService {
 
     if (!data) return null
 
-    // Neither of these depends on the other's result - run them together
-    // instead of one after another.
     const [[nextQuestion]] = await Promise.all([
       this.prisma.client.question.findMany({
         where: { isActive: true },
@@ -156,9 +154,7 @@ export class QuestionsService {
   private async recordView(userId: string, questionId: string): Promise<void> {
     try {
       await this.prisma.client.attempt.create({ data: { userId, questionId } })
-    } catch {
-      // ignore - viewing a question should never fail because of this
-    }
+    } catch {}
   }
 
   /**
