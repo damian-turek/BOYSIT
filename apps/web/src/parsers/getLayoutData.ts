@@ -105,9 +105,9 @@ export const getLayoutData = () => {
       },
     ],
     upgradeButton: {
-      link: '/price',
+      planId: 'pro_monthly',
       title: 'Upgrade to Pro',
-      text: 'From €9/month',
+      text: 'From €12/month',
     },
   } satisfies SidebarProps
 

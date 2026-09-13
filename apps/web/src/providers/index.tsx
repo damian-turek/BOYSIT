@@ -3,6 +3,7 @@
 import { ReactNode } from 'react'
 
 import { AuthModal } from '@/components/organisms/AuthModal'
+import { CheckoutModal } from '@/components/organisms/CheckoutModal'
 import { ThemeProvider } from '@/providers/ThemeProvider'
 import { AuthProvider } from '@/providers/AuthProvider'
 import { AbstractIntlMessages, NextIntlClientProvider } from 'next-intl'
@@ -20,6 +21,7 @@ export function AppProviders({ children, locale, messages }: AppProvidersProps) 
         <AuthProvider>
           <div>{children}</div>
           <AuthModal />
+          <CheckoutModal />
         </AuthProvider>
       </ThemeProvider>
     </NextIntlClientProvider>

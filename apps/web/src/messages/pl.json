@@ -41,7 +41,10 @@
   },
   "WelcomeSection": {
     "streak": "dni z rzędu",
-    "searchPlaceholder": "Szukaj pytań, tematów, firm..."
+    "searchPlaceholder": "Szukaj pytań, tematów, firm...",
+    "allQuestions": "Wszystkie pytania",
+    "noQuestions": "Nie znaleziono pytań",
+    "all": "Wszystko"
   },
   "QuestionsBank": {
     "shortcut": "Skróty"

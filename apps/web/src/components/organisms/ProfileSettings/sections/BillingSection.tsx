@@ -3,6 +3,8 @@
 import { CalendarDays, Check, CreditCard, ReceiptText } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
+import { useCheckoutStore } from '@/store/useCheckoutStore'
+
 import { Button } from '@/components/atoms/Button'
 import { ProfileSettingsCard } from '@/components/molecules/ProfileSettingsCard'
 
@@ -24,6 +26,7 @@ export const BillingSection = ({
   proUntil,
 }: BillingSectionProps) => {
   const t = useTranslations('ProfileSettings.billing')
+  const openCheckout = useCheckoutStore((state) => state.openCheckout)
   const renewalDate = proUntil
     ? new Intl.DateTimeFormat(locale, {
         day: 'numeric',
@@ -71,10 +74,10 @@ export const BillingSection = ({
         <div className="mt-6 border-t border-[var(--color-gray-10)] pt-5">
           {plan === 'free' ? (
             <Button
-              as="link"
-              href={`/${locale}#pricing-section`}
+              type="button"
               size="lg"
               className="px-4 py-2"
+              onClick={() => openCheckout('pro_monthly', 'Pro')}
             >
               {t('currentPlan.viewProPlans')}
             </Button>

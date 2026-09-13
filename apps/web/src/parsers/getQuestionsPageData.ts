@@ -12,6 +12,32 @@ interface QuestionsPageData {
   dbTechnologies: FilterItem[]
 }
 
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const supabase = await createSupabaseServerClient()
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  return session?.access_token ? { authorization: `Bearer ${session.access_token}` } : {}
+}
+
+async function fetchFilterItems(path: string, headers: Record<string, string>): Promise<FilterItem[]> {
+  try {
+    const res = await fetch(createApiUrl(path), { cache: 'no-store', headers })
+
+    if (!res.ok) {
+      console.error(`Backend responded with error for ${path}:`, res.status)
+      return []
+    }
+
+    const body = await res.json()
+    return (body?.data ?? []) as FilterItem[]
+  } catch (error) {
+    console.error(`Failed to fetch ${path}:`, error)
+    return []
+  }
+}
+
 export async function getQuestionsPageData(
   searchParams: Record<string, string | undefined>,
 ): Promise<QuestionsPageData> {
@@ -23,84 +49,67 @@ export async function getQuestionsPageData(
   if (searchParams.technology) query.append('technologies', searchParams.technology)
   if (searchParams.page) query.append('page', searchParams.page)
 
-  try {
-    const supabase = await createSupabaseServerClient()
-    const {
-      data: { session },
-    } = await supabase.auth.getSession()
+  const headers = await getAuthHeaders()
 
-    const headers: Record<string, string> = {}
-    if (session?.access_token) {
-      headers.authorization = `Bearer ${session.access_token}`
-    }
-
-    const res = await fetch(createApiUrl(`/api/v1/questions?${query.toString()}`), {
-      cache: 'no-store',
-      headers,
-    })
-
-    if (!res.ok) {
-      const errorBody = await res.text()
-      console.error('Backend responded with error:', res.status, errorBody)
-      throw new Error(`Failed to fetch data from backend api: ${res.status} ${errorBody}`)
-    }
-
-    const result = await res.json()
-
-    if (!result?.meta) {
-      console.error('Unexpected response shape from backend:', JSON.stringify(result))
-      throw new Error('Backend response missing "meta" field')
-    }
-
-    const categoriesMap = new Map<string, FilterItem>()
-    const technologiesMap = new Map<string, FilterItem>()
-
-    const questions: Question[] = (result.data || []).map((q: any) => {
-      if (q.category?.id) {
-        categoriesMap.set(q.category.id, {
-          id: q.category.id,
-          name: q.category.name,
-          slug: q.category.slug,
+  // The filter dropdowns must always list the FULL category/technology
+  // taxonomy, independent of the current search/filter/pagination - so
+  // they're fetched from their own endpoints, not derived from whatever
+  // questions happen to be on the current (possibly already-filtered) page.
+  const [questionsResult, dbCategories, dbTechnologies] = await Promise.all([
+    (async () => {
+      try {
+        const res = await fetch(createApiUrl(`/api/v1/questions?${query.toString()}`), {
+          cache: 'no-store',
+          headers,
         })
-      }
 
-      if (q.technology?.id) {
-        technologiesMap.set(q.technology.id, {
-          id: q.technology.id,
-          name: q.technology.name,
-          slug: q.technology.slug,
-        })
-      }
+        if (!res.ok) {
+          const errorBody = await res.text()
+          console.error('Backend responded with error:', res.status, errorBody)
+          return null
+        }
 
-      return {
-        index: q.id,
-        level: q.difficulty
-          ? q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1)
-          : 'Unknown',
-        question: q.questionText,
-        answer: q.answerText || q.explanation,
-        company: q.company || null,
-        category: q.category
-          ? { name: q.category.name, theme: q.category.theme || '#808080' }
-          : null,
-        technologies: q.technology ? [q.technology.name] : [],
-      }
-    })
+        const result = await res.json()
 
-    return {
-      QUESTIONS_DATA: {
-        questionsCount: result.meta.total || 0,
-        questions,
-      },
-      dbCategories: Array.from(categoriesMap.values()),
-      dbTechnologies: Array.from(technologiesMap.values()),
-    }
-  } catch (error) {
-    console.error('Error parsing questions page data:', error)
+        if (!result?.meta) {
+          console.error('Unexpected response shape from backend:', JSON.stringify(result))
+          return null
+        }
+
+        return result
+      } catch (error) {
+        console.error('Error fetching questions:', error)
+        return null
+      }
+    })(),
+    fetchFilterItems('/api/v1/questions/categories', headers),
+    fetchFilterItems('/api/v1/questions/technologies', headers),
+  ])
+
+  if (!questionsResult) {
     return {
       QUESTIONS_DATA: { questionsCount: 0, questions: [] },
-      dbCategories: [],
-      dbTechnologies: [],
+      dbCategories,
+      dbTechnologies,
     }
+  }
+
+  const questions: Question[] = (questionsResult.data || []).map((q: any) => ({
+    index: q.id,
+    level: q.difficulty ? q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1) : 'Unknown',
+    question: q.questionText,
+    answer: q.answerText || q.explanation,
+    company: q.company || null,
+    category: q.category ? { name: q.category.name, theme: q.category.theme || '#808080' } : null,
+    technologies: q.technology ? [q.technology.name] : [],
+  }))
+
+  return {
+    QUESTIONS_DATA: {
+      questionsCount: questionsResult.meta.total || 0,
+      questions,
+    },
+    dbCategories,
+    dbTechnologies,
   }
 }

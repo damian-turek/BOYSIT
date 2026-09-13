@@ -46,7 +46,7 @@ export const QuestionCard = ({
       </Link>
 
       <p className="label-font text-gray-60 mt-1 mr-2">
-        {index < 10 ? `0${pageNumber}` : pageNumber}
+        {pageNumber !== undefined && pageNumber < 10 ? `0${pageNumber}` : pageNumber}
       </p>
 
       <div className="w-full flex flex-col gap-3">

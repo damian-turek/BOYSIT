@@ -3,6 +3,7 @@ import { StaticImageData } from 'next/image'
 import { ReactSVG } from 'react-svg'
 
 import { useAuthStore } from '@/store/useAuthStore'
+import { useCheckoutStore } from '@/store/useCheckoutStore'
 
 import { cn } from '@/utils/cn'
 
@@ -28,6 +29,8 @@ export type PricingCardProps = {
     label: string
   }
   info?: string
+  /** Present only on paid tiers - clicking the button opens the checkout modal instead of sign up. */
+  planId?: string
 }
 
 export const PricingCard = ({
@@ -39,8 +42,18 @@ export const PricingCard = ({
   icon,
   button,
   info,
+  planId,
 }: PricingCardProps) => {
   const openModal = useAuthStore((state) => state.openModal)
+  const openCheckout = useCheckoutStore((state) => state.openCheckout)
+
+  const handleCtaClick = () => {
+    if (planId) {
+      openCheckout(planId, name)
+      return
+    }
+    openModal('register')
+  }
   return (
     <div
       className={cn(
@@ -136,7 +149,7 @@ export const PricingCard = ({
       <Button
         size="lg"
         variant={label ? 'primary' : 'secondary'}
-        onClick={() => openModal('register')}
+        onClick={handleCtaClick}
         className={cn('w-full', label ? 'bg-white text-primary shadow-lg hover:bg-gray-10' : '')}
       >
         {button.label}

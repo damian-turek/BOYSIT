@@ -41,7 +41,10 @@
   },
   "WelcomeSection": {
     "streak": "streak",
-    "searchPlaceholder": "Search questions, topics, companies..."
+    "searchPlaceholder": "Search questions, topics, companies...",
+    "allQuestions": "All questions",
+    "noQuestions": "No questions found",
+    "all": "All"
   },
   "QuestionsBank": {
     "shortcut": "Shortcuts"

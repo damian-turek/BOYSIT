@@ -25,6 +25,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { useAuthSessionStore } from '@/store/useAuthSessionStore'
+import { useCheckoutStore } from '@/store/useCheckoutStore'
 import { useThemeStore } from '@/store/useThemeStore'
 
 import { cn } from '@/utils/cn'
@@ -50,7 +51,7 @@ export type SidebarProps = {
     icon: keyof typeof iconMap
   }[]
   upgradeButton: {
-    link: string
+    planId: string
     title: string
     text: string
   }
@@ -63,8 +64,11 @@ export const Sidebar = ({ name, nav, upgradeButton }: SidebarProps) => {
   const [isSigningOut, setIsSigningOut] = useState(false)
   const [logoutError, setLogoutError] = useState(false)
   const isDark = useThemeStore((state) => state.isDark)
+  const openCheckout = useCheckoutStore((state) => state.openCheckout)
   const toggleTheme = useThemeStore((state) => state.toggleTheme)
   const clearAuth = useAuthSessionStore((state) => state.clear)
+  const plan = useAuthSessionStore((state) => state.profile?.plan)
+  const hasProAccess = plan === 'pro' || plan === 'admin'
   const locale = useLocale()
   const pathname = usePathname()
   const router = useRouter()
@@ -216,26 +220,31 @@ export const Sidebar = ({ name, nav, upgradeButton }: SidebarProps) => {
             })}
           </div>
 
-          <MotionLink
-            className="p-3 mx-3 flex items-center gap-3 border border-primary/50 rounded-xl bg-linear-to-r from-primary/15 to-primary/5 shrink-0"
-            href={upgradeButton.link}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-          >
-            <Button iconOnly icon={Crown} />
-            <div className="flex-1 min-w-0">
-              <p
-                className="body-small text-gray-100 font-bold truncate"
-                dangerouslySetInnerHTML={{ __html: upgradeButton.title }}
-              />
-              <p
-                className="body-small text-gray-60 truncate"
-                dangerouslySetInnerHTML={{ __html: upgradeButton.text }}
-              />
-            </div>
-            <ChevronRight size={13} className="shrink-0" />
-          </MotionLink>
+          {!hasProAccess && (
+            <motion.button
+              type="button"
+              onClick={() => openCheckout(upgradeButton.planId, 'Pro')}
+              className="p-3 mx-3 flex items-center gap-3 border border-primary/50 rounded-xl bg-linear-to-r from-primary/15 to-primary/5 shrink-0 text-left cursor-pointer"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            >
+              <span className="w-fit inline-flex items-center justify-center rounded-[12px] bg-primary p-1.5 text-white">
+                <Crown size={16} />
+              </span>
+              <div className="flex-1 min-w-0">
+                <p
+                  className="body-small text-gray-100 font-bold truncate"
+                  dangerouslySetInnerHTML={{ __html: upgradeButton.title }}
+                />
+                <p
+                  className="body-small text-gray-60 truncate"
+                  dangerouslySetInnerHTML={{ __html: upgradeButton.text }}
+                />
+              </div>
+              <ChevronRight size={13} className="shrink-0" />
+            </motion.button>
+          )}
         </div>
 
         <div className="flex flex-col px-3 py-4 border-t border-gray-60/30 shrink-0">

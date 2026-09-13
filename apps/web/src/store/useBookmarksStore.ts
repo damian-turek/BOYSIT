@@ -2,6 +2,8 @@ import { Question } from '@/types/question'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+import { toggleBookmarkOnServer } from '@/services/libraryApi'
+
 interface LibraryItem {
   id: string
   tabId: string
@@ -64,6 +66,14 @@ export const useBookmarksStore = create<BookmarksState>()(
             savedItems: [newItem, ...savedItems],
           })
         }
+
+        // Persist to the backend (Bookmark table) so "My Library" on the
+        // dashboard and other devices see the same saved questions. This is
+        // fire-and-forget for a snappy UI; a failure just means the toggle
+        // didn't survive server-side, which is logged for now.
+        toggleBookmarkOnServer(qId).catch((error) => {
+          console.error('Failed to sync bookmark with the server', error)
+        })
       },
 
       addToLastSeen: (question) => {
