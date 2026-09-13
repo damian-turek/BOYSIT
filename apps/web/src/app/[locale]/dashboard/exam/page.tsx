@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default async function ExamPage({ params }: PageProps) {
   const { locale } = await params
-  const { WELCOME_SECTION_DATA } = getDashboardData()
+  const { WELCOME_SECTION_DATA } = await getDashboardData()
 
   return <main className="dashboard-container">x</main>
 }

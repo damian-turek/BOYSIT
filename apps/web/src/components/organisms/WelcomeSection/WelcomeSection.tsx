@@ -7,16 +7,15 @@ import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
 import { Input } from '@/components/atoms/inputs/Input'
-import { ActivityCalendar, DBActivity } from '@/components/molecules/ActivityCalendar'
 
 export type WelcomeSectionProps = {
   title: string
   text: string
   streak: number
-  activities: DBActivity[]
+  // activities: DBActivity[]
 }
 
-export const WelcomeSection = ({ title, text, streak, activities }: WelcomeSectionProps) => {
+export const WelcomeSection = ({ title, text, streak }: WelcomeSectionProps) => {
   const [searchQuery, setSearchQuery] = useState('')
   const t = useTranslations('WelcomeSection')
 
@@ -54,7 +53,7 @@ export const WelcomeSection = ({ title, text, streak, activities }: WelcomeSecti
         />
       </div>
 
-      <ActivityCalendar activities={activities} streak={streak} />
+      {/*<ActivityCalendar activities={activities} streak={streak} />*/}
     </motion.section>
   )
 }

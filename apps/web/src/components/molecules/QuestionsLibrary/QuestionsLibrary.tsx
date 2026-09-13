@@ -1,14 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import Link from 'next/link'
 
 import { ArrowRight, Bookmark, Clock, Lightbulb } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
+import { useTranslations } from 'next-intl'
 
-import { useBookmarksStore } from '@/store/useBookmarksStore'
-
+import { formatRelativeTime } from '@/utils/formatRelativeTime'
 import { cn } from '@/utils/cn'
 
 import { Tag } from '@/components/atoms/Tag'
@@ -34,28 +34,18 @@ export type QuestionsLibraryProps = {
   name: string
   allQuestionsLink: string
   tabs: { id: string; label: string; icon: keyof typeof tabIconMap }[]
+  /** Items per tab id, fetched server-side from /library (Bookmark + Attempt tables). */
+  items: Record<string, Item[]>
 }
 
 const MotionLink = motion.create(Link)
 
-export const QuestionsLibrary = ({ name, allQuestionsLink, tabs }: QuestionsLibraryProps) => {
+export const QuestionsLibrary = ({ name, allQuestionsLink, tabs, items }: QuestionsLibraryProps) => {
+  const t = useTranslations('WelcomeSection')
   const [activeTab, setActiveTab] = useState(tabs[0]?.id || '')
-  const { savedItems, lastSeenItems } = useBookmarksStore()
-  const [hasHydrated, setHasHydrated] = useState(false)
 
-  useEffect(() => {
-    setHasHydrated(true)
-  }, [])
+  const filteredItems: Item[] = items[activeTab] ?? []
 
-  let filteredItems: Item[] = []
-
-  if (hasHydrated) {
-    if (activeTab === 'saved') {
-      filteredItems = savedItems
-    } else if (activeTab === 'last-seen') {
-      filteredItems = lastSeenItems
-    }
-  }
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.98 }}
@@ -69,7 +59,7 @@ export const QuestionsLibrary = ({ name, allQuestionsLink, tabs }: QuestionsLibr
           href={allQuestionsLink}
           className="flex items-center gap-1 text-primary body-small font-medium hover:underline transition-all"
         >
-          All questions <ArrowRight size={14} />
+          {t('allQuestions')} <ArrowRight size={14} />
         </Link>
       </div>
 
@@ -137,7 +127,11 @@ export const QuestionsLibrary = ({ name, allQuestionsLink, tabs }: QuestionsLibr
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="body-small text-gray-60 text-xs">{item.timeAgo}</span>
+                  {item.timeAgo && (
+                    <span className="body-small text-gray-60 text-xs">
+                      {formatRelativeTime(item.timeAgo)}
+                    </span>
+                  )}
                   <motion.div
                     variants={{ hover: { x: 3 } }}
                     transition={{ type: 'spring', stiffness: 400, damping: 25 }}
@@ -155,7 +149,7 @@ export const QuestionsLibrary = ({ name, allQuestionsLink, tabs }: QuestionsLibr
               exit={{ opacity: 0 }}
               className="flex flex-col items-center justify-center text-gray-60 text-sm py-12"
             >
-              No questions found here.
+              {t('noQuestions')}
             </motion.div>
           )}
         </AnimatePresence>
