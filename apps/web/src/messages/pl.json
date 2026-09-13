@@ -320,13 +320,15 @@
         "proAccessUntil": "Dostęp Pro do {date}",
         "active": "Aktywny",
         "viewProPlans": "Zobacz plany Pro",
-        "subscriptionManagementSoon": "Zarządzanie subskrypcją będzie dostępne wkrótce"
+        "manageSubscription": "Zarządzaj subskrypcją",
+        "manageSubscriptionError": "Nie udało się otworzyć panelu rozliczeń. Spróbuj ponownie."
       },
       "history": {
         "title": "Historia rozliczeń",
         "description": "Faktury i płatności pojawią się tutaj.",
         "emptyTitle": "Brak historii rozliczeń",
-        "emptyDescription": "Potwierdzenia będą dostępne po włączeniu integracji płatności."
+        "emptyDescription": "Potwierdzenia będą dostępne po włączeniu integracji płatności.",
+        "viewInvoice": "Zobacz fakturę"
       }
     }
   }

@@ -32,7 +32,7 @@ const getCategoryIcon = (name: string): CategoryIcon =>
 
 type DashboardOverview = {
   topCategories: { name: string; slug: string; questionCount: number }[]
-  practiceTools: { questions: number; codingChallenges: number; jobTrackerActive: number }
+  practiceTools: { questions: number; jobTrackerActive: number }
   questionsBank: { total: number; tags: string[] }
 }
 
@@ -55,7 +55,7 @@ type LibraryPayload = {
 
 const EMPTY_OVERVIEW: DashboardOverview = {
   topCategories: [],
-  practiceTools: { questions: 0, codingChallenges: 0, jobTrackerActive: 0 },
+  practiceTools: { questions: 0, jobTrackerActive: 0 },
   questionsBank: { total: 0, tags: [] },
 }
 
@@ -181,18 +181,9 @@ export const getDashboardData = async () => {
           link: '/dashboard/questions',
         },
         {
-          name: 'Coding Challenges',
-          description: 'Hands-on coding problems from real interviews',
-          label: `${overview.practiceTools.codingChallenges} problems`,
-          badge: 'NEW',
-          theme: '#7F22FE',
-          icon: 'Terminal',
-          link: '/dashboard/coding',
-        },
-        {
           name: 'Exam Mode',
-          description: 'Timed multiple-choice · simulate a real interview',
-          label: '3 modes',
+          description: 'Timed practice questions · simulate a real interview',
+          label: '3 levels',
           badge: 'POPULAR',
           theme: '#2563EB',
           icon: 'ClipboardCheck',

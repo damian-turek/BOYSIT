@@ -5,6 +5,21 @@ type CheckoutSessionResponse = {
   id: string
 }
 
+type PortalSessionResponse = {
+  url: string
+}
+
+export type Invoice = {
+  id: string
+  number: string | null
+  amountPaid: number
+  currency: string
+  status: string | null
+  created: string
+  hostedInvoiceUrl: string | null
+  invoicePdf: string | null
+}
+
 export const createCheckoutSession = async (
   planId: string,
   returnPath: string,
@@ -16,4 +31,18 @@ export const createCheckoutSession = async (
   })
 
   return (await response.json()) as CheckoutSessionResponse
+}
+
+export const createPortalSession = async (): Promise<PortalSessionResponse> => {
+  const response = await requestAuthenticatedApi('/api/v1/stripe/portal-session', {
+    method: 'POST',
+  })
+
+  return (await response.json()) as PortalSessionResponse
+}
+
+export const getInvoices = async (): Promise<Invoice[]> => {
+  const response = await requestAuthenticatedApi('/api/v1/stripe/invoices')
+  const body = (await response.json()) as { invoices: Invoice[] }
+  return body.invoices
 }

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Headers,
   Logger,
   NotFoundException,
@@ -39,6 +40,22 @@ export class StripeController {
   ): Promise<{ url: string | null; id: string }> {
     const session = await this.stripeService.createSubscriptionCheckout(request.user, dto)
     return { url: session.url, id: session.id }
+  }
+
+  @Post('portal-session')
+  @UseGuards(AuthGuard)
+  async createPortalSession(
+    @Req() request: AuthenticatedRequest,
+  ): Promise<{ url: string }> {
+    const portalSession = await this.stripeService.createBillingPortalSession(request.user)
+    return { url: portalSession.url }
+  }
+
+  @Get('invoices')
+  @UseGuards(AuthGuard)
+  async getInvoices(@Req() request: AuthenticatedRequest) {
+    const invoices = await this.stripeService.listInvoices(request.user)
+    return { invoices }
   }
 
   // Stripe -> our backend. No AuthGuard here: Stripe is not our user, the

@@ -1,18 +1,19 @@
-import { getDashboardData } from '@/parsers/getDashboardData'
-import { LangProps } from '@/types/lang'
+import { Suspense } from 'react'
+
 import { Metadata } from 'next'
 
-type PageProps = {
-  params: Promise<{ locale: LangProps }>
-}
+import { ExamExperience } from '@/components/organisms/ExamExperience'
 
 export const metadata: Metadata = {
   title: 'Exam',
 }
 
-export default async function ExamPage({ params }: PageProps) {
-  const { locale } = await params
-  const { WELCOME_SECTION_DATA } = await getDashboardData()
-
-  return <main className="dashboard-container">x</main>
+export default function ExamPage() {
+  return (
+    <main className="dashboard-container max-w-[840px]">
+      <Suspense fallback={<div className="h-96 animate-pulse rounded-xl bg-gray-60/5" />}>
+        <ExamExperience />
+      </Suspense>
+    </main>
+  )
 }

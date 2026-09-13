@@ -1,12 +1,17 @@
 'use client'
 
-import { CalendarDays, Check, CreditCard, ReceiptText } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
+import { CalendarDays, Check, CreditCard, Download, Loader2, ReceiptText } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+
+import { createPortalSession, getInvoices, Invoice } from '@/services/billingApi'
 
 import { useCheckoutStore } from '@/store/useCheckoutStore'
 
 import { Button } from '@/components/atoms/Button'
 import { ProfileSettingsCard } from '@/components/molecules/ProfileSettingsCard'
+import { ProfileStatusMessage } from '@/components/molecules/ProfileStatusMessage'
 
 const planLabels = {
   free: 'plans.free',
@@ -27,6 +32,44 @@ export const BillingSection = ({
 }: BillingSectionProps) => {
   const t = useTranslations('ProfileSettings.billing')
   const openCheckout = useCheckoutStore((state) => state.openCheckout)
+  const [isOpeningPortal, setIsOpeningPortal] = useState(false)
+  const [portalError, setPortalError] = useState<string | null>(null)
+
+  const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [isLoadingInvoices, setIsLoadingInvoices] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+
+    getInvoices()
+      .then((data) => {
+        if (isMounted) setInvoices(data)
+      })
+      .catch(() => {
+        if (isMounted) setInvoices([])
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingInvoices(false)
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const handleManageSubscription = async () => {
+    setIsOpeningPortal(true)
+    setPortalError(null)
+
+    try {
+      const { url } = await createPortalSession()
+      window.location.href = url
+    } catch {
+      setPortalError(t('currentPlan.manageSubscriptionError'))
+      setIsOpeningPortal(false)
+    }
+  }
+
   const renewalDate = proUntil
     ? new Intl.DateTimeFormat(locale, {
         day: 'numeric',
@@ -84,12 +127,27 @@ export const BillingSection = ({
           ) : (
             <Button
               type="button"
-              disabled
+              size="lg"
               variant="secondary"
-              className="border-[var(--color-gray-10)] bg-gray-05 px-4 py-2 text-gray-60 opacity-70 hover:border-[var(--color-gray-10)]"
+              disabled={isOpeningPortal}
+              className="px-4 py-2"
+              onClick={() => void handleManageSubscription()}
             >
-              {t('currentPlan.subscriptionManagementSoon')}
+              {isOpeningPortal ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                  {t('currentPlan.manageSubscription')}
+                </>
+              ) : (
+                t('currentPlan.manageSubscription')
+              )}
             </Button>
+          )}
+
+          {portalError && (
+            <div className="mt-3">
+              <ProfileStatusMessage tone="error" message={portalError} />
+            </div>
           )}
         </div>
       </ProfileSettingsCard>
@@ -98,17 +156,64 @@ export const BillingSection = ({
         title={t('history.title')}
         description={t('history.description')}
       >
-        <div className="flex flex-col items-center py-8 text-center">
-          <span className="mb-3 flex size-12 items-center justify-center rounded-xl bg-gray-05 text-gray-60">
-            <ReceiptText size={21} aria-hidden="true" />
-          </span>
-          <p className="body-medium font-semibold text-gray-100">
-            {t('history.emptyTitle')}
-          </p>
-          <p className="mt-1 max-w-sm body-small text-gray-60">
-            {t('history.emptyDescription')}
-          </p>
-        </div>
+        {isLoadingInvoices ? (
+          <div className="flex flex-col gap-2 py-2">
+            {[0, 1, 2].map((key) => (
+              <div key={key} className="h-12 w-full animate-pulse rounded-lg bg-gray-05" />
+            ))}
+          </div>
+        ) : invoices.length ? (
+          <div className="flex flex-col">
+            {invoices.map((invoice) => (
+              <div
+                key={invoice.id}
+                className="flex items-center justify-between gap-4 border-b border-[var(--color-gray-10)] last:border-none py-3.5"
+              >
+                <div>
+                  <p className="body-small text-gray-100">
+                    {new Intl.DateTimeFormat(locale, {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    }).format(new Date(invoice.created))}
+                  </p>
+                  <p className="body-small text-gray-60 capitalize">{invoice.status}</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <p className="body-small font-semibold text-gray-100">
+                    {new Intl.NumberFormat(locale, {
+                      style: 'currency',
+                      currency: invoice.currency.toUpperCase(),
+                    }).format(invoice.amountPaid / 100)}
+                  </p>
+                  {invoice.hostedInvoiceUrl && (
+                    <a
+                      href={invoice.hostedInvoiceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex size-8 items-center justify-center rounded-lg text-gray-60 hover:bg-gray-05 hover:text-gray-100 transition-colors"
+                      aria-label={t('history.viewInvoice')}
+                    >
+                      <Download size={15} aria-hidden="true" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center py-8 text-center">
+            <span className="mb-3 flex size-12 items-center justify-center rounded-xl bg-gray-05 text-gray-60">
+              <ReceiptText size={21} aria-hidden="true" />
+            </span>
+            <p className="body-medium font-semibold text-gray-100">
+              {t('history.emptyTitle')}
+            </p>
+            <p className="mt-1 max-w-sm body-small text-gray-60">
+              {t('history.emptyDescription')}
+            </p>
+          </div>
+        )}
       </ProfileSettingsCard>
     </div>
   )

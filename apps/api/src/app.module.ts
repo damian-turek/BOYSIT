@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 
 import { DashboardModule } from './dashboard/dashboard.module'
+import { ExamModule } from './exam/exam.module'
 import { HealthModule } from './health/health.module'
 import { JobApplicationsModule } from './job-applications/job-applications.module'
 import { LibraryModule } from './library/library.module'
@@ -21,6 +22,7 @@ import { UserModule } from './users/user.module'
     StripeModule,
     LibraryModule,
     DashboardModule,
+    ExamModule,
   ],
   controllers: [],
   providers: [],

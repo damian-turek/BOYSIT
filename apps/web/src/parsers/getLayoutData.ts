@@ -1,5 +1,3 @@
-import { BookOpen, Briefcase, ClipboardCheck, LayoutDashboard, Terminal, User } from 'lucide-react'
-
 import { HeaderProps } from '@/components/organisms/Nav/Header'
 import { SidebarProps } from '@/components/organisms/Nav/Sidebar'
 
@@ -57,15 +55,15 @@ export const getLayoutData = () => {
     bottomLinks: [
       {
         label: 'Privacy',
-        link: '#',
+        link: '/privacy',
       },
       {
         label: 'Terms',
-        link: '#',
+        link: '/terms',
       },
       {
         label: 'Cookies',
-        link: '#',
+        link: '/privacy#cookies',
       },
     ],
   }
@@ -82,11 +80,6 @@ export const getLayoutData = () => {
         label: 'Questions',
         link: '/dashboard/questions',
         icon: 'BookOpen',
-      },
-      {
-        label: 'Coding',
-        link: '/dashboard/coding',
-        icon: 'Terminal',
       },
       {
         label: 'Job Tracker',
