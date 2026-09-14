@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "predev": "pnpm --filter database build",
-    "dev": "nest start --watch",
+    "dev": "concurrently -n api,stripe -c blue,magenta \"nest start --watch\" \"pnpm stripe:listen\" --kill-others=false",
+    "stripe:listen": "stripe listen --forward-to localhost:4000/api/v1/stripe/webhook",
     "prebuild": "pnpm --filter database build",
     "build": "nest build",
     "start": "node dist/main.js",
@@ -30,6 +31,7 @@
     "@nestjs/schematics": "^11.0.0",
     "@types/node": "^22.15.3",
     "typescript": "^5.7.0",
-    "vitest": "^2.1.9"
+    "vitest": "^2.1.9",
+    "concurrently": "^9.0.0"
   }
 }
