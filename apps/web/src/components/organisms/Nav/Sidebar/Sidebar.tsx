@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 import { getSupabaseClient } from '@/services/supabaseClient'
 import {
@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ClipboardCheck,
   Crown,
+  Globe,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -72,8 +73,14 @@ export const Sidebar = ({ name, nav, upgradeButton }: SidebarProps) => {
   const locale = useLocale()
   const pathname = usePathname()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const cleanedPathname = pathname ? pathname.replace(/^\/[a-z]{2}(\/|$)/, '/').toLowerCase() : '/'
   const t = useTranslations('Sidebar')
+
+  const otherLocale = locale === 'en' ? 'pl' : 'en'
+  const localelessPathname = pathname ? pathname.replace(/^\/[a-z]{2}(\/|$)/, '/') : '/'
+  const search = searchParams.toString()
+  const switchLocaleHref = `/${otherLocale}${localelessPathname}${search ? `?${search}` : ''}`
 
   const handleSignOut = async () => {
     if (isSigningOut) {
@@ -248,6 +255,16 @@ export const Sidebar = ({ name, nav, upgradeButton }: SidebarProps) => {
         </div>
 
         <div className="flex flex-col px-3 py-4 border-t border-gray-60/30 shrink-0">
+          <Button
+            as="link"
+            href={switchLocaleHref}
+            variant="text"
+            icon={Globe}
+            iconOnly
+            className={`hover:[&_svg_path]:stroke-primary! ${isDark ? '[&_svg_path]:stroke-primary' : ''}`}
+          >
+            {t('switchLanguage', { locale: otherLocale.toUpperCase() })}
+          </Button>
           <Button
             variant="text"
             icon={isDark ? Sun : Moon}

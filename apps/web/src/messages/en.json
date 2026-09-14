@@ -27,6 +27,7 @@
   "Sidebar": {
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
+    "switchLanguage": "Switch to {locale}",
     "darkMode": "Dark mode",
     "logout": "Log out",
     "loggingOut": "Logging out...",
