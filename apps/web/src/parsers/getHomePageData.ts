@@ -201,6 +201,7 @@ export const getHomePageData = () => {
       {
         name: 'Pro',
         icon: CrownIcon,
+        planId: 'pro_monthly',
         price: '€12<span>/month</span>',
         text: 'Unlock everything you need to ace your interviews',
         label: {

@@ -42,6 +42,15 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  const isHomeRoute = request.nextUrl.pathname.match(/^\/(en|pl)\/?$/)
+
+  if (isHomeRoute && user) {
+    const locale = request.nextUrl.pathname.split('/')[1] || 'en'
+    const url = request.nextUrl.clone()
+    url.pathname = `/${locale}/dashboard`
+    return NextResponse.redirect(url)
+  }
+
   return response
 }
 

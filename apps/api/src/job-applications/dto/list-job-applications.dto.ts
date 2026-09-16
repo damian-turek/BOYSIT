@@ -9,6 +9,13 @@ export enum JobApplicationSort {
   companyAsc = 'company_asc',
 }
 
+export enum JobApplicationFollowUpFilter {
+  overdue = 'overdue',
+  today = 'today',
+  next7Days = 'next_7_days',
+  none = 'none',
+}
+
 export class ListJobApplicationsDto {
   @IsOptional()
   @IsString()
@@ -19,6 +26,10 @@ export class ListJobApplicationsDto {
   @IsOptional()
   @IsEnum(JobApplicationStatus)
   status?: JobApplicationStatus
+
+  @IsOptional()
+  @IsEnum(JobApplicationFollowUpFilter)
+  followUp?: JobApplicationFollowUpFilter
 
   @IsOptional()
   @IsEnum(JobApplicationSort)

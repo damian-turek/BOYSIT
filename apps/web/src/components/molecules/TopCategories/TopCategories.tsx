@@ -14,6 +14,7 @@ import {
   Terminal,
 } from 'lucide-react'
 import { motion } from 'motion/react'
+import { useTranslations } from 'next-intl'
 
 const iconMap = {
   Code,
@@ -39,6 +40,7 @@ export type TopCategoriesProps = {
 const MotionLink = motion.create(Link)
 
 export const TopCategories = ({ name, categories }: TopCategoriesProps) => {
+  const t = useTranslations('WelcomeSection')
   const maxQuestions = Math.max(...categories.map((c) => c.questionNumber), 1)
 
   return (
@@ -54,7 +56,7 @@ export const TopCategories = ({ name, categories }: TopCategoriesProps) => {
           <h3 className="body-large text-gray-100">{name}</h3>
         </div>
         <Link className="body-small text-primary underline" href="/dashboard/questions">
-          All →
+          {t('all')} →
         </Link>
       </div>
       <div className="flex flex-col gap-2">

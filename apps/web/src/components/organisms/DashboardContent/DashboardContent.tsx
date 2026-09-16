@@ -9,7 +9,7 @@ export type DashboardContentProps = {
   questionsBank: QuestionsBankCardProps
   topCategories: TopCategoriesProps
   platformStats: PlatformStatsProps
-  proPlanCard: ProPlanCardProps
+  proPlanCard?: ProPlanCardProps
   practiceTools: PracticeToolsProps
   questionsLibrary: QuestionsLibraryProps
 }
@@ -32,7 +32,7 @@ export const DashboardContent = ({
       <div className="w-full flex flex-col gap-6">
         <TopCategories {...topCategories} />
         <PlatformStats {...platformStats} />
-        <ProPlanCard {...proPlanCard} />
+        {proPlanCard && <ProPlanCard {...proPlanCard} />}
       </div>
     </section>
   )

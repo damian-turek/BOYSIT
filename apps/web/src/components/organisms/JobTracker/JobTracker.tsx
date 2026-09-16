@@ -21,6 +21,7 @@ import {
 } from '@/services/jobTrackerApi'
 import type {
   JobApplication,
+  JobApplicationFollowUpFilter,
   JobApplicationInput,
   JobApplicationSort,
   JobApplicationStatus,
@@ -31,6 +32,7 @@ import type {
 import {
   AlertTriangle,
   Briefcase,
+  CalendarClock,
   ChevronLeft,
   ChevronRight,
   Plus,
@@ -39,6 +41,8 @@ import {
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
+
+import { cn } from '@/utils/cn'
 
 import { Button } from '@/components/atoms/Button'
 import { Input } from '@/components/atoms/inputs/Input'
@@ -74,11 +78,25 @@ const JOB_APPLICATION_SORTS: JobApplicationSort[] = [
   'company_asc',
 ]
 
+const JOB_APPLICATION_FOLLOW_UP_FILTERS: JobApplicationFollowUpFilter[] = [
+  'overdue',
+  'today',
+  'next_7_days',
+  'none',
+]
+
+const TERMINAL_JOB_APPLICATION_STATUSES: JobApplicationStatus[] = ['offer', 'rejected']
+
 const isStatus = (value: string | null): value is JobApplicationStatus =>
   Boolean(value && JOB_APPLICATION_STATUSES.includes(value as JobApplicationStatus))
 
 const isSort = (value: string | null): value is JobApplicationSort =>
   Boolean(value && JOB_APPLICATION_SORTS.includes(value as JobApplicationSort))
+
+const isFollowUpFilter = (value: string | null): value is JobApplicationFollowUpFilter =>
+  Boolean(
+    value && JOB_APPLICATION_FOLLOW_UP_FILTERS.includes(value as JobApplicationFollowUpFilter),
+  )
 
 const parsePage = (value: string | null): number => {
   const page = Number(value)
@@ -100,8 +118,10 @@ export const JobTracker = () => {
   const search = searchParams.get('search')?.trim() ?? ''
   const statusParam = searchParams.get('status')
   const sortParam = searchParams.get('sort')
+  const followUpParam = searchParams.get('followUp')
   const statusFilter = isStatus(statusParam) ? statusParam : undefined
   const sort = isSort(sortParam) ? sortParam : 'updated_desc'
+  const followUpFilter = isFollowUpFilter(followUpParam) ? followUpParam : undefined
   const page = parsePage(searchParams.get('page'))
 
   const [searchInput, setSearchInput] = useState(search)
@@ -162,6 +182,7 @@ export const JobTracker = () => {
       {
         search: search || undefined,
         status: statusFilter,
+        followUp: followUpFilter,
         sort,
         page,
         limit: PAGE_SIZE,
@@ -186,7 +207,7 @@ export const JobTracker = () => {
       })
 
     return () => controller.abort()
-  }, [page, reloadKey, search, sort, statusFilter, updateQuery])
+  }, [followUpFilter, page, reloadKey, search, sort, statusFilter, updateQuery])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -316,10 +337,30 @@ export const JobTracker = () => {
       <JobTrackerFilters
         search={searchInput}
         statusFilter={statusFilter}
+        followUpFilter={followUpFilter}
         sort={sort}
         disabled={isNavigating}
         onSearchChange={setSearchInput}
-        onStatusChange={(value) => updateQuery({ status: value ?? null, page: null })}
+        onStatusChange={(value) =>
+          updateQuery({
+            status: value ?? null,
+            followUp:
+              value && TERMINAL_JOB_APPLICATION_STATUSES.includes(value)
+                ? null
+                : (followUpFilter ?? null),
+            page: null,
+          })
+        }
+        onFollowUpChange={(value) =>
+          updateQuery({
+            followUp: value ?? null,
+            status:
+              value && statusFilter && TERMINAL_JOB_APPLICATION_STATUSES.includes(statusFilter)
+                ? null
+                : (statusFilter ?? null),
+            page: null,
+          })
+        }
         onSortChange={(value) => updateQuery({ sort: value, page: null })}
       />
 
@@ -420,20 +461,24 @@ const JobTrackerStats = ({ stats }: { stats: JobTrackerStats }) => {
 type JobTrackerFiltersProps = {
   search: string
   statusFilter?: JobApplicationStatus
+  followUpFilter?: JobApplicationFollowUpFilter
   sort: JobApplicationSort
   disabled: boolean
   onSearchChange: Dispatch<SetStateAction<string>>
   onStatusChange: (value?: JobApplicationStatus) => void
+  onFollowUpChange: (value?: JobApplicationFollowUpFilter) => void
   onSortChange: (value: JobApplicationSort) => void
 }
 
 const JobTrackerFilters = ({
   search,
   statusFilter,
+  followUpFilter,
   sort,
   disabled,
   onSearchChange,
   onStatusChange,
+  onFollowUpChange,
   onSortChange,
 }: JobTrackerFiltersProps) => {
   const t = useTranslations('JobTracker')
@@ -487,6 +532,39 @@ const JobTrackerFilters = ({
           </option>
         ))}
       </select>
+
+      <div
+        role="group"
+        aria-label={t('followUpFilters.label')}
+        className="flex flex-wrap items-center gap-2 pt-1 lg:col-span-3"
+      >
+        <span className="mr-1 inline-flex items-center gap-1.5 body-small font-semibold text-gray-60">
+          <CalendarClock size={14} aria-hidden="true" />
+          {t('followUpFilters.label')}
+        </span>
+        {[undefined, ...JOB_APPLICATION_FOLLOW_UP_FILTERS].map((filter) => {
+          const isSelected = filter === followUpFilter
+          const label = filter ? t(`followUpFilters.${filter}`) : t('followUpFilters.all')
+
+          return (
+            <button
+              key={filter ?? 'all'}
+              type="button"
+              aria-pressed={isSelected}
+              disabled={disabled}
+              onClick={() => onFollowUpChange(filter)}
+              className={cn(
+                'rounded-lg border px-3 py-1.5 body-small font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-wait disabled:opacity-60',
+                isSelected
+                  ? 'border-primary/40 bg-primary/10 text-primary'
+                  : 'border-gray-60/20 bg-gray-60/5 text-gray-60 hover:border-primary/30 hover:text-gray-100',
+              )}
+            >
+              {label}
+            </button>
+          )
+        })}
+      </div>
     </section>
   )
 }

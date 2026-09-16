@@ -27,6 +27,7 @@
   "Sidebar": {
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
+    "switchLanguage": "Switch to {locale}",
     "darkMode": "Dark mode",
     "logout": "Log out",
     "loggingOut": "Logging out...",
@@ -41,7 +42,10 @@
   },
   "WelcomeSection": {
     "streak": "streak",
-    "searchPlaceholder": "Search questions, topics, companies..."
+    "searchPlaceholder": "Search questions, topics, companies...",
+    "allQuestions": "All questions",
+    "noQuestions": "No questions found",
+    "all": "All"
   },
   "QuestionsBank": {
     "shortcut": "Shortcuts"
@@ -56,6 +60,14 @@
     "addJob": "Add job",
     "allStatuses": "All statuses",
     "filterByStatus": "Filter by application status",
+    "followUpFilters": {
+      "label": "Follow-up",
+      "all": "All applications",
+      "overdue": "Overdue",
+      "today": "Today",
+      "next_7_days": "Next 7 days",
+      "none": "No date"
+    },
     "searchPlaceholder": "Search company or role...",
     "cancel": "Cancel",
     "saveChanges": "Save changes",
@@ -91,7 +103,9 @@
       "comingSoon": "Coming soon",
       "statusHistory": "Status history",
       "applied": "Applied {date}",
-      "followUp": "Follow up {date}"
+      "followUp": "Follow up {date}",
+      "followUpOverdue": "Overdue · {date}",
+      "followUpToday": "Due today · {date}"
     },
     "emptyState": {
       "title": "No applications found",
@@ -478,13 +492,15 @@
         "proAccessUntil": "Pro access until {date}",
         "active": "Active",
         "viewProPlans": "View Pro plans",
-        "subscriptionManagementSoon": "Subscription management coming soon"
+        "manageSubscription": "Manage subscription",
+        "manageSubscriptionError": "Could not open the billing portal. Please try again."
       },
       "history": {
         "title": "Billing history",
         "description": "Invoices and payments will appear here.",
         "emptyTitle": "No billing history yet",
-        "emptyDescription": "Receipts will be available after billing integration is enabled."
+        "emptyDescription": "Receipts will be available after billing integration is enabled.",
+        "viewInvoice": "View invoice"
       }
     }
   }

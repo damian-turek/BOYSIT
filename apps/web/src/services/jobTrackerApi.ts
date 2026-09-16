@@ -1,6 +1,7 @@
 import { requestAuthenticatedApi } from '@/services/apiClient'
 import type {
   JobApplication,
+  JobApplicationFollowUpFilter,
   JobApplicationInput,
   JobApplicationSort,
   JobApplicationStatus,
@@ -32,6 +33,7 @@ type StatusEventsResponse = {
 export type JobApplicationsQuery = {
   search?: string
   status?: JobApplicationStatus
+  followUp?: JobApplicationFollowUpFilter
   sort?: JobApplicationSort
   page?: number
   limit?: number
@@ -47,6 +49,7 @@ export const fetchJobApplications = async (
 
   if (query.search) params.set('search', query.search)
   if (query.status) params.set('status', query.status)
+  if (query.followUp) params.set('followUp', query.followUp)
   if (query.sort) params.set('sort', query.sort)
   if (query.page) params.set('page', String(query.page))
   if (query.limit) params.set('limit', String(query.limit))

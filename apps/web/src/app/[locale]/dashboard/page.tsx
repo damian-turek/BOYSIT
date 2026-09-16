@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 }
 
 export default async function DashboardPage() {
-  const { WELCOME_SECTION_DATA, DASHBOARD_CONTENT_DATA } = getDashboardData()
+  const { WELCOME_SECTION_DATA, DASHBOARD_CONTENT_DATA } = await getDashboardData()
 
   return (
     <main className="dashboard-container flex flex-col gap-6">

@@ -26,10 +26,7 @@ export const ProfileSettingsTabs = <T extends string>({
   ariaLabel,
 }: ProfileSettingsTabsProps<T>) => {
   return (
-    <nav
-      className="mb-6 flex gap-1 overflow-x-auto border-b border-[var(--color-gray-10)]"
-      aria-label={ariaLabel}
-    >
+    <nav className="mb-6 flex gap-1 border-b border-[var(--color-gray-10)]" aria-label={ariaLabel}>
       {tabs.map((tab) => {
         const Icon = tab.icon
         const isActive = activeTab === tab.id
