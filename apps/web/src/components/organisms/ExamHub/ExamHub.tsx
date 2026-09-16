@@ -18,7 +18,6 @@ import {
   Layers3,
   RefreshCw,
   ShieldCheck,
-  Sparkles,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
@@ -38,16 +37,9 @@ type ExamVisual = {
   tone: ExamCardTone
 }
 
-const EXAM_CATEGORIES: ExamFilterCategory[] = [
-  'all',
-  'mixed',
-  'frontend',
-  'backend',
-  'system_design',
-]
+const EXAM_CATEGORIES: ExamFilterCategory[] = ['all', 'frontend', 'backend', 'system_design']
 
 const EXAM_VISUALS: Record<ExamSlug, ExamVisual> = {
-  warmup: { icon: Sparkles, tone: 'blue' },
   'frontend-basics': { icon: Code2, tone: 'green' },
   javascript: { icon: Braces, tone: 'amber' },
   react: { icon: Blocks, tone: 'purple' },
@@ -67,6 +59,7 @@ export const ExamHub = () => {
   const [catalogLoading, setCatalogLoading] = useState(true)
   const [retryKey, setRetryKey] = useState(0)
   const [startingSlug, setStartingSlug] = useState<ExamSlug>()
+  const [selectedCounts, setSelectedCounts] = useState<Partial<Record<ExamSlug, number>>>({})
   const [error, setError] = useState<string>()
   const hasProAccess = profile?.plan === 'pro' || profile?.plan === 'admin'
   const isAccessLoading = !initialized || authLoading || catalogLoading
@@ -102,7 +95,13 @@ export const ExamHub = () => {
     setError(undefined)
 
     try {
-      const session = await startExam(exam.slug)
+      const questionCount =
+        selectedCounts[exam.slug] ??
+        exam.availableQuestionCountOptions[0] ??
+        exam.questionCountOptions[0]
+      if (!questionCount) return
+
+      const session = await startExam(exam.slug, questionCount)
       router.push(`${pathname.replace(/\/$/, '')}/${session.sessionId}`)
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : t('errors.start'))
@@ -232,7 +231,7 @@ export const ExamHub = () => {
             {Array.from({ length: 6 }, (_, index) => (
               <div
                 key={index}
-                className="h-[365px] animate-pulse rounded-xl border border-[var(--color-gray-10)] bg-gray-05"
+                className="h-[320px] animate-pulse rounded-xl border border-[var(--color-gray-10)] bg-gray-05"
               />
             ))}
             <span className="sr-only">{t('library.loading')}</span>
@@ -262,23 +261,33 @@ export const ExamHub = () => {
                     questionPoolLabel={t(
                       exam.access === 'free' ? 'card.freeQuestionPool' : 'card.fullQuestionPool',
                     )}
-                    questionCountLabel={t('card.questions', { count: exam.questionCount })}
-                    durationLabel={t('card.minutes', { count: exam.durationMinutes })}
+                    questionCountLabel={t('card.cards', {
+                      count: Math.min(
+                        selectedCounts[exam.slug] ??
+                          exam.availableQuestionCountOptions[0] ??
+                          exam.questionCountOptions[0] ??
+                          0,
+                        exam.availableQuestionCount,
+                      ),
+                    })}
+                    cardCountLabel={t('card.cardCountLabel')}
+                    cardCountOptions={exam.availableQuestionCountOptions}
+                    selectedCardCount={
+                      selectedCounts[exam.slug] ??
+                      exam.availableQuestionCountOptions[0] ??
+                      exam.questionCountOptions[0] ??
+                      0
+                    }
                     difficultyLabel={t(`difficulty.${exam.displayDifficulty}`)}
                     actionLabel={isBusy ? t('card.starting') : t(actionKey)}
-                    availabilityLabel={
-                      exam.lockReason === 'insufficient_questions'
-                        ? t('card.availableQuestions', {
-                            available: exam.availableQuestionCount,
-                            required: exam.questionCount,
-                          })
-                        : undefined
-                    }
                     topics={exam.topics.map((topic) => t(`topics.${topic}`))}
                     icon={visual.icon}
                     tone={visual.tone}
                     isLocked={!exam.canStart}
                     isBusy={isBusy}
+                    onCardCountChange={(count) =>
+                      setSelectedCounts((current) => ({ ...current, [exam.slug]: count }))
+                    }
                     onStart={() => handleStart(exam)}
                   />
                 )

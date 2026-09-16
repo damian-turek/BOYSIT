@@ -23,9 +23,14 @@ export const fetchExamCatalog = async (signal?: AbortSignal): Promise<ExamCatalo
   return readData<ExamCatalogItem[]>(response)
 }
 
-export const startExam = async (slug: string): Promise<StartedExamSession> => {
+export const startExam = async (
+  slug: string,
+  questionCount: number,
+): Promise<StartedExamSession> => {
   const response = await requestAuthenticatedApi(`/api/v1/exams/${slug}/sessions`, {
     method: 'POST',
+    headers: jsonHeaders,
+    body: JSON.stringify({ questionCount }),
   })
   return readData<StartedExamSession>(response)
 }
@@ -36,31 +41,6 @@ export const fetchExamSession = async (
 ): Promise<ExamSession> => {
   const response = await requestAuthenticatedApi(`/api/v1/exam-sessions/${sessionId}`, { signal })
   return readData<ExamSession>(response)
-}
-
-export const saveExamAnswer = async (
-  sessionId: string,
-  questionId: string,
-  userAnswer: string,
-): Promise<{ questionId: string; userAnswer: string | null; savedAt: string }> => {
-  const response = await requestAuthenticatedApi(
-    `/api/v1/exam-sessions/${sessionId}/questions/${questionId}`,
-    {
-      method: 'PATCH',
-      headers: jsonHeaders,
-      body: JSON.stringify({ userAnswer }),
-    },
-  )
-  return readData(response)
-}
-
-export const submitExam = async (
-  sessionId: string,
-): Promise<{ sessionId: string; status: ExamSession['status']; submittedAt: string | null }> => {
-  const response = await requestAuthenticatedApi(`/api/v1/exam-sessions/${sessionId}/submit`, {
-    method: 'POST',
-  })
-  return readData(response)
 }
 
 export const fetchExamResult = async (

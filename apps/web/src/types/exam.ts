@@ -1,10 +1,4 @@
-export type ExamSlug =
-  | 'warmup'
-  | 'frontend-basics'
-  | 'javascript'
-  | 'react'
-  | 'backend'
-  | 'system-design'
+export type ExamSlug = 'frontend-basics' | 'javascript' | 'react' | 'backend' | 'system-design'
 
 export type ExamCategory = 'mixed' | 'frontend' | 'backend' | 'system_design'
 export type ExamAccess = 'free' | 'pro'
@@ -25,8 +19,8 @@ export type ExamCatalogItem = {
   category: ExamCategory
   access: ExamAccess
   displayDifficulty: ExamDisplayDifficulty
-  questionCount: number
-  durationMinutes: number
+  questionCountOptions: number[]
+  availableQuestionCountOptions: number[]
   topics: ExamTopic[]
   availableQuestionCount: number
   activeSessionId: string | null
@@ -49,22 +43,19 @@ export type ExamSessionQuestion = {
   questionType: 'theory' | 'practical' | 'code' | 'system_design' | 'troubleshooting'
   category: ExamTaxonomyItem | null
   technology: ExamTaxonomyItem | null
-  userAnswer: string | null
-  savedAt: string | null
   assessment: ExamAssessment | null
-  answerText?: string | null
-  explanation?: string | null
-  codeSnippet?: string | null
+  answerText: string | null
+  explanation: string | null
+  codeSnippet: string | null
 }
 
 export type ExamSession = {
   id: string
   examSlug: ExamSlug
+  access: ExamAccess
   status: ExamSessionStatus
   questionCount: number
-  durationMinutes: number
   startedAt: string
-  expiresAt: string
   submittedAt: string | null
   completedAt: string | null
   questions: ExamSessionQuestion[]
@@ -72,7 +63,6 @@ export type ExamSession = {
 
 export type ExamResultSummary = {
   total: number
-  answered: number
   assessed: number
   know: number
   partial: number
@@ -93,6 +83,5 @@ export type ExamResult = {
 export type StartedExamSession = {
   sessionId: string
   status: ExamSessionStatus
-  expiresAt: string
   resumed: boolean
 }

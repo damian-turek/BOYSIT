@@ -3,22 +3,25 @@ import { validate } from 'class-validator'
 import { Assessment } from 'database'
 import { describe, expect, it } from 'vitest'
 
-import { EXAM_ANSWER_MAX_LENGTH, SaveExamAnswerDto } from './save-exam-answer.dto'
+import { StartExamSessionDto } from './start-exam-session.dto'
 import { SubmitExamAssessmentDto } from './submit-exam-assessment.dto'
 
 describe('exam DTOs', () => {
-  it('accepts an empty answer so the user can clear a saved response', async () => {
-    const input = plainToInstance(SaveExamAnswerDto, { userAnswer: '' })
+  it.each([20, 30, 50])('accepts a %s-card deck size', async (questionCount) => {
+    const input = plainToInstance(StartExamSessionDto, { questionCount })
     await expect(validate(input)).resolves.toHaveLength(0)
   })
 
-  it('rejects an oversized answer', async () => {
-    const input = plainToInstance(SaveExamAnswerDto, {
-      userAnswer: 'a'.repeat(EXAM_ANSWER_MAX_LENGTH + 1),
-    })
+  it('rejects a string card count', async () => {
+    const input = plainToInstance(StartExamSessionDto, { questionCount: '30' })
     const errors = await validate(input)
+    expect(errors.some((error) => error.property === 'questionCount')).toBe(true)
+  })
 
-    expect(errors.some((error) => error.property === 'userAnswer')).toBe(true)
+  it.each([0, 1.5, 101])('rejects the invalid card count %s', async (questionCount) => {
+    const input = plainToInstance(StartExamSessionDto, { questionCount })
+    const errors = await validate(input)
+    expect(errors.some((error) => error.property === 'questionCount')).toBe(true)
   })
 
   it.each(Object.values(Assessment))('accepts the %s assessment', async (assessment) => {

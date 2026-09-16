@@ -177,20 +177,20 @@
   "Exam": {
     "title": "Exam simulator",
     "modeBadge": "Exam mode",
-    "description": "Choose a focused interview exam and practice under a clear time limit.",
+    "description": "Study interview topics with two-sided cards, then assess what you knew.",
     "access": {
       "checkingTitle": "Checking your access",
       "checkingDescription": "Your available exam catalogue will appear in a moment.",
       "freeTitle": "Free preview mode",
-      "freeDescription": "Preview exams contain free questions only. Pro exam cards stay visible so you can explore the full format without accessing protected questions.",
-      "proTitle": "Full exam access",
-      "proDescription": "Your plan can use both free questions and the full Pro question pool.",
-      "freePool": "Free questions only",
-      "fullPool": "Full question pool"
+      "freeDescription": "Your plan includes one fixed Frontend deck with 20 cards. Pro unlocks more topics and larger decks.",
+      "proTitle": "Full flashcard access",
+      "proDescription": "Choose a technical topic and the number of cards you want to study.",
+      "freePool": "Fixed Frontend deck",
+      "fullPool": "Topic-based decks"
     },
     "library": {
       "title": "Choose an exam",
-      "description": "Start with a short warm-up or pick a focused technical track.",
+      "description": "Choose a topic, reveal each answer and assess your knowledge.",
       "loading": "Loading the exam catalogue"
     },
     "filters": {
@@ -206,17 +206,16 @@
       "pro": "Pro"
     },
     "card": {
-      "questions": "{count} questions",
-      "minutes": "{count} min",
-      "freeQuestionPool": "Free question pool",
-      "fullQuestionPool": "Full question pool",
+      "cards": "{count} cards",
+      "cardCountLabel": "Deck size",
+      "freeQuestionPool": "Same 20 cards every time",
+      "fullQuestionPool": "Cards selected from this topic",
       "proRequired": "Pro required",
-      "questionsUnavailable": "Not enough questions",
-      "availableQuestions": "{available} of {required} required questions are currently available",
-      "continueExam": "Continue exam",
-      "startPreview": "Start free preview",
-      "startExam": "Start exam",
-      "starting": "Starting exam"
+      "questionsUnavailable": "No cards available",
+      "continueExam": "Continue cards",
+      "startPreview": "Study free deck",
+      "startExam": "Start cards",
+      "starting": "Starting..."
     },
     "difficulty": {
       "introductory": "Intro",
@@ -238,33 +237,26 @@
       "catalog": "The exam catalogue could not be loaded.",
       "start": "The exam could not be started.",
       "session": "The exam session could not be loaded.",
-      "saveAnswer": "Your answer could not be saved.",
-      "submit": "The exam could not be submitted.",
       "result": "The exam result could not be loaded.",
-      "assessment": "The assessment could not be saved.",
-      "complete": "The review could not be completed."
+      "assessment": "The assessment could not be saved."
     },
     "session": {
       "loading": "Loading the exam session",
       "loadErrorTitle": "Unable to open this exam"
     },
     "runner": {
-      "eyebrow": "Active exam",
-      "progress": "Answered {answered} of {total}",
-      "questionNumber": "Question {current} of {total}",
-      "answerLabel": "Your answer",
-      "answerPlaceholder": "Write your answer here. It is saved automatically.",
-      "saving": "Saving...",
-      "saved": "Saved",
-      "saveFailed": "Save failed",
-      "previous": "Previous",
-      "next": "Next question",
-      "submit": "Submit exam",
-      "submitting": "Submitting...",
-      "submitConfirm": "Submit this exam? You will not be able to edit your answers afterwards.",
-      "navigationLabel": "Exam question navigation",
-      "navigationTitle": "Questions",
-      "goToQuestion": "Go to question {number}",
+      "eyebrow": "Flashcard session",
+      "progress": "Assessed {assessed} of {total}",
+      "questionNumber": "Card {current} of {total}",
+      "answerSide": "Answer",
+      "showAnswer": "Reveal answer",
+      "showQuestion": "Show question again",
+      "referenceAnswer": "Reference answer",
+      "noReferenceAnswer": "No reference answer is available.",
+      "explanation": "Explanation",
+      "assessmentPrompt": "How well did you know this?",
+      "freeDisclaimerTitle": "Limited Free deck",
+      "freeDisclaimerDescription": "This Free version always contains the same 20 Frontend cards. Pro unlocks more topics and larger decks.",
       "noQuestions": "This exam session does not contain any questions."
     },
     "questionTypes": {
@@ -287,42 +279,27 @@
     "review": {
       "loading": "Loading the exam review",
       "loadErrorTitle": "Unable to load the review",
-      "eyebrow": "Review your answers",
       "completedEyebrow": "Review completed",
-      "description": "Compare your answers with the reference answers and assess your understanding.",
-      "completedDescription": "Your assessments are saved. You can revisit every answer below.",
-      "submittedAt": "Submitted {date}",
+      "completedDescription": "Your self-assessments are saved. Review the cards and see what to revisit.",
+      "completedAt": "Completed {date}",
       "backToCatalog": "Back to exams",
       "summaryLabel": "Exam result summary",
       "summary": {
-        "total": "Questions",
-        "answered": "Answered",
+        "total": "Cards",
         "know": "Knew",
         "partial": "Partial",
         "dontKnow": "Did not know"
       },
-      "questionsTitle": "Question review",
-      "questionsDescription": "Open a question to compare your response and record a self-assessment.",
-      "questionNumber": "Question {number}",
+      "questionsTitle": "Card review",
+      "questionsDescription": "Open a card to revisit its question and reference answer.",
+      "questionNumber": "Card {number}",
       "prompt": "Question",
-      "yourAnswer": "Your answer",
-      "noAnswer": "No answer was submitted.",
       "referenceAnswer": "Reference answer",
       "noReferenceAnswer": "No reference answer is available.",
       "explanation": "Explanation",
-      "codeSnippet": "Reference code",
-      "assessmentPrompt": "How well did you know this?",
-      "completeTitle": "Finish the review",
-      "completeReady": "Every question is assessed. You can finish the review.",
-      "completeRemaining": "Assess {count} more questions to finish.",
-      "completeAction": "Complete review",
-      "completing": "Completing..."
+      "codeSnippet": "Reference code"
     },
     "exams": {
-      "warmup": {
-        "title": "Interview warm-up",
-        "description": "A short mixed set that introduces the exam format without pressure."
-      },
       "frontend-basics": {
         "title": "Frontend basics",
         "description": "Core browser, JavaScript, TypeScript and React fundamentals."

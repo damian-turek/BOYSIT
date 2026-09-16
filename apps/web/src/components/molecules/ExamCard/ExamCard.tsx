@@ -1,13 +1,12 @@
 'use client'
 
 import type { LucideIcon } from 'lucide-react'
-import { Clock3, Gauge, LoaderCircle, LockKeyhole, Play, ShieldCheck } from 'lucide-react'
+import { Gauge, Layers3, LoaderCircle, LockKeyhole, Play, ShieldCheck } from 'lucide-react'
 import { motion } from 'motion/react'
 
 import { cn } from '@/utils/cn'
 
 import { Button } from '@/components/atoms/Button'
-import { Tag } from '@/components/atoms/Tag'
 
 export type ExamCardTone = 'blue' | 'purple' | 'amber' | 'green'
 
@@ -17,15 +16,17 @@ export type ExamCardProps = {
   accessLabel: string
   questionPoolLabel: string
   questionCountLabel: string
-  durationLabel: string
+  cardCountLabel: string
+  cardCountOptions: number[]
+  selectedCardCount: number
   difficultyLabel: string
   actionLabel: string
   topics: string[]
-  availabilityLabel?: string
   icon: LucideIcon
   tone: ExamCardTone
   isLocked: boolean
   isBusy?: boolean
+  onCardCountChange: (count: number) => void
   onStart: () => void
 }
 
@@ -61,15 +62,17 @@ export const ExamCard = ({
   accessLabel,
   questionPoolLabel,
   questionCountLabel,
-  durationLabel,
+  cardCountLabel,
+  cardCountOptions,
+  selectedCardCount,
   difficultyLabel,
   actionLabel,
   topics,
-  availabilityLabel,
   icon: Icon,
   tone,
   isLocked,
   isBusy = false,
+  onCardCountChange,
   onStart,
 }: ExamCardProps) => {
   const toneClasses = toneClassNames[tone]
@@ -83,67 +86,70 @@ export const ExamCard = ({
       transition={{ duration: 0.2, ease: 'easeOut' }}
       aria-busy={isBusy}
       className={cn(
-        'relative flex h-full flex-col overflow-hidden rounded-xl border border-[var(--color-gray-10)] bg-gray-05 p-5 transition-colors',
+        'relative flex h-full flex-col rounded-xl border border-[var(--color-gray-10)] bg-gray-05 p-5 transition-colors',
         toneClasses.border,
-        isLocked && 'opacity-80',
+        isLocked && 'bg-gray-60/[0.03]',
       )}
     >
-      {isLocked && (
-        <span className="absolute right-4 top-4 flex size-8 items-center justify-center rounded-xl bg-gray-60/10 text-gray-60">
-          <LockKeyhole size={15} aria-hidden="true" />
-        </span>
-      )}
-
-      <div className="mb-4 flex items-start gap-3 pr-9">
+      <div className="mb-4 flex items-start gap-3">
         <span
           className={cn(
-            'flex size-11 shrink-0 items-center justify-center rounded-xl',
+            'flex size-10 shrink-0 items-center justify-center rounded-lg',
             toneClasses.iconBackground,
           )}
         >
-          <Icon size={20} className={toneClasses.icon} aria-hidden="true" />
+          <Icon size={19} className={toneClasses.icon} aria-hidden="true" />
         </span>
-        <div className="min-w-0">
-          <div className="mb-1.5 flex flex-wrap items-center gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
             <h2 className="text-[17px] leading-6 font-bold text-gray-100">{title}</h2>
-            <Tag
-              text={accessLabel}
+            <span
               className={cn(
-                'rounded-md px-2 py-0.5',
-                isLocked
-                  ? 'border-gray-60/20 bg-gray-60/10 text-gray-60'
-                  : 'border-primary/25 bg-primary/10 text-primary',
+                'inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-0.5 body-small font-semibold',
+                isLocked ? 'bg-gray-60/10 text-gray-60' : 'bg-primary/10 text-primary',
               )}
-            />
+            >
+              {isLocked && <LockKeyhole size={12} aria-hidden="true" />}
+              {accessLabel}
+            </span>
           </div>
-          <p className="body-medium text-gray-60">{description}</p>
+          <p className="mt-1 line-clamp-3 body-medium text-gray-60">{description}</p>
         </div>
       </div>
 
-      <div className="mb-4 grid grid-cols-3 gap-2 rounded-xl border border-[var(--color-gray-10)] bg-white/60 p-3 dark:bg-white/5">
+      <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-y border-[var(--color-gray-10)] py-3">
         <ExamMeta icon={ShieldCheck} label={questionCountLabel} />
-        <ExamMeta icon={Clock3} label={durationLabel} />
         <ExamMeta icon={Gauge} label={difficultyLabel} />
       </div>
 
-      <p className="mb-3 inline-flex w-fit items-center gap-1.5 rounded-lg border border-primary/20 bg-primary/5 px-2.5 py-1 body-small font-semibold text-primary">
-        <ShieldCheck size={13} aria-hidden="true" />
-        {questionPoolLabel}
-      </p>
-
-      <div className="mb-5 flex flex-wrap gap-1.5">
-        {topics.map((topic) => (
-          <Tag
-            key={topic}
-            text={topic}
-            className="rounded-lg border-gray-60/20 bg-white px-2.5 py-1 text-gray-60 dark:bg-white/5"
-          />
-        ))}
-      </div>
-
-      {availabilityLabel && (
-        <p className="mb-3 body-small font-medium text-gray-60">{availabilityLabel}</p>
+      {cardCountOptions.length > 1 && !isLocked && (
+        <label className="mb-4 flex items-center justify-between gap-3 body-small font-semibold text-gray-100">
+          <span className="inline-flex items-center gap-1.5">
+            <Layers3 size={14} className="text-primary" aria-hidden="true" />
+            {cardCountLabel}
+          </span>
+          <select
+            value={selectedCardCount}
+            disabled={isBusy}
+            onChange={(event) => onCardCountChange(Number(event.target.value))}
+            className="rounded-lg border border-[var(--color-gray-10)] bg-white px-3 py-1.5 body-small text-gray-100 outline-none focus:border-primary dark:bg-white/5"
+          >
+            {cardCountOptions.map((count) => (
+              <option key={count} value={count}>
+                {count}
+              </option>
+            ))}
+          </select>
+        </label>
       )}
+
+      <div className="mb-5 space-y-1.5 body-small">
+        <p className="flex items-center gap-1.5 font-semibold text-primary">
+          <ShieldCheck size={13} aria-hidden="true" />
+          {questionPoolLabel}
+        </p>
+        <p className="line-clamp-2 text-gray-60">{topics.join(' · ')}</p>
+      </div>
 
       <Button
         className="mt-auto w-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
@@ -159,8 +165,8 @@ export const ExamCard = ({
 }
 
 const ExamMeta = ({ icon: Icon, label }: { icon: LucideIcon; label: string }) => (
-  <span className="flex min-w-0 flex-col items-center gap-1 text-center body-small text-gray-60">
+  <span className="inline-flex min-w-0 items-center gap-1.5 body-small text-gray-60">
     <Icon size={14} aria-hidden="true" />
-    <span className="line-clamp-2">{label}</span>
+    <span>{label}</span>
   </span>
 )

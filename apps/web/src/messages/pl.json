@@ -177,20 +177,20 @@
   "Exam": {
     "title": "Symulator egzaminu",
     "modeBadge": "Tryb egzaminu",
-    "description": "Wybierz egzamin rekrutacyjny i ćwicz w jasno określonym limicie czasu.",
+    "description": "Ucz się tematów rekrutacyjnych z dwustronnych kart i oceniaj swoją wiedzę.",
     "access": {
       "checkingTitle": "Sprawdzanie dostępu",
       "checkingDescription": "Za chwilę pojawi się dostępny katalog egzaminów.",
       "freeTitle": "Tryb bezpłatnego podglądu",
-      "freeDescription": "Egzaminy podglądowe zawierają wyłącznie bezpłatne pytania. Karty Pro pozostają widoczne, aby pokazać pełny format bez udostępniania chronionych pytań.",
-      "proTitle": "Pełny dostęp do egzaminów",
-      "proDescription": "Twój plan może korzystać z bezpłatnych pytań i pełnej puli Pro.",
-      "freePool": "Tylko bezpłatne pytania",
-      "fullPool": "Pełna pula pytań"
+      "freeDescription": "Twój plan obejmuje jeden stały zestaw 20 kart z Frontendu. Pro odblokowuje więcej tematów i większe zestawy.",
+      "proTitle": "Pełny dostęp do fiszek",
+      "proDescription": "Wybierz temat techniczny i liczbę kart, które chcesz przejść.",
+      "freePool": "Stały zestaw Frontend",
+      "fullPool": "Zestawy tematyczne"
     },
     "library": {
       "title": "Wybierz egzamin",
-      "description": "Zacznij od krótkiej rozgrzewki albo wybierz techniczną ścieżkę.",
+      "description": "Wybierz temat, odsłaniaj odpowiedzi i oceniaj swoją wiedzę.",
       "loading": "Ładowanie katalogu egzaminów"
     },
     "filters": {
@@ -206,17 +206,16 @@
       "pro": "Pro"
     },
     "card": {
-      "questions": "Liczba pytań: {count}",
-      "minutes": "{count} min",
-      "freeQuestionPool": "Pula bezpłatnych pytań",
-      "fullQuestionPool": "Pełna pula pytań",
+      "cards": "Liczba kart: {count}",
+      "cardCountLabel": "Rozmiar zestawu",
+      "freeQuestionPool": "Zawsze te same 20 kart",
+      "fullQuestionPool": "Karty wybrane z tego tematu",
       "proRequired": "Wymagany plan Pro",
-      "questionsUnavailable": "Za mało pytań",
-      "availableQuestions": "Obecnie dostępnych jest {available} z {required} wymaganych pytań",
-      "continueExam": "Kontynuuj egzamin",
-      "startPreview": "Uruchom bezpłatny podgląd",
-      "startExam": "Rozpocznij egzamin",
-      "starting": "Uruchamianie egzaminu"
+      "questionsUnavailable": "Brak dostępnych kart",
+      "continueExam": "Kontynuuj karty",
+      "startPreview": "Przejdź darmowy zestaw",
+      "startExam": "Rozpocznij karty",
+      "starting": "Uruchamianie..."
     },
     "difficulty": {
       "introductory": "Wprowadzenie",
@@ -238,33 +237,26 @@
       "catalog": "Nie udało się wczytać katalogu egzaminów.",
       "start": "Nie udało się rozpocząć egzaminu.",
       "session": "Nie udało się wczytać sesji egzaminacyjnej.",
-      "saveAnswer": "Nie udało się zapisać odpowiedzi.",
-      "submit": "Nie udało się oddać egzaminu.",
       "result": "Nie udało się wczytać wyniku egzaminu.",
-      "assessment": "Nie udało się zapisać samooceny.",
-      "complete": "Nie udało się zakończyć przeglądu."
+      "assessment": "Nie udało się zapisać samooceny."
     },
     "session": {
       "loading": "Ładowanie sesji egzaminacyjnej",
       "loadErrorTitle": "Nie można otworzyć tego egzaminu"
     },
     "runner": {
-      "eyebrow": "Trwający egzamin",
-      "progress": "Odpowiedzi: {answered} z {total}",
-      "questionNumber": "Pytanie {current} z {total}",
-      "answerLabel": "Twoja odpowiedź",
-      "answerPlaceholder": "Wpisz odpowiedź. Zostanie zapisana automatycznie.",
-      "saving": "Zapisywanie...",
-      "saved": "Zapisano",
-      "saveFailed": "Błąd zapisu",
-      "previous": "Poprzednie",
-      "next": "Następne pytanie",
-      "submit": "Oddaj egzamin",
-      "submitting": "Oddawanie...",
-      "submitConfirm": "Oddać egzamin? Po tej operacji nie będzie można edytować odpowiedzi.",
-      "navigationLabel": "Nawigacja po pytaniach egzaminacyjnych",
-      "navigationTitle": "Pytania",
-      "goToQuestion": "Przejdź do pytania {number}",
+      "eyebrow": "Sesja z fiszkami",
+      "progress": "Oceniono {assessed} z {total}",
+      "questionNumber": "Karta {current} z {total}",
+      "answerSide": "Odpowiedź",
+      "showAnswer": "Pokaż odpowiedź",
+      "showQuestion": "Pokaż pytanie ponownie",
+      "referenceAnswer": "Odpowiedź wzorcowa",
+      "noReferenceAnswer": "Brak odpowiedzi wzorcowej.",
+      "explanation": "Wyjaśnienie",
+      "assessmentPrompt": "Jak dobrze znałeś odpowiedź?",
+      "freeDisclaimerTitle": "Ograniczony zestaw Free",
+      "freeDisclaimerDescription": "Wersja Free zawsze zawiera te same 20 kart z Frontendu. Pro odblokowuje więcej tematów i większe zestawy.",
       "noQuestions": "Ta sesja egzaminacyjna nie zawiera pytań."
     },
     "questionTypes": {
@@ -287,42 +279,27 @@
     "review": {
       "loading": "Ładowanie przeglądu egzaminu",
       "loadErrorTitle": "Nie udało się wczytać przeglądu",
-      "eyebrow": "Przejrzyj swoje odpowiedzi",
       "completedEyebrow": "Przegląd zakończony",
-      "description": "Porównaj odpowiedzi z odpowiedziami wzorcowymi i oceń swoją wiedzę.",
-      "completedDescription": "Twoje samooceny zostały zapisane. Poniżej możesz ponownie przejrzeć odpowiedzi.",
-      "submittedAt": "Oddano {date}",
+      "completedDescription": "Twoje samooceny zostały zapisane. Sprawdź karty i zobacz, do czego warto wrócić.",
+      "completedAt": "Ukończono {date}",
       "backToCatalog": "Wróć do egzaminów",
       "summaryLabel": "Podsumowanie wyniku egzaminu",
       "summary": {
-        "total": "Pytania",
-        "answered": "Odpowiedzi",
+        "total": "Karty",
         "know": "Wiedziałem",
         "partial": "Częściowo",
         "dontKnow": "Nie wiedziałem"
       },
-      "questionsTitle": "Przegląd pytań",
-      "questionsDescription": "Otwórz pytanie, porównaj odpowiedź i zapisz samoocenę.",
-      "questionNumber": "Pytanie {number}",
+      "questionsTitle": "Przegląd kart",
+      "questionsDescription": "Otwórz kartę, aby ponownie zobaczyć pytanie i odpowiedź wzorcową.",
+      "questionNumber": "Karta {number}",
       "prompt": "Pytanie",
-      "yourAnswer": "Twoja odpowiedź",
-      "noAnswer": "Nie przesłano odpowiedzi.",
       "referenceAnswer": "Odpowiedź wzorcowa",
       "noReferenceAnswer": "Brak odpowiedzi wzorcowej.",
       "explanation": "Wyjaśnienie",
-      "codeSnippet": "Kod wzorcowy",
-      "assessmentPrompt": "Jak dobrze znałeś odpowiedź?",
-      "completeTitle": "Zakończ przegląd",
-      "completeReady": "Wszystkie pytania zostały ocenione. Możesz zakończyć przegląd.",
-      "completeRemaining": "Oceń jeszcze {count} pytań, aby zakończyć.",
-      "completeAction": "Zakończ przegląd",
-      "completing": "Kończenie..."
+      "codeSnippet": "Kod wzorcowy"
     },
     "exams": {
-      "warmup": {
-        "title": "Rozgrzewka rekrutacyjna",
-        "description": "Krótki mieszany zestaw, który bez presji przedstawia format egzaminu."
-      },
       "frontend-basics": {
         "title": "Podstawy frontendu",
         "description": "Najważniejsze podstawy przeglądarki, JavaScriptu, TypeScriptu i Reacta."

@@ -4,7 +4,6 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
-  Patch,
   Post,
   Req,
   UseGuards,
@@ -14,7 +13,7 @@ import {
 
 import { AuthGuard } from '../auth/auth.guard'
 import type { AuthenticatedRequest } from '../auth/authenticated-request'
-import { SaveExamAnswerDto } from './dto/save-exam-answer.dto'
+import { StartExamSessionDto } from './dto/start-exam-session.dto'
 import { SubmitExamAssessmentDto } from './dto/submit-exam-assessment.dto'
 import { ExamsService } from './exams.service'
 
@@ -36,8 +35,12 @@ export class ExamsController {
   }
 
   @Post(':slug/sessions')
-  startSession(@Req() request: AuthenticatedRequest, @Param('slug') slug: string) {
-    return this.examsService.startSession(request.user, slug)
+  startSession(
+    @Req() request: AuthenticatedRequest,
+    @Param('slug') slug: string,
+    @Body() input: StartExamSessionDto,
+  ) {
+    return this.examsService.startSession(request.user, slug, input)
   }
 }
 
@@ -53,24 +56,6 @@ export class ExamSessionsController {
     @Param('sessionId', new ParseUUIDPipe({ version: '4' })) sessionId: string,
   ) {
     return this.examsService.getSession(request.user, sessionId)
-  }
-
-  @Patch(':sessionId/questions/:questionId')
-  saveAnswer(
-    @Req() request: AuthenticatedRequest,
-    @Param('sessionId', new ParseUUIDPipe({ version: '4' })) sessionId: string,
-    @Param('questionId', new ParseUUIDPipe({ version: '4' })) questionId: string,
-    @Body() input: SaveExamAnswerDto,
-  ) {
-    return this.examsService.saveAnswer(request.user, sessionId, questionId, input)
-  }
-
-  @Post(':sessionId/submit')
-  submit(
-    @Req() request: AuthenticatedRequest,
-    @Param('sessionId', new ParseUUIDPipe({ version: '4' })) sessionId: string,
-  ) {
-    return this.examsService.submit(request.user, sessionId)
   }
 
   @Post(':sessionId/questions/:questionId/assessment')

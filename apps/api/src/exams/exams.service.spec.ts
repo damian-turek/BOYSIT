@@ -1,16 +1,21 @@
-import { ConflictException, ForbiddenException, NotFoundException } from '@nestjs/common'
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common'
 import { AccessLevel, Assessment, ExamSessionStatus, UserPlan } from 'database'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { PrismaService } from '../prisma/prisma.service'
-import { EXAM_PRESETS } from './exam-presets'
+import { EXAM_PRESETS, FREE_PREVIEW_CARD_COUNT } from './exam-presets'
 import { ExamsService } from './exams.service'
 
 const userId = '6ac9a588-2637-4527-a183-4ba6dde1da65'
 const otherUserId = '4c743ccb-89d7-4a7f-aa4f-270272713a67'
 const sessionId = '29a06c16-20ab-48c4-bd1c-4b67ef5d8551'
 const questionId = 'f42637cb-ab7b-428b-97b4-475f75404f28'
-const now = new Date('2026-08-12T10:00:00.000Z')
+const now = new Date('2026-09-16T10:00:00.000Z')
 
 const freeUser = { id: userId, plan: UserPlan.free }
 const proUser = { id: userId, plan: UserPlan.pro }
@@ -21,13 +26,13 @@ const createSession = (
 ) => ({
   id: sessionId,
   userId,
-  examSlug: 'warmup',
+  examSlug: 'frontend-basics',
   status,
   questionCount: 1,
-  durationMinutes: 10,
+  durationMinutes: null,
   startedAt: now,
-  expiresAt: new Date('2026-08-12T10:10:00.000Z'),
-  submittedAt: status === ExamSessionStatus.in_progress ? null : now,
+  expiresAt: null,
+  submittedAt: status === ExamSessionStatus.completed ? now : null,
   completedAt: status === ExamSessionStatus.completed ? now : null,
   createdAt: now,
   updatedAt: now,
@@ -37,8 +42,8 @@ const createSession = (
       questionId,
       attemptId: null,
       position: 1,
-      userAnswer: 'A closure retains its lexical environment.',
-      savedAt: now,
+      userAnswer: null,
+      savedAt: null,
       attempt: null as { id: string; assessment: Assessment | null } | null,
       question: {
         id: questionId,
@@ -63,10 +68,8 @@ describe('ExamsService', () => {
   const countSessions = vi.fn()
   const createSessionRecord = vi.fn()
   const updateSession = vi.fn()
-  const updateManySessions = vi.fn()
   const countQuestions = vi.fn()
   const findManyQuestions = vi.fn()
-  const updateManySessionQuestions = vi.fn()
   const updateSessionQuestion = vi.fn()
   const createAttempt = vi.fn()
   const transaction = vi.fn()
@@ -76,7 +79,6 @@ describe('ExamsService', () => {
       count: countSessions,
       findFirst: findFirstSession,
       create: createSessionRecord,
-      updateMany: updateManySessions,
     },
     examSessionQuestion: {
       update: updateSessionQuestion,
@@ -98,9 +100,6 @@ describe('ExamsService', () => {
         findFirst: findFirstSession,
         update: updateSession,
       },
-      examSessionQuestion: {
-        updateMany: updateManySessionQuestions,
-      },
       question: {
         count: countQuestions,
       },
@@ -110,6 +109,7 @@ describe('ExamsService', () => {
   let service: ExamsService
 
   beforeEach(() => {
+    vi.restoreAllMocks()
     vi.clearAllMocks()
     vi.useFakeTimers()
     vi.setSystemTime(now)
@@ -117,31 +117,56 @@ describe('ExamsService', () => {
     findManySessions.mockResolvedValue([])
     countQuestions.mockResolvedValue(100)
     countSessions.mockResolvedValue(1)
-    updateManySessions.mockResolvedValue({ count: 0 })
-    updateManySessionQuestions.mockResolvedValue({ count: 1 })
     updateSessionQuestion.mockResolvedValue({})
     service = new ExamsService(prismaService)
   })
 
-  it('returns server-owned catalogue access and locks Pro exams for a Free user', async () => {
+  it('returns one Free Frontend deck and locks Pro topics for a Free user', async () => {
     const result = await service.getCatalog(freeUser)
-    const freeExam = result.data.find((exam) => exam.slug === 'warmup')
+    const freeExams = result.data.filter((exam) => exam.access === AccessLevel.free)
     const proExam = result.data.find((exam) => exam.slug === 'javascript')
 
     expect(result.data).toHaveLength(EXAM_PRESETS.length)
-    expect(freeExam).toMatchObject({
-      access: AccessLevel.free,
-      canStart: true,
-      lockReason: null,
-    })
+    expect(freeExams).toEqual([
+      expect.objectContaining({
+        slug: 'frontend-basics',
+        questionCountOptions: [FREE_PREVIEW_CARD_COUNT],
+        availableQuestionCountOptions: [FREE_PREVIEW_CARD_COUNT],
+        canStart: true,
+        lockReason: null,
+      }),
+    ])
     expect(proExam).toMatchObject({
       access: AccessLevel.pro,
       canStart: false,
       lockReason: 'pro_required',
+      questionCountOptions: [20, 30, 50],
     })
   })
 
-  it('counts only active, verified Free questions for a Free preset', async () => {
+  it('exposes only Pro deck sizes supported by the current topic pool', async () => {
+    countQuestions.mockResolvedValue(35)
+
+    const result = await service.getCatalog(proUser)
+    const javascriptExam = result.data.find((exam) => exam.slug === 'javascript')
+
+    expect(javascriptExam?.availableQuestionCountOptions).toEqual([20, 30])
+  })
+
+  it('allows a topic to start when its pool is smaller than the minimum deck size', async () => {
+    countQuestions.mockResolvedValue(7)
+
+    const result = await service.getCatalog(proUser)
+    const javascriptExam = result.data.find((exam) => exam.slug === 'javascript')
+
+    expect(javascriptExam).toMatchObject({
+      availableQuestionCountOptions: [20],
+      canStart: true,
+      lockReason: null,
+    })
+  })
+
+  it('counts only active, verified Free questions for the Free deck', async () => {
     await service.getCatalog(freeUser)
 
     expect(countQuestions).toHaveBeenCalledWith({
@@ -153,106 +178,115 @@ describe('ExamsService', () => {
     })
   })
 
-  it('rejects a direct Free-user request for a Pro exam before accessing the database', async () => {
-    await expect(service.startSession(freeUser, 'javascript')).rejects.toBeInstanceOf(
-      ForbiddenException,
-    )
+  it('rejects direct Free-user access to a Pro topic before accessing the database', async () => {
+    await expect(
+      service.startSession(freeUser, 'javascript', { questionCount: 20 }),
+    ).rejects.toBeInstanceOf(ForbiddenException)
     expect(transaction).not.toHaveBeenCalled()
   })
 
-  it('starts a Free session with a stable question order and server expiry', async () => {
+  it('uses the same oldest 20 eligible questions for every Free session', async () => {
     findFirstSession.mockResolvedValueOnce(null)
-    countQuestions.mockResolvedValueOnce(8)
+    countQuestions.mockResolvedValueOnce(40)
     findManyQuestions.mockResolvedValueOnce(
-      Array.from({ length: 8 }, (_, index) => ({ id: `question-${index}` })),
+      Array.from({ length: FREE_PREVIEW_CARD_COUNT }, (_, index) => ({ id: `question-${index}` })),
     )
     createSessionRecord.mockResolvedValueOnce({
       id: sessionId,
       status: ExamSessionStatus.in_progress,
-      expiresAt: new Date('2026-08-12T10:10:00.000Z'),
     })
 
-    const result = await service.startSession(freeUser, 'warmup')
+    const result = await service.startSession(freeUser, 'frontend-basics', { questionCount: 50 })
     const createInput = createSessionRecord.mock.calls[0]?.[0]
 
+    expect(findManyQuestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+        take: FREE_PREVIEW_CARD_COUNT,
+      }),
+    )
+    expect(createInput.data.questionCount).toBe(FREE_PREVIEW_CARD_COUNT)
+    expect(createInput.data.durationMinutes).toBeNull()
+    expect(createInput.data.expiresAt).toBeNull()
     expect(result.data).toEqual({
       sessionId,
       status: ExamSessionStatus.in_progress,
-      expiresAt: '2026-08-12T10:10:00.000Z',
       resumed: false,
     })
-    expect(createInput.data.questions.create).toHaveLength(8)
-    expect(
-      createInput.data.questions.create.map((question: { position: number }) => question.position),
-    ).toEqual([1, 2, 3, 4, 5, 6, 7, 8])
   })
 
-  it('resumes an existing unexpired session instead of creating a duplicate', async () => {
-    findFirstSession.mockResolvedValueOnce({
+  it('starts a Pro session with the selected deck size', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+    findFirstSession.mockResolvedValueOnce(null)
+    countQuestions.mockResolvedValueOnce(60)
+    findManyQuestions.mockResolvedValueOnce(
+      Array.from({ length: 30 }, (_, index) => ({ id: `question-${index}` })),
+    )
+    createSessionRecord.mockResolvedValueOnce({
       id: sessionId,
       status: ExamSessionStatus.in_progress,
-      expiresAt: new Date('2026-08-12T10:10:00.000Z'),
     })
 
-    const result = await service.startSession(freeUser, 'warmup')
+    await service.startSession(proUser, 'javascript', { questionCount: 30 })
+
+    expect(createSessionRecord.mock.calls[0]?.[0].data.questionCount).toBe(30)
+    expect(createSessionRecord.mock.calls[0]?.[0].data.questions.create).toHaveLength(30)
+  })
+
+  it('rejects a Pro deck size outside the preset options', async () => {
+    await expect(
+      service.startSession(proUser, 'javascript', { questionCount: 25 }),
+    ).rejects.toBeInstanceOf(BadRequestException)
+    expect(transaction).not.toHaveBeenCalled()
+  })
+
+  it('resumes an unfinished session instead of creating a duplicate', async () => {
+    findFirstSession.mockResolvedValueOnce({ id: sessionId, status: ExamSessionStatus.in_progress })
+
+    const result = await service.startSession(freeUser, 'frontend-basics')
 
     expect(result.data.resumed).toBe(true)
     expect(createSessionRecord).not.toHaveBeenCalled()
   })
 
-  it('returns a controlled conflict when the eligible question pool is too small', async () => {
+  it('starts with every available card when the pool has fewer than 20 cards', async () => {
     findFirstSession.mockResolvedValueOnce(null)
-    countQuestions.mockResolvedValueOnce(7)
+    countQuestions.mockResolvedValueOnce(19)
+    findManyQuestions.mockResolvedValueOnce(
+      Array.from({ length: 19 }, (_, index) => ({ id: `question-${index}` })),
+    )
+    createSessionRecord.mockResolvedValueOnce({
+      id: sessionId,
+      status: ExamSessionStatus.in_progress,
+    })
 
-    await expect(service.startSession(freeUser, 'warmup')).rejects.toMatchObject({
+    await service.startSession(freeUser, 'frontend-basics')
+
+    expect(createSessionRecord.mock.calls[0]?.[0].data.questionCount).toBe(19)
+    expect(createSessionRecord.mock.calls[0]?.[0].data.questions.create).toHaveLength(19)
+  })
+
+  it('returns a controlled conflict only when the eligible pool is empty', async () => {
+    findFirstSession.mockResolvedValueOnce(null)
+    countQuestions.mockResolvedValueOnce(0)
+
+    await expect(service.startSession(freeUser, 'frontend-basics')).rejects.toMatchObject({
       status: 409,
-      response: {
-        error: expect.objectContaining({ code: 'EXAM_QUESTIONS_UNAVAILABLE' }),
-      },
+      response: { error: expect.objectContaining({ code: 'EXAM_QUESTIONS_UNAVAILABLE' }) },
     })
   })
 
-  it('does not expose protected answer fields while a session is active', async () => {
+  it('returns the answer side while a flashcard session is active', async () => {
     findFirstSession.mockResolvedValueOnce(createSession())
 
     const result = await service.getSession(freeUser, sessionId)
 
-    expect(result.data.questions[0]).not.toHaveProperty('answerText')
-    expect(result.data.questions[0]).not.toHaveProperty('explanation')
-    expect(result.data.questions[0]).not.toHaveProperty('codeSnippet')
-  })
-
-  it('reveals solutions only after the session enters review', async () => {
-    findFirstSession.mockResolvedValueOnce(createSession(ExamSessionStatus.review))
-
-    const result = await service.getSession(freeUser, sessionId)
-
+    expect(result.data).toMatchObject({ access: AccessLevel.free })
     expect(result.data.questions[0]).toMatchObject({
       answerText: 'A function with access to its lexical scope.',
       explanation: 'The referenced scope survives after the outer function returns.',
       codeSnippet: 'function outer() {}',
     })
-  })
-
-  it('marks an expired session before returning it and then reveals review data', async () => {
-    const activeExpiredSession = createSession(ExamSessionStatus.in_progress, {
-      expiresAt: new Date('2026-08-12T09:59:00.000Z'),
-    })
-    const expiredSession = createSession(ExamSessionStatus.expired, {
-      expiresAt: new Date('2026-08-12T09:59:00.000Z'),
-    })
-    findFirstSession.mockResolvedValueOnce(activeExpiredSession)
-    updateSession.mockResolvedValueOnce(expiredSession)
-
-    const result = await service.getSession(freeUser, sessionId)
-
-    expect(updateSession).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ status: ExamSessionStatus.expired }),
-      }),
-    )
-    expect(result.data.status).toBe(ExamSessionStatus.expired)
-    expect(result.data.questions[0]).toHaveProperty('answerText')
   })
 
   it('does not reveal whether a session owned by another user exists', async () => {
@@ -263,73 +297,8 @@ describe('ExamsService', () => {
     ).rejects.toBeInstanceOf(NotFoundException)
   })
 
-  it('saves an answer only through an owned active and unexpired session', async () => {
+  it('creates an assessment Attempt without a typed answer and links it to the card', async () => {
     findFirstSession.mockResolvedValueOnce(createSession())
-
-    const result = await service.saveAnswer(freeUser, sessionId, questionId, {
-      userAnswer: 'My answer',
-    })
-
-    expect(updateManySessionQuestions).toHaveBeenCalledWith({
-      where: expect.objectContaining({
-        sessionId,
-        questionId,
-        session: {
-          is: expect.objectContaining({
-            userId,
-            status: ExamSessionStatus.in_progress,
-            expiresAt: { gt: now },
-          }),
-        },
-      }),
-      data: { userAnswer: 'My answer', savedAt: now },
-    })
-    expect(result.data.savedAt).toBe(now.toISOString())
-  })
-
-  it('rejects an answer when the session expires during the save request', async () => {
-    findFirstSession.mockResolvedValueOnce(createSession())
-    updateManySessionQuestions.mockResolvedValueOnce({ count: 0 })
-
-    await expect(
-      service.saveAnswer(freeUser, sessionId, questionId, { userAnswer: 'Too late' }),
-    ).rejects.toMatchObject({
-      status: 409,
-      response: {
-        error: expect.objectContaining({ code: 'EXAM_SESSION_NOT_EDITABLE' }),
-      },
-    })
-  })
-
-  it('rejects a question that is not part of the session', async () => {
-    findFirstSession.mockResolvedValueOnce(createSession())
-
-    await expect(
-      service.saveAnswer(freeUser, sessionId, 'other-question', { userAnswer: 'Nope' }),
-    ).rejects.toBeInstanceOf(NotFoundException)
-    expect(updateManySessionQuestions).not.toHaveBeenCalled()
-  })
-
-  it('submits an active session once and keeps repeat submissions idempotent', async () => {
-    findFirstSession
-      .mockResolvedValueOnce(createSession())
-      .mockResolvedValueOnce(createSession(ExamSessionStatus.review))
-    updateSession.mockResolvedValueOnce({
-      id: sessionId,
-      status: ExamSessionStatus.review,
-      submittedAt: now,
-    })
-
-    const first = await service.submit(freeUser, sessionId)
-    const second = await service.submit(freeUser, sessionId)
-
-    expect(first.data.status).toBe(ExamSessionStatus.review)
-    expect(second.data.status).toBe(ExamSessionStatus.review)
-    expect(updateSession).toHaveBeenCalledTimes(1)
-  })
-
-  it('creates an Attempt and links the latest assessment to the session question', async () => {
-    findFirstSession.mockResolvedValueOnce(createSession(ExamSessionStatus.review))
     createAttempt.mockResolvedValueOnce({
       id: 'attempt-id',
       assessment: Assessment.know,
@@ -341,12 +310,7 @@ describe('ExamsService', () => {
     })
 
     expect(createAttempt).toHaveBeenCalledWith({
-      data: {
-        userId,
-        questionId,
-        userAnswer: 'A closure retains its lexical environment.',
-        assessment: Assessment.know,
-      },
+      data: { userId, questionId, userAnswer: null, assessment: Assessment.know },
       select: { id: true, assessment: true, createdAt: true },
     })
     expect(updateSessionQuestion).toHaveBeenCalledWith({
@@ -356,8 +320,8 @@ describe('ExamsService', () => {
     expect(result.data.assessment).toBe(Assessment.know)
   })
 
-  it('requires every question to be assessed before completing review', async () => {
-    findFirstSession.mockResolvedValueOnce(createSession(ExamSessionStatus.review))
+  it('requires every card to be assessed before completion', async () => {
+    findFirstSession.mockResolvedValueOnce(createSession())
 
     await expect(service.completeReview(freeUser, sessionId)).rejects.toBeInstanceOf(
       ConflictException,
@@ -365,57 +329,41 @@ describe('ExamsService', () => {
     expect(updateSession).not.toHaveBeenCalled()
   })
 
-  it('completes a fully assessed review and preserves its result', async () => {
-    const assessedReview = createSession(ExamSessionStatus.review)
-    assessedReview.questions[0]!.attempt = {
-      id: 'attempt-id',
-      assessment: Assessment.know,
-    }
-    const completedReview = createSession(ExamSessionStatus.completed)
-    completedReview.questions[0]!.attempt = {
-      id: 'attempt-id',
-      assessment: Assessment.know,
-    }
-    findFirstSession.mockResolvedValueOnce(assessedReview).mockResolvedValueOnce(completedReview)
+  it('completes a fully assessed session and returns its result', async () => {
+    const assessedSession = createSession()
+    assessedSession.questions[0]!.attempt = { id: 'attempt-id', assessment: Assessment.know }
+    const completedSession = createSession(ExamSessionStatus.completed)
+    completedSession.questions[0]!.attempt = { id: 'attempt-id', assessment: Assessment.know }
+    findFirstSession.mockResolvedValueOnce(assessedSession).mockResolvedValueOnce(completedSession)
     updateSession.mockResolvedValueOnce({})
 
     const result = await service.completeReview(freeUser, sessionId)
 
     expect(updateSession).toHaveBeenCalledWith({
       where: { id: sessionId },
-      data: {
-        status: ExamSessionStatus.completed,
-        completedAt: now,
-      },
+      data: { status: ExamSessionStatus.completed, submittedAt: now, completedAt: now },
     })
-    expect(result.data.status).toBe(ExamSessionStatus.completed)
     expect(result.data.summary.know).toBe(1)
   })
 
-  it('blocks result access until the exam is submitted', async () => {
+  it('blocks result access until the flashcard session is complete', async () => {
     findFirstSession.mockResolvedValueOnce(createSession())
 
     await expect(service.getResult(freeUser, sessionId)).rejects.toMatchObject({
       status: 409,
-      response: {
-        error: expect.objectContaining({ code: 'EXAM_SESSION_NOT_REVIEWABLE' }),
-      },
+      response: { error: expect.objectContaining({ code: 'EXAM_SESSION_NOT_COMPLETED' }) },
     })
   })
 
   it('returns assessment counts without inventing an automatic score', async () => {
-    const assessedSession = createSession(ExamSessionStatus.completed)
-    assessedSession.questions[0]!.attempt = {
-      id: 'attempt-id',
-      assessment: Assessment.partial,
-    }
-    findFirstSession.mockResolvedValueOnce(assessedSession)
+    const completedSession = createSession(ExamSessionStatus.completed)
+    completedSession.questions[0]!.attempt = { id: 'attempt-id', assessment: Assessment.partial }
+    findFirstSession.mockResolvedValueOnce(completedSession)
 
-    const result = await service.getResult(proUser, sessionId)
+    const result = await service.getResult(freeUser, sessionId)
 
     expect(result.data.summary).toEqual({
       total: 1,
-      answered: 1,
       assessed: 1,
       know: 0,
       partial: 1,

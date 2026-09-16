@@ -65,11 +65,11 @@ export const ExamSession = ({ sessionId }: ExamSessionProps) => {
     )
   }
 
-  if (session.status !== 'in_progress') {
+  if (session.status === 'completed') {
     return <ExamReview sessionId={session.id} />
   }
 
   return (
-    <ExamRunner session={session} onSubmitted={() => setRetryKey((currentKey) => currentKey + 1)} />
+    <ExamRunner session={session} onCompleted={() => setRetryKey((currentKey) => currentKey + 1)} />
   )
 }

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -7,7 +8,7 @@ import {
 import { AccessLevel, Assessment, ExamSessionStatus, Prisma, type User, UserPlan } from 'database'
 
 import { PrismaService } from '../prisma/prisma.service'
-import type { SaveExamAnswerDto } from './dto/save-exam-answer.dto'
+import type { StartExamSessionDto } from './dto/start-exam-session.dto'
 import type { SubmitExamAssessmentDto } from './dto/submit-exam-assessment.dto'
 import {
   EXAM_PRESETS,
@@ -52,12 +53,12 @@ export class ExamsService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async getCatalog(user: ExamUser) {
-    const now = new Date()
     const activeSessions = await this.prismaService.client.examSession.findMany({
       where: {
         userId: user.id,
-        status: ExamSessionStatus.in_progress,
-        expiresAt: { gt: now },
+        status: {
+          in: [ExamSessionStatus.in_progress, ExamSessionStatus.review, ExamSessionStatus.expired],
+        },
       },
       orderBy: { createdAt: 'desc' },
       select: { id: true, examSlug: true },
@@ -81,10 +82,19 @@ export class ExamsService {
         const availableQuestionCount = availableCounts[index] ?? 0
         const activeSessionId = activeSessionBySlug.get(preset.slug) ?? null
         const requiresPro = preset.access === AccessLevel.pro && !this.hasProAccess(user)
-        const hasEnoughQuestions = availableQuestionCount >= preset.questionCount
+        const supportedQuestionCountOptions = preset.questionCountOptions.filter(
+          (questionCount) => questionCount <= availableQuestionCount,
+        )
+        const availableQuestionCountOptions =
+          supportedQuestionCountOptions.length > 0
+            ? supportedQuestionCountOptions
+            : availableQuestionCount > 0
+              ? preset.questionCountOptions.slice(0, 1)
+              : []
+        const hasQuestions = availableQuestionCount > 0
         const lockReason = requiresPro
           ? 'pro_required'
-          : !hasEnoughQuestions && !activeSessionId
+          : !hasQuestions && !activeSessionId
             ? 'insufficient_questions'
             : null
 
@@ -93,53 +103,44 @@ export class ExamsService {
           category: preset.category,
           access: preset.access,
           displayDifficulty: preset.displayDifficulty,
-          questionCount: preset.questionCount,
-          durationMinutes: preset.durationMinutes,
+          questionCountOptions: [...preset.questionCountOptions],
+          availableQuestionCountOptions,
           topics: preset.topics,
           availableQuestionCount,
           activeSessionId,
-          canStart: !requiresPro && (Boolean(activeSessionId) || hasEnoughQuestions),
+          canStart: !requiresPro && (Boolean(activeSessionId) || hasQuestions),
           lockReason,
         }
       }),
     }
   }
 
-  async startSession(user: ExamUser, slug: string) {
+  async startSession(user: ExamUser, slug: string, input: StartExamSessionDto = {}) {
     const preset = this.requirePreset(slug)
     this.ensurePresetAccess(user, preset)
+    const questionCount = this.resolveQuestionCount(preset, input.questionCount)
 
-    const now = new Date()
     const data = await this.prismaService.client.$transaction(async (transaction) => {
-      await transaction.examSession.updateMany({
-        where: {
-          userId: user.id,
-          examSlug: preset.slug,
-          status: ExamSessionStatus.in_progress,
-          expiresAt: { lte: now },
-        },
-        data: {
-          status: ExamSessionStatus.expired,
-          submittedAt: now,
-        },
-      })
-
       const activeSession = await transaction.examSession.findFirst({
         where: {
           userId: user.id,
           examSlug: preset.slug,
-          status: ExamSessionStatus.in_progress,
-          expiresAt: { gt: now },
+          status: {
+            in: [
+              ExamSessionStatus.in_progress,
+              ExamSessionStatus.review,
+              ExamSessionStatus.expired,
+            ],
+          },
         },
         orderBy: { createdAt: 'desc' },
-        select: { id: true, status: true, expiresAt: true },
+        select: { id: true, status: true },
       })
 
       if (activeSession) {
         return {
           sessionId: activeSession.id,
           status: activeSession.status,
-          expiresAt: activeSession.expiresAt.toISOString(),
           resumed: true,
         }
       }
@@ -147,25 +148,28 @@ export class ExamsService {
       const questionWhere = this.getQuestionWhere(preset)
       const availableQuestionCount = await transaction.question.count({ where: questionWhere })
 
-      if (availableQuestionCount < preset.questionCount) {
+      if (availableQuestionCount === 0) {
         throw new ConflictException({
           error: {
             code: 'EXAM_QUESTIONS_UNAVAILABLE',
-            message: 'There are not enough eligible questions to start this exam',
-            availableQuestionCount,
-            requiredQuestionCount: preset.questionCount,
+            message: 'There are no eligible questions to start this exam',
           },
         })
       }
 
-      const selectedQuestions = await this.selectQuestions(
-        transaction,
-        questionWhere,
-        availableQuestionCount,
-        preset.questionCount,
-      )
+      const sessionQuestionCount = Math.min(questionCount, availableQuestionCount)
 
-      if (selectedQuestions.length !== preset.questionCount) {
+      const selectedQuestions =
+        preset.access === AccessLevel.free
+          ? await this.selectFixedPreviewQuestions(transaction, questionWhere, sessionQuestionCount)
+          : await this.selectQuestions(
+              transaction,
+              questionWhere,
+              availableQuestionCount,
+              sessionQuestionCount,
+            )
+
+      if (selectedQuestions.length !== sessionQuestionCount) {
         throw new ConflictException({
           error: {
             code: 'EXAM_QUESTIONS_UNAVAILABLE',
@@ -173,15 +177,13 @@ export class ExamsService {
           },
         })
       }
-      const expiresAt = new Date(now.getTime() + preset.durationMinutes * 60_000)
       const session = await transaction.examSession.create({
         data: {
           userId: user.id,
           examSlug: preset.slug,
-          questionCount: preset.questionCount,
-          durationMinutes: preset.durationMinutes,
-          startedAt: now,
-          expiresAt,
+          questionCount: sessionQuestionCount,
+          durationMinutes: null,
+          expiresAt: null,
           questions: {
             create: selectedQuestions.map(({ id: questionId }, index) => ({
               questionId,
@@ -189,13 +191,12 @@ export class ExamsService {
             })),
           },
         },
-        select: { id: true, status: true, expiresAt: true },
+        select: { id: true, status: true },
       })
 
       return {
         sessionId: session.id,
         status: session.status,
-        expiresAt: session.expiresAt.toISOString(),
         resumed: false,
       }
     })
@@ -208,86 +209,6 @@ export class ExamsService {
     return { data: this.formatSession(session) }
   }
 
-  async saveAnswer(
-    user: ExamUser,
-    sessionId: string,
-    questionId: string,
-    input: SaveExamAnswerDto,
-  ) {
-    const session = await this.getOwnedSession(user, sessionId)
-    this.ensureSessionInProgress(session)
-
-    const sessionQuestion = session.questions.find((item) => item.questionId === questionId)
-    if (!sessionQuestion) throw this.questionNotFound()
-
-    const savedAt = new Date()
-    const userAnswer = input.userAnswer.trim() ? input.userAnswer : null
-    const updateResult = await this.prismaService.client.examSessionQuestion.updateMany({
-      where: {
-        sessionId,
-        questionId,
-        session: {
-          is: {
-            userId: user.id,
-            status: ExamSessionStatus.in_progress,
-            expiresAt: { gt: savedAt },
-          },
-        },
-      },
-      data: { userAnswer, savedAt },
-    })
-
-    if (updateResult.count === 0) {
-      throw new ConflictException({
-        error: {
-          code: 'EXAM_SESSION_NOT_EDITABLE',
-          message: 'This exam session no longer accepts answers',
-        },
-      })
-    }
-
-    return {
-      data: {
-        questionId,
-        userAnswer,
-        savedAt: savedAt.toISOString(),
-      },
-    }
-  }
-
-  async submit(user: ExamUser, sessionId: string) {
-    const session = await this.getOwnedSession(user, sessionId)
-
-    if (session.status !== ExamSessionStatus.in_progress) {
-      return {
-        data: {
-          sessionId: session.id,
-          status: session.status,
-          submittedAt: session.submittedAt?.toISOString() ?? null,
-        },
-      }
-    }
-
-    const submittedAt = new Date()
-    const status =
-      session.expiresAt.getTime() <= submittedAt.getTime()
-        ? ExamSessionStatus.expired
-        : ExamSessionStatus.review
-    const updated = await this.prismaService.client.examSession.update({
-      where: { id: session.id },
-      data: { status, submittedAt },
-      select: { id: true, status: true, submittedAt: true },
-    })
-
-    return {
-      data: {
-        sessionId: updated.id,
-        status: updated.status,
-        submittedAt: updated.submittedAt?.toISOString() ?? null,
-      },
-    }
-  }
-
   async submitAssessment(
     user: ExamUser,
     sessionId: string,
@@ -295,24 +216,30 @@ export class ExamsService {
     input: SubmitExamAssessmentDto,
   ) {
     const session = await this.getOwnedSession(user, sessionId)
-    this.ensureSessionReviewable(session)
+    this.ensureSessionAssessable(session)
 
     const sessionQuestion = session.questions.find((item) => item.questionId === questionId)
     if (!sessionQuestion) throw this.questionNotFound()
 
     const attempt = await this.prismaService.client.$transaction(async (transaction) => {
-      const reviewableSessionCount = await transaction.examSession.count({
+      const assessableSessionCount = await transaction.examSession.count({
         where: {
           id: sessionId,
           userId: user.id,
-          status: { in: [ExamSessionStatus.review, ExamSessionStatus.expired] },
+          status: {
+            in: [
+              ExamSessionStatus.in_progress,
+              ExamSessionStatus.review,
+              ExamSessionStatus.expired,
+            ],
+          },
         },
       })
 
-      if (reviewableSessionCount === 0) {
+      if (assessableSessionCount === 0) {
         throw new ConflictException({
           error: {
-            code: 'EXAM_SESSION_NOT_REVIEWABLE',
+            code: 'EXAM_SESSION_NOT_ASSESSABLE',
             message: 'This exam session no longer accepts assessments',
           },
         })
@@ -322,7 +249,7 @@ export class ExamsService {
         data: {
           userId: user.id,
           questionId,
-          userAnswer: sessionQuestion.userAnswer,
+          userAnswer: null,
           assessment: input.assessment,
         },
         select: { id: true, assessment: true, createdAt: true },
@@ -354,7 +281,7 @@ export class ExamsService {
       return { data: this.formatResult(session) }
     }
 
-    this.ensureSessionReviewable(session)
+    this.ensureSessionAssessable(session)
     const remainingAssessments = session.questions.filter(
       (question) => question.attempt?.assessment == null,
     ).length
@@ -373,6 +300,7 @@ export class ExamsService {
       where: { id: session.id },
       data: {
         status: ExamSessionStatus.completed,
+        submittedAt: new Date(),
         completedAt: new Date(),
       },
     })
@@ -383,7 +311,14 @@ export class ExamsService {
 
   async getResult(user: ExamUser, sessionId: string) {
     const session = await this.getOwnedSession(user, sessionId)
-    this.ensureSessionReviewable(session, true)
+    if (session.status !== ExamSessionStatus.completed) {
+      throw new ConflictException({
+        error: {
+          code: 'EXAM_SESSION_NOT_COMPLETED',
+          message: 'Complete all flashcards before viewing the result',
+        },
+      })
+    }
     return { data: this.formatResult(session) }
   }
 
@@ -451,6 +386,19 @@ export class ExamsService {
     return this.shuffle([...firstBatch, ...secondBatch])
   }
 
+  private async selectFixedPreviewQuestions(
+    transaction: Prisma.TransactionClient,
+    where: Prisma.QuestionWhereInput,
+    questionCount: number,
+  ) {
+    return transaction.question.findMany({
+      where,
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
+      take: questionCount,
+      select: { id: true },
+    })
+  }
+
   private shuffle<T>(items: T[]): T[] {
     for (let index = items.length - 1; index > 0; index -= 1) {
       const target = Math.floor(Math.random() * (index + 1))
@@ -466,7 +414,7 @@ export class ExamsService {
   }
 
   private async getOwnedSession(user: ExamUser, sessionId: string): Promise<SessionWithQuestions> {
-    let session = await this.prismaService.client.examSession.findFirst({
+    const session = await this.prismaService.client.examSession.findFirst({
       where: { id: sessionId, userId: user.id },
       include: sessionInclude,
     })
@@ -476,34 +424,19 @@ export class ExamsService {
     const preset = this.requirePreset(session.examSlug)
     this.ensurePresetAccess(user, preset)
 
-    if (
-      session.status === ExamSessionStatus.in_progress &&
-      session.expiresAt.getTime() <= Date.now()
-    ) {
-      session = await this.prismaService.client.examSession.update({
-        where: { id: session.id },
-        data: {
-          status: ExamSessionStatus.expired,
-          submittedAt: session.submittedAt ?? new Date(),
-        },
-        include: sessionInclude,
-      })
-    }
-
     return session
   }
 
   private formatSession(session: SessionWithQuestions) {
-    const includeSolutions = session.status !== ExamSessionStatus.in_progress
+    const preset = this.requirePreset(session.examSlug)
 
     return {
       id: session.id,
       examSlug: session.examSlug,
+      access: preset.access,
       status: session.status,
       questionCount: session.questionCount,
-      durationMinutes: session.durationMinutes,
       startedAt: session.startedAt.toISOString(),
-      expiresAt: session.expiresAt.toISOString(),
       submittedAt: session.submittedAt?.toISOString() ?? null,
       completedAt: session.completedAt?.toISOString() ?? null,
       questions: session.questions.map((sessionQuestion) => ({
@@ -515,16 +448,10 @@ export class ExamsService {
         questionType: sessionQuestion.question.questionType,
         category: sessionQuestion.question.category,
         technology: sessionQuestion.question.technology,
-        userAnswer: sessionQuestion.userAnswer,
-        savedAt: sessionQuestion.savedAt?.toISOString() ?? null,
         assessment: sessionQuestion.attempt?.assessment ?? null,
-        ...(includeSolutions
-          ? {
-              answerText: sessionQuestion.question.answerText,
-              explanation: sessionQuestion.question.explanation,
-              codeSnippet: sessionQuestion.question.codeSnippet,
-            }
-          : {}),
+        answerText: sessionQuestion.question.answerText,
+        explanation: sessionQuestion.question.explanation,
+        codeSnippet: sessionQuestion.question.codeSnippet,
       })),
     }
   }
@@ -553,7 +480,6 @@ export class ExamsService {
       completedAt: session.completedAt?.toISOString() ?? null,
       summary: {
         total: session.questions.length,
-        answered: session.questions.filter((question) => question.userAnswer !== null).length,
         assessed: Object.values(assessmentCounts).reduce((total, count) => total + count, 0),
         know: assessmentCounts[Assessment.know],
         partial: assessmentCounts[Assessment.partial],
@@ -590,30 +516,36 @@ export class ExamsService {
     })
   }
 
-  private ensureSessionInProgress(session: SessionWithQuestions): void {
-    if (session.status === ExamSessionStatus.in_progress) return
+  private resolveQuestionCount(preset: ExamPreset, requestedQuestionCount?: number): number {
+    if (preset.access === AccessLevel.free) return preset.questionCountOptions[0]
 
-    throw new ConflictException({
+    const questionCount = requestedQuestionCount ?? preset.questionCountOptions[0]
+    if (preset.questionCountOptions.includes(questionCount)) return questionCount
+
+    throw new BadRequestException({
       error: {
-        code: 'EXAM_SESSION_NOT_EDITABLE',
-        message: 'This exam session no longer accepts answers',
+        code: 'EXAM_CARD_COUNT_INVALID',
+        message: 'Choose one of the available card counts for this topic',
+        allowedQuestionCounts: [...preset.questionCountOptions],
       },
     })
   }
 
-  private ensureSessionReviewable(session: SessionWithQuestions, allowCompleted = false): void {
-    const reviewableStatuses: ExamSessionStatus[] = [
+  private ensureSessionAssessable(session: SessionWithQuestions): void {
+    const assessableStatuses: ExamSessionStatus[] = [
+      ExamSessionStatus.in_progress,
       ExamSessionStatus.review,
       ExamSessionStatus.expired,
-      ...(allowCompleted ? [ExamSessionStatus.completed] : []),
     ]
 
-    if (reviewableStatuses.includes(session.status)) return
+    if (assessableStatuses.includes(session.status)) {
+      return
+    }
 
     throw new ConflictException({
       error: {
-        code: 'EXAM_SESSION_NOT_REVIEWABLE',
-        message: 'Submit the exam before reviewing its answers',
+        code: 'EXAM_SESSION_NOT_ASSESSABLE',
+        message: 'This flashcard session no longer accepts assessments',
       },
     })
   }

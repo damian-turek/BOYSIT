@@ -1,7 +1,6 @@
 import { AccessLevel, Difficulty, QuestionType } from 'database'
 
 export type ExamPresetSlug =
-  | 'warmup'
   | 'frontend-basics'
   | 'javascript'
   | 'react'
@@ -30,32 +29,21 @@ export type ExamPreset = {
   category: ExamCategory
   access: AccessLevel
   displayDifficulty: ExamDisplayDifficulty
-  questionCount: number
-  durationMinutes: number
+  questionCountOptions: readonly number[]
   topics: readonly ExamTopic[]
   questionFilter: ExamQuestionFilter
 }
 
+export const FREE_PREVIEW_CARD_COUNT = 20
+export const PRO_CARD_COUNT_OPTIONS = [20, 30, 50] as const
+
 export const EXAM_PRESETS = [
-  {
-    slug: 'warmup',
-    category: 'mixed',
-    access: AccessLevel.free,
-    displayDifficulty: 'introductory',
-    questionCount: 8,
-    durationMinutes: 10,
-    topics: ['javascript', 'typescript', 'databases'],
-    questionFilter: {
-      difficulties: [Difficulty.junior],
-    },
-  },
   {
     slug: 'frontend-basics',
     category: 'frontend',
     access: AccessLevel.free,
     displayDifficulty: 'introductory',
-    questionCount: 10,
-    durationMinutes: 15,
+    questionCountOptions: [FREE_PREVIEW_CARD_COUNT],
     topics: ['javascript', 'typescript', 'react'],
     questionFilter: {
       categorySlugs: ['frontend'],
@@ -67,8 +55,7 @@ export const EXAM_PRESETS = [
     category: 'frontend',
     access: AccessLevel.pro,
     displayDifficulty: 'intermediate',
-    questionCount: 25,
-    durationMinutes: 35,
+    questionCountOptions: PRO_CARD_COUNT_OPTIONS,
     topics: ['javascript', 'typescript'],
     questionFilter: {
       technologySlugs: ['javascript', 'typescript'],
@@ -80,8 +67,7 @@ export const EXAM_PRESETS = [
     category: 'frontend',
     access: AccessLevel.pro,
     displayDifficulty: 'intermediate',
-    questionCount: 20,
-    durationMinutes: 30,
+    questionCountOptions: PRO_CARD_COUNT_OPTIONS,
     topics: ['react', 'javascript', 'typescript'],
     questionFilter: {
       technologySlugs: ['react'],
@@ -93,8 +79,7 @@ export const EXAM_PRESETS = [
     category: 'backend',
     access: AccessLevel.pro,
     displayDifficulty: 'intermediate',
-    questionCount: 25,
-    durationMinutes: 40,
+    questionCountOptions: PRO_CARD_COUNT_OPTIONS,
     topics: ['node', 'databases', 'architecture'],
     questionFilter: {
       categorySlugs: ['backend', 'databases'],
@@ -106,8 +91,7 @@ export const EXAM_PRESETS = [
     category: 'system_design',
     access: AccessLevel.pro,
     displayDifficulty: 'advanced',
-    questionCount: 15,
-    durationMinutes: 45,
+    questionCountOptions: PRO_CARD_COUNT_OPTIONS,
     topics: ['architecture', 'databases'],
     questionFilter: {
       difficulties: [Difficulty.senior],
