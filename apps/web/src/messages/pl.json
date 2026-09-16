@@ -174,6 +174,154 @@
       "status": "Nie udało się zmienić statusu. Przywrócono poprzednią wartość."
     }
   },
+  "Exam": {
+    "title": "Symulator egzaminu",
+    "modeBadge": "Tryb egzaminu",
+    "description": "Ucz się tematów rekrutacyjnych z dwustronnych kart i oceniaj swoją wiedzę.",
+    "access": {
+      "checkingTitle": "Sprawdzanie dostępu",
+      "checkingDescription": "Za chwilę pojawi się dostępny katalog egzaminów.",
+      "freeTitle": "Tryb bezpłatnego podglądu",
+      "freeDescription": "Twój plan obejmuje jeden stały zestaw 20 kart z Frontendu. Pro odblokowuje więcej tematów i większe zestawy.",
+      "proTitle": "Pełny dostęp do fiszek",
+      "proDescription": "Wybierz temat techniczny i liczbę kart, które chcesz przejść.",
+      "freePool": "Stały zestaw Frontend",
+      "fullPool": "Zestawy tematyczne"
+    },
+    "library": {
+      "title": "Wybierz egzamin",
+      "description": "Wybierz temat, odsłaniaj odpowiedzi i oceniaj swoją wiedzę.",
+      "loading": "Ładowanie katalogu egzaminów"
+    },
+    "filters": {
+      "label": "Filtruj egzaminy",
+      "all": "Wszystkie",
+      "mixed": "Mieszane",
+      "frontend": "Frontend",
+      "backend": "Backend",
+      "system_design": "Projektowanie systemów"
+    },
+    "accessLabels": {
+      "free": "Bezpłatny podgląd",
+      "pro": "Pro"
+    },
+    "card": {
+      "cards": "Liczba kart: {count}",
+      "cardCountLabel": "Rozmiar zestawu",
+      "freeQuestionPool": "Zawsze te same 20 kart",
+      "fullQuestionPool": "Karty wybrane z tego tematu",
+      "proRequired": "Wymagany plan Pro",
+      "questionsUnavailable": "Brak dostępnych kart",
+      "continueExam": "Kontynuuj karty",
+      "startPreview": "Przejdź darmowy zestaw",
+      "startExam": "Rozpocznij karty",
+      "starting": "Uruchamianie..."
+    },
+    "difficulty": {
+      "introductory": "Wprowadzenie",
+      "intermediate": "Średni",
+      "advanced": "Zaawansowany"
+    },
+    "topics": {
+      "javascript": "JavaScript",
+      "typescript": "TypeScript",
+      "react": "React",
+      "node": "Node.js",
+      "databases": "Bazy danych",
+      "architecture": "Architektura"
+    },
+    "actions": {
+      "retry": "Spróbuj ponownie"
+    },
+    "errors": {
+      "catalog": "Nie udało się wczytać katalogu egzaminów.",
+      "start": "Nie udało się rozpocząć egzaminu.",
+      "session": "Nie udało się wczytać sesji egzaminacyjnej.",
+      "result": "Nie udało się wczytać wyniku egzaminu.",
+      "assessment": "Nie udało się zapisać samooceny."
+    },
+    "session": {
+      "loading": "Ładowanie sesji egzaminacyjnej",
+      "loadErrorTitle": "Nie można otworzyć tego egzaminu"
+    },
+    "runner": {
+      "eyebrow": "Sesja z fiszkami",
+      "progress": "Oceniono {assessed} z {total}",
+      "questionNumber": "Karta {current} z {total}",
+      "answerSide": "Odpowiedź",
+      "showAnswer": "Pokaż odpowiedź",
+      "showQuestion": "Pokaż pytanie ponownie",
+      "referenceAnswer": "Odpowiedź wzorcowa",
+      "noReferenceAnswer": "Brak odpowiedzi wzorcowej.",
+      "explanation": "Wyjaśnienie",
+      "assessmentPrompt": "Jak dobrze znałeś odpowiedź?",
+      "freeDisclaimerTitle": "Ograniczony zestaw Free",
+      "freeDisclaimerDescription": "Wersja Free zawsze zawiera te same 20 kart z Frontendu. Pro odblokowuje więcej tematów i większe zestawy.",
+      "noQuestions": "Ta sesja egzaminacyjna nie zawiera pytań."
+    },
+    "questionTypes": {
+      "theory": "Teoria",
+      "practical": "Praktyka",
+      "code": "Kod",
+      "system_design": "Projektowanie systemów",
+      "troubleshooting": "Rozwiązywanie problemów"
+    },
+    "questionDifficulty": {
+      "junior": "Junior",
+      "middle": "Middle",
+      "senior": "Senior"
+    },
+    "assessment": {
+      "know": "Wiedziałem",
+      "partial": "Wiedziałem częściowo",
+      "dont_know": "Nie wiedziałem"
+    },
+    "review": {
+      "loading": "Ładowanie przeglądu egzaminu",
+      "loadErrorTitle": "Nie udało się wczytać przeglądu",
+      "completedEyebrow": "Przegląd zakończony",
+      "completedDescription": "Twoje samooceny zostały zapisane. Sprawdź karty i zobacz, do czego warto wrócić.",
+      "completedAt": "Ukończono {date}",
+      "backToCatalog": "Wróć do egzaminów",
+      "summaryLabel": "Podsumowanie wyniku egzaminu",
+      "summary": {
+        "total": "Karty",
+        "know": "Wiedziałem",
+        "partial": "Częściowo",
+        "dontKnow": "Nie wiedziałem"
+      },
+      "questionsTitle": "Przegląd kart",
+      "questionsDescription": "Otwórz kartę, aby ponownie zobaczyć pytanie i odpowiedź wzorcową.",
+      "questionNumber": "Karta {number}",
+      "prompt": "Pytanie",
+      "referenceAnswer": "Odpowiedź wzorcowa",
+      "noReferenceAnswer": "Brak odpowiedzi wzorcowej.",
+      "explanation": "Wyjaśnienie",
+      "codeSnippet": "Kod wzorcowy"
+    },
+    "exams": {
+      "frontend-basics": {
+        "title": "Podstawy frontendu",
+        "description": "Najważniejsze podstawy przeglądarki, JavaScriptu, TypeScriptu i Reacta."
+      },
+      "javascript": {
+        "title": "JavaScript — dogłębnie",
+        "description": "Skupiony test mechanizmów języka, kodu asynchronicznego i działania środowiska."
+      },
+      "react": {
+        "title": "Rozmowa techniczna z React",
+        "description": "Komponenty, hooki, renderowanie, stan i architektura frontendu."
+      },
+      "backend": {
+        "title": "Podstawy backendu",
+        "description": "API, Node.js, bazy danych, niezawodność i decyzje projektowe backendu."
+      },
+      "system-design": {
+        "title": "Wyzwanie z projektowania systemów",
+        "description": "Kompromisy architektoniczne, skalowanie i podstawy systemów rozproszonych."
+      }
+    }
+  },
   "ProfileSettings": {
     "eyebrow": "Konto",
     "title": "Ustawienia konta",

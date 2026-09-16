@@ -1,56 +1,77 @@
 import { requestAuthenticatedApi } from '@/services/apiClient'
+import type {
+  ExamAssessment,
+  ExamCatalogItem,
+  ExamResult,
+  ExamSession,
+  StartedExamSession,
+} from '@/types/exam'
 
-export type ExamDifficulty = 'junior' | 'middle' | 'senior'
-
-export type ExamQuestion = {
-  id: string
-  title: string
-  questionText: string
-  answerText: string | null
-  explanation: string | null
-  codeSnippet: string | null
-  category: string | null
-  technology: string | null
+type DataResponse<T> = {
+  data: T
 }
 
-export type StartExamResponse = {
-  difficulty: ExamDifficulty
-  totalAvailable: number
-  totalQuestions: number
-  questions: ExamQuestion[]
+const jsonHeaders = { 'Content-Type': 'application/json' }
+
+const readData = async <T>(response: Response): Promise<T> => {
+  const body = (await response.json()) as DataResponse<T>
+  return body.data
 }
 
-export type SubmitExamResponse = {
-  difficulty: ExamDifficulty
-  totalQuestions: number
-  correctCount: number
-  scorePercentage: number
-  durationSeconds: number
+export const fetchExamCatalog = async (signal?: AbortSignal): Promise<ExamCatalogItem[]> => {
+  const response = await requestAuthenticatedApi('/api/v1/exams', { signal })
+  return readData<ExamCatalogItem[]>(response)
 }
 
 export const startExam = async (
-  difficulty: ExamDifficulty,
-  questionCount = 10,
-): Promise<StartExamResponse> => {
-  const response = await requestAuthenticatedApi('/api/v1/exam/start', {
+  slug: string,
+  questionCount: number,
+): Promise<StartedExamSession> => {
+  const response = await requestAuthenticatedApi(`/api/v1/exams/${slug}/sessions`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ difficulty, questionCount }),
+    headers: jsonHeaders,
+    body: JSON.stringify({ questionCount }),
   })
-
-  return (await response.json()) as StartExamResponse
+  return readData<StartedExamSession>(response)
 }
 
-export const submitExam = async (payload: {
-  difficulty: ExamDifficulty
-  answers: { questionId: string; knewIt: boolean }[]
-  durationSeconds: number
-}): Promise<SubmitExamResponse> => {
-  const response = await requestAuthenticatedApi('/api/v1/exam/submit', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  })
+export const fetchExamSession = async (
+  sessionId: string,
+  signal?: AbortSignal,
+): Promise<ExamSession> => {
+  const response = await requestAuthenticatedApi(`/api/v1/exam-sessions/${sessionId}`, { signal })
+  return readData<ExamSession>(response)
+}
 
-  return (await response.json()) as SubmitExamResponse
+export const fetchExamResult = async (
+  sessionId: string,
+  signal?: AbortSignal,
+): Promise<ExamResult> => {
+  const response = await requestAuthenticatedApi(`/api/v1/exam-sessions/${sessionId}/result`, {
+    signal,
+  })
+  return readData<ExamResult>(response)
+}
+
+export const submitExamAssessment = async (
+  sessionId: string,
+  questionId: string,
+  assessment: ExamAssessment,
+): Promise<{ questionId: string; assessment: ExamAssessment; assessedAt: string }> => {
+  const response = await requestAuthenticatedApi(
+    `/api/v1/exam-sessions/${sessionId}/questions/${questionId}/assessment`,
+    {
+      method: 'POST',
+      headers: jsonHeaders,
+      body: JSON.stringify({ assessment }),
+    },
+  )
+  return readData(response)
+}
+
+export const completeExamReview = async (sessionId: string): Promise<ExamResult> => {
+  const response = await requestAuthenticatedApi(`/api/v1/exam-sessions/${sessionId}/complete`, {
+    method: 'POST',
+  })
+  return readData<ExamResult>(response)
 }
