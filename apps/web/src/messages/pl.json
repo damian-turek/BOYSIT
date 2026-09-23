@@ -466,11 +466,22 @@
         "description": "Subskrypcja kontroluje dostęp do chronionych pytań.",
         "freeDescription": "Darmowe pytania i podstawowe funkcje konta.",
         "paidDescription": "Pełny dostęp do chronionych materiałów rekrutacyjnych.",
-        "proAccessUntil": "Dostęp Pro do {date}",
-        "active": "Aktywny",
+        "renewsOn": "Odnowienie: {date}",
+        "cancelsOn": "Dostęp wygasa: {date}",
         "viewProPlans": "Zobacz plany Pro",
         "manageSubscription": "Zarządzaj subskrypcją",
-        "manageSubscriptionError": "Nie udało się otworzyć panelu rozliczeń. Spróbuj ponownie."
+        "manageSubscriptionError": "Nie udało się otworzyć panelu rozliczeń. Spróbuj ponownie.",
+        "status": {
+          "free": "Darmowy",
+          "active": "Aktywna",
+          "trialing": "Okres próbny",
+          "pastDue": "Płatność zaległa",
+          "unpaid": "Nieopłacona",
+          "paused": "Wstrzymana",
+          "canceled": "Anulowana",
+          "incomplete": "Płatność niedokończona",
+          "incompleteExpired": "Płatność wygasła"
+        }
       },
       "history": {
         "title": "Historia rozliczeń",

@@ -19,6 +19,7 @@ import Stripe from 'stripe'
 
 import { AuthGuard } from '../auth/auth.guard'
 import type { AuthenticatedRequest } from '../auth/authenticated-request'
+import { CreateBillingPortalSessionDto } from './dto/billing-portal-session.dto'
 import { CreateCheckoutSessionDto } from './dto/checkout-session.dto'
 import { StripeService } from './stripe.service'
 
@@ -44,11 +45,22 @@ export class StripeController {
 
   @Post('portal-session')
   @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true }))
   async createPortalSession(
     @Req() request: AuthenticatedRequest,
+    @Body() dto: CreateBillingPortalSessionDto,
   ): Promise<{ url: string }> {
-    const portalSession = await this.stripeService.createBillingPortalSession(request.user)
+    const portalSession = await this.stripeService.createBillingPortalSession(
+      request.user,
+      dto.returnPath,
+    )
     return { url: portalSession.url }
+  }
+
+  @Get('subscription')
+  @UseGuards(AuthGuard)
+  getSubscription(@Req() request: AuthenticatedRequest) {
+    return this.stripeService.getBillingStatus(request.user)
   }
 
   @Get('invoices')

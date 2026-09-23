@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SupabaseAdminService } from '../auth/supabase-admin.service'
 import type { SupabaseEmailOtpService } from '../auth/supabase-email-otp.service'
 import type { PrismaService } from '../prisma/prisma.service'
+import type { StripeService } from '../stripe/stripe.service'
 import type { AccountDeletionRateLimitService } from './account-deletion-rate-limit.service'
 import { UsersService } from './user.service'
 
@@ -27,6 +28,7 @@ describe('UsersService', () => {
   const verifyAccountDeletionCode = vi.fn()
   const consumeDeletionCodeRequest = vi.fn()
   const clearDeletionCodeRequests = vi.fn()
+  const cancelSubscriptionsForAccountDeletion = vi.fn()
   const prismaService = {
     client: {
       user: {
@@ -47,6 +49,9 @@ describe('UsersService', () => {
     consume: consumeDeletionCodeRequest,
     clear: clearDeletionCodeRequests,
   } as unknown as AccountDeletionRateLimitService
+  const stripeService = {
+    cancelSubscriptionsForAccountDeletion,
+  } as unknown as StripeService
 
   let service: UsersService
 
@@ -59,11 +64,13 @@ describe('UsersService', () => {
     verifyAccountDeletionCode.mockReset()
     consumeDeletionCodeRequest.mockReset()
     clearDeletionCodeRequests.mockReset()
+    cancelSubscriptionsForAccountDeletion.mockReset()
     service = new UsersService(
       prismaService,
       supabaseAdminService,
       supabaseEmailOtpService,
       accountDeletionRateLimitService,
+      stripeService,
     )
   })
 
@@ -133,16 +140,29 @@ describe('UsersService', () => {
       user.authProviderId,
     )
     expect(deleteAuthUser).toHaveBeenCalledWith(user.authProviderId)
+    expect(cancelSubscriptionsForAccountDeletion).toHaveBeenCalledWith(user)
     expect(deleteUserRecord).toHaveBeenCalledWith({
       where: { id: user.id },
     })
     expect(clearDeletionCodeRequests).toHaveBeenCalledWith(user.id)
     expect(verifyAccountDeletionCode.mock.invocationCallOrder[0]).toBeLessThan(
+      cancelSubscriptionsForAccountDeletion.mock.invocationCallOrder[0],
+    )
+    expect(cancelSubscriptionsForAccountDeletion.mock.invocationCallOrder[0]).toBeLessThan(
       deleteAuthUser.mock.invocationCallOrder[0],
     )
     expect(deleteAuthUser.mock.invocationCallOrder[0]).toBeLessThan(
       deleteUserRecord.mock.invocationCallOrder[0],
     )
+  })
+
+  it('does not delete user records when Stripe cancellation fails', async () => {
+    verifyAccountDeletionCode.mockResolvedValue(undefined)
+    cancelSubscriptionsForAccountDeletion.mockRejectedValue(new Error('Stripe is unavailable'))
+
+    await expect(service.deleteAccount(user, '12345678')).rejects.toThrow('Stripe is unavailable')
+    expect(deleteAuthUser).not.toHaveBeenCalled()
+    expect(deleteUserRecord).not.toHaveBeenCalled()
   })
 
   it('does not delete application data when Supabase rejects account deletion', async () => {

@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react'
 
+import { createPortalSession, getBillingStatus, getInvoices } from '@/services/billingApi'
+import type { BillingStatus, Invoice } from '@/services/billingApi'
 import { CalendarDays, Check, CreditCard, Download, Loader2, ReceiptText } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-
-import { createPortalSession, getInvoices, Invoice } from '@/services/billingApi'
 
 import { useCheckoutStore } from '@/store/useCheckoutStore'
 
@@ -19,31 +19,42 @@ const planLabels = {
   admin: 'plans.admin',
 } as const
 
+const statusLabels = {
+  incomplete: 'status.incomplete',
+  incomplete_expired: 'status.incompleteExpired',
+  trialing: 'status.trialing',
+  active: 'status.active',
+  past_due: 'status.pastDue',
+  canceled: 'status.canceled',
+  unpaid: 'status.unpaid',
+  paused: 'status.paused',
+} as const
+
 type BillingSectionProps = {
   locale: string
   plan: 'free' | 'pro' | 'admin'
   proUntil: string | null | undefined
 }
 
-export const BillingSection = ({
-  locale,
-  plan,
-  proUntil,
-}: BillingSectionProps) => {
+export const BillingSection = ({ locale, plan, proUntil }: BillingSectionProps) => {
   const t = useTranslations('ProfileSettings.billing')
   const openCheckout = useCheckoutStore((state) => state.openCheckout)
   const [isOpeningPortal, setIsOpeningPortal] = useState(false)
   const [portalError, setPortalError] = useState<string | null>(null)
 
   const [invoices, setInvoices] = useState<Invoice[]>([])
+  const [billingStatus, setBillingStatus] = useState<BillingStatus | null>(null)
   const [isLoadingInvoices, setIsLoadingInvoices] = useState(true)
 
   useEffect(() => {
     let isMounted = true
 
-    getInvoices()
-      .then((data) => {
-        if (isMounted) setInvoices(data)
+    Promise.all([getInvoices(), getBillingStatus()])
+      .then(([invoiceData, status]) => {
+        if (isMounted) {
+          setInvoices(invoiceData)
+          setBillingStatus(status)
+        }
       })
       .catch(() => {
         if (isMounted) setInvoices([])
@@ -62,7 +73,7 @@ export const BillingSection = ({
     setPortalError(null)
 
     try {
-      const { url } = await createPortalSession()
+      const { url } = await createPortalSession(`/${locale}/dashboard/profile`)
       window.location.href = url
     } catch {
       setPortalError(t('currentPlan.manageSubscriptionError'))
@@ -70,13 +81,22 @@ export const BillingSection = ({
     }
   }
 
-  const renewalDate = proUntil
+  const subscription = billingStatus?.subscription
+  const periodEnd = subscription?.currentPeriodEnd ?? proUntil
+  const renewalDate = periodEnd
     ? new Intl.DateTimeFormat(locale, {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
-      }).format(new Date(proUntil))
+      }).format(new Date(periodEnd))
     : null
+
+  const statusKey = subscription?.status
+    ? statusLabels[subscription.status]
+    : plan === 'free'
+      ? 'status.free'
+      : 'status.active'
+  const isHealthy = !subscription || subscription.status === 'active'
 
   return (
     <div className="space-y-5">
@@ -100,22 +120,36 @@ export const BillingSection = ({
               </div>
             </div>
 
-            {renewalDate && (
+            {renewalDate && subscription?.cancelAtPeriodEnd && (
               <p className="mt-4 flex items-center gap-2 body-small text-gray-60">
                 <CalendarDays size={14} aria-hidden="true" />
-                {t('currentPlan.proAccessUntil', { date: renewalDate })}
+                {t('currentPlan.cancelsOn', { date: renewalDate })}
               </p>
             )}
+            {renewalDate &&
+              subscription?.status === 'active' &&
+              !subscription.cancelAtPeriodEnd && (
+                <p className="mt-4 flex items-center gap-2 body-small text-gray-60">
+                  <CalendarDays size={14} aria-hidden="true" />
+                  {t('currentPlan.renewsOn', { date: renewalDate })}
+                </p>
+              )}
           </div>
 
-          <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-success-50/25 bg-success-50/10 px-3 py-1 body-small font-semibold text-success-100">
-            <Check size={13} aria-hidden="true" />
-            {t('currentPlan.active')}
+          <span
+            className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-3 py-1 body-small font-semibold ${
+              isHealthy
+                ? 'border-success-50/25 bg-success-50/10 text-success-100'
+                : 'border-primary/25 bg-primary/10 text-primary'
+            }`}
+          >
+            {isHealthy && <Check size={13} aria-hidden="true" />}
+            {t(statusKey)}
           </span>
         </div>
 
         <div className="mt-6 border-t border-[var(--color-gray-10)] pt-5">
-          {plan === 'free' ? (
+          {plan === 'free' && !billingStatus?.customerExists ? (
             <Button
               type="button"
               size="lg"
@@ -124,7 +158,7 @@ export const BillingSection = ({
             >
               {t('currentPlan.viewProPlans')}
             </Button>
-          ) : (
+          ) : billingStatus?.customerExists ? (
             <Button
               type="button"
               size="lg"
@@ -142,7 +176,16 @@ export const BillingSection = ({
                 t('currentPlan.manageSubscription')
               )}
             </Button>
-          )}
+          ) : plan !== 'admin' ? (
+            <Button
+              type="button"
+              size="lg"
+              className="px-4 py-2"
+              onClick={() => openCheckout('pro_monthly', 'Pro')}
+            >
+              {t('currentPlan.viewProPlans')}
+            </Button>
+          ) : null}
 
           {portalError && (
             <div className="mt-3">
@@ -152,10 +195,7 @@ export const BillingSection = ({
         </div>
       </ProfileSettingsCard>
 
-      <ProfileSettingsCard
-        title={t('history.title')}
-        description={t('history.description')}
-      >
+      <ProfileSettingsCard title={t('history.title')} description={t('history.description')}>
         {isLoadingInvoices ? (
           <div className="flex flex-col gap-2 py-2">
             {[0, 1, 2].map((key) => (
@@ -206,12 +246,8 @@ export const BillingSection = ({
             <span className="mb-3 flex size-12 items-center justify-center rounded-xl bg-gray-05 text-gray-60">
               <ReceiptText size={21} aria-hidden="true" />
             </span>
-            <p className="body-medium font-semibold text-gray-100">
-              {t('history.emptyTitle')}
-            </p>
-            <p className="mt-1 max-w-sm body-small text-gray-60">
-              {t('history.emptyDescription')}
-            </p>
+            <p className="body-medium font-semibold text-gray-100">{t('history.emptyTitle')}</p>
+            <p className="mt-1 max-w-sm body-small text-gray-60">{t('history.emptyDescription')}</p>
           </div>
         )}
       </ProfileSettingsCard>
