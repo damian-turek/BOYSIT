@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Param,
+  ParseUUIDPipe,
   Query,
   Req,
   UseGuards,
@@ -43,7 +44,10 @@ export class QuestionsController {
 
   @Get(':id')
   @UseGuards(AuthGuard)
-  async getQuestionsSingle(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+  async getQuestionsSingle(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
     return this.questionsService.findSingle(id, req.user.plan, req.user.id)
   }
 }
