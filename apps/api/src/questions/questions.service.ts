@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { QuestionWhereInput, UserPlan } from 'database'
 
 import { PrismaService } from '../prisma/prisma.service'
@@ -84,8 +84,8 @@ export class QuestionsService {
   }
 
   async findSingle(id: string, viewerPlan: UserPlan, viewerUserId?: string) {
-    const data = await this.prisma.client.question.findUnique({
-      where: { id },
+    const data = await this.prisma.client.question.findFirst({
+      where: { id, isActive: true },
       include: {
         category: { select: { id: true, name: true, slug: true } },
         technology: { select: { id: true, name: true, slug: true } },
@@ -93,7 +93,14 @@ export class QuestionsService {
       },
     })
 
-    if (!data) return null
+    if (!data) {
+      throw new NotFoundException({
+        error: {
+          code: 'QUESTION_NOT_FOUND',
+          message: 'Question not found',
+        },
+      })
+    }
 
     const [[nextQuestion]] = await Promise.all([
       this.prisma.client.question.findMany({
@@ -128,8 +135,7 @@ export class QuestionsService {
     question: T,
     viewerPlan: UserPlan,
   ): T & { locked: boolean } {
-    const hasAccess =
-      question.accessLevel !== 'pro' || PLANS_WITH_FULL_ACCESS.includes(viewerPlan)
+    const hasAccess = question.accessLevel !== 'pro' || PLANS_WITH_FULL_ACCESS.includes(viewerPlan)
 
     if (hasAccess) {
       return { ...question, locked: false }
