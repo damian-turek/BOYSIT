@@ -20,14 +20,14 @@ const planLabels = {
 } as const
 
 const statusLabels = {
-  incomplete: 'status.incomplete',
-  incomplete_expired: 'status.incompleteExpired',
-  trialing: 'status.trialing',
-  active: 'status.active',
-  past_due: 'status.pastDue',
-  canceled: 'status.canceled',
-  unpaid: 'status.unpaid',
-  paused: 'status.paused',
+  incomplete: 'currentPlan.status.incomplete',
+  incomplete_expired: 'currentPlan.status.incompleteExpired',
+  trialing: 'currentPlan.status.trialing',
+  active: 'currentPlan.status.active',
+  past_due: 'currentPlan.status.pastDue',
+  canceled: 'currentPlan.status.canceled',
+  unpaid: 'currentPlan.status.unpaid',
+  paused: 'currentPlan.status.paused',
 } as const
 
 type BillingSectionProps = {
@@ -94,8 +94,8 @@ export const BillingSection = ({ locale, plan, proUntil }: BillingSectionProps) 
   const statusKey = subscription?.status
     ? statusLabels[subscription.status]
     : plan === 'free'
-      ? 'status.free'
-      : 'status.active'
+      ? 'currentPlan.status.free'
+      : 'currentPlan.status.active'
   const isHealthy = !subscription || subscription.status === 'active'
 
   return (
