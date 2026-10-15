@@ -491,5 +491,15 @@
         "viewInvoice": "Zobacz fakturę"
       }
     }
+  },
+  "CheckoutConfirmation": {
+    "successTitle": "Witamy w Pro",
+    "successDescription": "Płatność została potwierdzona. Materiały Pro są już odblokowane.",
+    "successButton": "Zacznij naukę",
+    "processingTitle": "Potwierdzamy płatność",
+    "checkingDescription": "Sprawdzamy status Twojej subskrypcji.",
+    "processingDescription": "Stripe zakończył płatność. Aktywujemy teraz dostęp Pro — zwykle zajmuje to kilka sekund.",
+    "processingButton": "Kontynuuj przeglądanie",
+    "close": "Zamknij"
   }
 }

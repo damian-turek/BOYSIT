@@ -491,5 +491,15 @@
         "viewInvoice": "View invoice"
       }
     }
+  },
+  "CheckoutConfirmation": {
+    "successTitle": "Welcome to Pro",
+    "successDescription": "Your payment is confirmed. Pro interview content is now unlocked.",
+    "successButton": "Start learning",
+    "processingTitle": "Confirming your payment",
+    "checkingDescription": "We are checking your subscription status.",
+    "processingDescription": "Stripe has completed checkout. We are activating your Pro access now; this usually takes a few seconds.",
+    "processingButton": "Continue browsing",
+    "close": "Close"
   }
 }
