@@ -11,9 +11,16 @@ import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/atoms/Button'
 
-type ConfirmationState = 'checking' | 'processing' | 'confirmed'
+type ConfirmationState = 'checking' | 'processing' | 'confirmed' | 'pending' | 'failed'
 
 const BILLING_STATUS_RETRY_DELAY_MS = 2_000
+const MAX_BILLING_STATUS_CHECKS = 30
+const unsuccessfulSubscriptionStatuses = new Set([
+  'canceled',
+  'incomplete_expired',
+  'past_due',
+  'unpaid',
+])
 
 export const CheckoutConfirmationModal = () => {
   const pathname = usePathname()
@@ -24,14 +31,17 @@ export const CheckoutConfirmationModal = () => {
   const descriptionId = useId()
   const isCheckoutReturn = searchParams.get('checkout') === 'success'
   const [state, setState] = useState<ConfirmationState>('checking')
+  const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
     if (!isCheckoutReturn) return
 
     let isCurrent = true
     let retryTimeout: number | undefined
+    let checks = 0
 
     const refreshBillingStatus = async () => {
+      checks += 1
       try {
         const billingStatus = await getBillingStatus()
         if (!isCurrent) return
@@ -40,11 +50,22 @@ export const CheckoutConfirmationModal = () => {
           setState('confirmed')
           return
         }
+        if (
+          billingStatus.subscription?.status &&
+          unsuccessfulSubscriptionStatuses.has(billingStatus.subscription.status)
+        ) {
+          setState('failed')
+          return
+        }
       } catch {
         // The return redirect is not proof of entitlement. Retry while a webhook or auth refresh is pending.
       }
 
       if (!isCurrent) return
+      if (checks >= MAX_BILLING_STATUS_CHECKS) {
+        setState('pending')
+        return
+      }
       setState('processing')
       retryTimeout = window.setTimeout(refreshBillingStatus, BILLING_STATUS_RETRY_DELAY_MS)
     }
@@ -56,7 +77,7 @@ export const CheckoutConfirmationModal = () => {
       isCurrent = false
       if (retryTimeout) window.clearTimeout(retryTimeout)
     }
-  }, [isCheckoutReturn])
+  }, [isCheckoutReturn, retryCount])
 
   useEffect(() => {
     if (!isCheckoutReturn) return
@@ -78,6 +99,8 @@ export const CheckoutConfirmationModal = () => {
 
   const isConfirmed = state === 'confirmed'
   const isChecking = state === 'checking'
+  const isPending = state === 'pending'
+  const isFailed = state === 'failed'
 
   return (
     <AnimatePresence>
@@ -120,7 +143,13 @@ export const CheckoutConfirmationModal = () => {
                   </span>
                   <div className="min-w-0">
                     <h2 id={titleId} className="body-large text-gray-100">
-                      {isConfirmed ? t('successTitle') : t('processingTitle')}
+                      {isConfirmed
+                        ? t('successTitle')
+                        : isFailed
+                          ? t('failedTitle')
+                          : isPending
+                            ? t('pendingTitle')
+                            : t('processingTitle')}
                     </h2>
                     <p
                       id={descriptionId}
@@ -129,9 +158,13 @@ export const CheckoutConfirmationModal = () => {
                     >
                       {isConfirmed
                         ? t('successDescription')
-                        : isChecking
-                          ? t('checkingDescription')
-                          : t('processingDescription')}
+                        : isFailed
+                          ? t('failedDescription')
+                          : isPending
+                            ? t('pendingDescription')
+                            : isChecking
+                              ? t('checkingDescription')
+                              : t('processingDescription')}
                     </p>
                   </div>
                 </div>
@@ -146,8 +179,22 @@ export const CheckoutConfirmationModal = () => {
               </div>
 
               <div className="mt-6 flex justify-end">
-                <Button type="button" onClick={closeModal}>
-                  {isConfirmed ? t('successButton') : t('processingButton')}
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (isPending || isFailed) {
+                      setState('checking')
+                      setRetryCount((count) => count + 1)
+                    } else {
+                      closeModal()
+                    }
+                  }}
+                >
+                  {isPending || isFailed
+                    ? t('retryButton')
+                    : isConfirmed
+                      ? t('successButton')
+                      : t('processingButton')}
                 </Button>
               </div>
             </motion.div>

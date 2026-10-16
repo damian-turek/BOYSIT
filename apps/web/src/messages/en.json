@@ -500,6 +500,11 @@
     "checkingDescription": "We are checking your subscription status.",
     "processingDescription": "Stripe has completed checkout. We are activating your Pro access now; this usually takes a few seconds.",
     "processingButton": "Continue browsing",
+    "pendingTitle": "Payment is still processing",
+    "pendingDescription": "Your payment may take longer to confirm. You can continue browsing and check again from your billing page.",
+    "failedTitle": "Payment was not completed",
+    "failedDescription": "Pro access was not activated. Check your payment method or try checkout again.",
+    "retryButton": "Check again",
     "close": "Close"
   }
 }

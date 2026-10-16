@@ -500,6 +500,11 @@
     "checkingDescription": "Sprawdzamy status Twojej subskrypcji.",
     "processingDescription": "Stripe zakończył płatność. Aktywujemy teraz dostęp Pro — zwykle zajmuje to kilka sekund.",
     "processingButton": "Kontynuuj przeglądanie",
+    "pendingTitle": "Płatność jest nadal przetwarzana",
+    "pendingDescription": "Potwierdzenie płatności może potrwać dłużej. Możesz kontynuować i ponownie sprawdzić status na stronie rozliczeń.",
+    "failedTitle": "Płatność nie została zakończona",
+    "failedDescription": "Dostęp Pro nie został aktywowany. Sprawdź metodę płatności lub spróbuj ponownie.",
+    "retryButton": "Sprawdź ponownie",
     "close": "Zamknij"
   }
 }

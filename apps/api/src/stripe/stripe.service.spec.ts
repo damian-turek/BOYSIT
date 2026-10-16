@@ -108,6 +108,36 @@ describe('StripeService subscription access', () => {
       expect.objectContaining({ data: { plan: 'free', proUntil: null } }),
     )
   })
+  it.each([
+    ['checkout.session.async_payment_succeeded', 'active', 'pro'],
+    ['checkout.session.async_payment_failed', 'incomplete', 'free'],
+  ] as const)(
+    'reconciles a subscription after %s using its current Stripe state',
+    async (type, status, expectedPlan) => {
+      const subscription = testSubscription(userId, 'cus_test', status)
+      fake.subscriptions.set(subscription.id, subscription)
+      const event = {
+        id: `evt_${type}`,
+        created: Math.floor(Date.now() / 1000),
+        type,
+        data: {
+          object: {
+            mode: 'subscription',
+            customer: 'cus_test',
+            subscription: subscription.id,
+            client_reference_id: userId,
+          },
+        },
+      } as Stripe.Event
+
+      await service.handleWebhookEvent(event)
+
+      expect(updateMany).toHaveBeenCalledWith({
+        where: { id: userId, plan: { not: 'admin' } },
+        data: { plan: expectedPlan, proUntil: expectedPlan === 'pro' ? periodEnd : null },
+      })
+    },
+  )
   it('keeps access from a new subscription when an old cancellation arrives', async () => {
     const old = testSubscription(userId, 'cus_test', 'canceled', 'sub_old')
     const current = testSubscription(userId, 'cus_test', 'active', 'sub_current')

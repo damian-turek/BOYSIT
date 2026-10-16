@@ -385,7 +385,9 @@ export class StripeService {
     let customerId: string
     let fallbackUserId: string | undefined
     switch (event.type) {
-      case 'checkout.session.completed': {
+      case 'checkout.session.completed':
+      case 'checkout.session.async_payment_succeeded':
+      case 'checkout.session.async_payment_failed': {
         const session = event.data.object as Stripe.Checkout.Session
 
         if (session.mode !== 'subscription' || !session.subscription || !session.customer) return
