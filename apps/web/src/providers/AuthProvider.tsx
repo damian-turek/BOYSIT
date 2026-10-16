@@ -106,48 +106,5 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [clear, markInitialized, setLoading, setProfile, setSession])
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('checkout') !== 'success') return
-
-    let cancelled = false
-    let attempt = 0
-    const maxAttempts = 6
-
-    const poll = async () => {
-      attempt += 1
-
-      try {
-        const profile = await fetchCurrentUser()
-        if (cancelled) return
-
-        setProfile(profile)
-
-        if (profile.plan !== 'free' || attempt >= maxAttempts) return
-      } catch (error) {
-        console.error('Post-checkout profile refresh failed', error)
-        if (attempt >= maxAttempts) return
-      }
-
-      if (!cancelled) setTimeout(poll, 1500)
-    }
-
-    void poll()
-
-    params.delete('checkout')
-    const search = params.toString()
-    window.history.replaceState(
-      {},
-      '',
-      window.location.pathname + (search ? `?${search}` : '') + window.location.hash,
-    )
-
-    return () => {
-      cancelled = true
-    }
-  }, [setProfile])
-
   return <>{children}</>
 }

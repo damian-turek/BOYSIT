@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "predev": "pnpm --filter database build",
-    "dev": "concurrently -n api,stripe -c blue,magenta \"nest start --watch\" \"pnpm stripe:listen\" --kill-others=false",
-    "stripe:listen": "stripe listen --forward-to localhost:4000/api/v1/stripe/webhook",
+    "dev": "concurrently -n api,stripe -c blue,magenta \"nest start --watch\" \"pnpm stripe:listen\" --kill-others-on-fail",
+    "stripe:listen": "node --env-file=.env scripts/stripe-listen.mjs",
     "prebuild": "pnpm --filter database build",
     "build": "nest build",
     "start": "node dist/main.js",
@@ -29,9 +29,10 @@
   "devDependencies": {
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
+    "@stripe/cli": "1.53.1",
     "@types/node": "^22.15.3",
+    "concurrently": "^9.0.0",
     "typescript": "^5.7.0",
-    "vitest": "^2.1.9",
-    "concurrently": "^9.0.0"
+    "vitest": "^2.1.9"
   }
 }

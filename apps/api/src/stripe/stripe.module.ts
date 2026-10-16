@@ -25,5 +25,6 @@ import { StripeService } from './stripe.service'
     },
     StripeService,
   ],
+  exports: [StripeService],
 })
 export class StripeModule {}

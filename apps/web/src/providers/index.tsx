@@ -1,13 +1,14 @@
 'use client'
 
-import { ReactNode } from 'react'
+import { ReactNode, Suspense } from 'react'
+
+import { AuthProvider } from '@/providers/AuthProvider'
+import { ThemeProvider } from '@/providers/ThemeProvider'
+import { AbstractIntlMessages, NextIntlClientProvider } from 'next-intl'
 
 import { AuthModal } from '@/components/organisms/AuthModal'
-import { CheckoutModal } from '@/components/organisms/CheckoutModal'
+import { CheckoutConfirmationModal, CheckoutModal } from '@/components/organisms/CheckoutModal'
 import { CookieNotice } from '@/components/organisms/CookieNotice'
-import { ThemeProvider } from '@/providers/ThemeProvider'
-import { AuthProvider } from '@/providers/AuthProvider'
-import { AbstractIntlMessages, NextIntlClientProvider } from 'next-intl'
 
 interface AppProvidersProps {
   children: ReactNode
@@ -23,6 +24,9 @@ export function AppProviders({ children, locale, messages }: AppProvidersProps) 
           <div>{children}</div>
           <AuthModal />
           <CheckoutModal />
+          <Suspense fallback={null}>
+            <CheckoutConfirmationModal />
+          </Suspense>
           <CookieNotice />
         </AuthProvider>
       </ThemeProvider>

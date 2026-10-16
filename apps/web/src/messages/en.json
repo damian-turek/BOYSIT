@@ -466,11 +466,22 @@
         "description": "Your subscription controls access to protected questions.",
         "freeDescription": "Free questions and basic account features.",
         "paidDescription": "Full access to protected interview content.",
-        "proAccessUntil": "Pro access until {date}",
-        "active": "Active",
+        "renewsOn": "Renews on {date}",
+        "cancelsOn": "Access ends on {date}",
         "viewProPlans": "View Pro plans",
         "manageSubscription": "Manage subscription",
-        "manageSubscriptionError": "Could not open the billing portal. Please try again."
+        "manageSubscriptionError": "Could not open the billing portal. Please try again.",
+        "status": {
+          "free": "Free",
+          "active": "Active",
+          "trialing": "Trialing",
+          "pastDue": "Payment overdue",
+          "unpaid": "Unpaid",
+          "paused": "Paused",
+          "canceled": "Canceled",
+          "incomplete": "Payment incomplete",
+          "incompleteExpired": "Payment expired"
+        }
       },
       "history": {
         "title": "Billing history",
@@ -480,5 +491,20 @@
         "viewInvoice": "View invoice"
       }
     }
+  },
+  "CheckoutConfirmation": {
+    "successTitle": "Welcome to Pro",
+    "successDescription": "Your payment is confirmed. Pro interview content is now unlocked.",
+    "successButton": "Start learning",
+    "processingTitle": "Confirming your payment",
+    "checkingDescription": "We are checking your subscription status.",
+    "processingDescription": "Stripe has completed checkout. We are activating your Pro access now; this usually takes a few seconds.",
+    "processingButton": "Continue browsing",
+    "pendingTitle": "Payment is still processing",
+    "pendingDescription": "Your payment may take longer to confirm. You can continue browsing and check again from your billing page.",
+    "failedTitle": "Payment was not completed",
+    "failedDescription": "Pro access was not activated. Check your payment method or try checkout again.",
+    "retryButton": "Check again",
+    "close": "Close"
   }
 }

@@ -4,6 +4,7 @@ import type { User } from 'database'
 import { SupabaseAdminService } from '../auth/supabase-admin.service'
 import { SupabaseEmailOtpService } from '../auth/supabase-email-otp.service'
 import { PrismaService } from '../prisma/prisma.service'
+import { StripeService } from '../stripe/stripe.service'
 import {
   ACCOUNT_DELETION_CODE_COOLDOWN_SECONDS,
   AccountDeletionRateLimitService,
@@ -32,6 +33,7 @@ export class UsersService {
     private readonly supabaseAdminService: SupabaseAdminService,
     private readonly supabaseEmailOtpService: SupabaseEmailOtpService,
     private readonly accountDeletionRateLimitService: AccountDeletionRateLimitService,
+    private readonly stripeService: StripeService,
   ) {}
 
   formatUserProfile(user: User): UserProfileResponse {
@@ -83,6 +85,7 @@ export class UsersService {
       code,
       user.authProviderId,
     )
+    await this.stripeService.cancelSubscriptionsForAccountDeletion(user)
     await this.supabaseAdminService.deleteUser(user.authProviderId)
     await this.prismaService.client.user.delete({
       where: { id: user.id },

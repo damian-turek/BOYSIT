@@ -40,6 +40,7 @@ enum SubscriptionStatus {
   past_due
   canceled
   unpaid
+  paused
 }
 
 enum JobApplicationStatus {
@@ -81,6 +82,7 @@ model User {
   subscriptions   Subscription[]
   jobApplications JobApplication[]
   examSessions    ExamSession[]
+  billingAccount  BillingAccount?
 
   @@map("users")
 }
@@ -232,7 +234,7 @@ model Subscription {
   userId String @map("user_id") @db.Uuid
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  stripeCustomerId     String? @unique @map("stripe_customer_id")
+  stripeCustomerId     String? @map("stripe_customer_id")
   stripeSubscriptionId String? @unique @map("stripe_subscription_id")
   stripePriceId        String? @map("stripe_price_id")
 
@@ -245,7 +247,43 @@ model Subscription {
 
   @@index([userId])
   @@index([status])
+  @@index([stripeCustomerId])
   @@map("subscriptions")
+}
+
+model BillingAccount {
+  userId                   String                  @id @map("user_id") @db.Uuid
+  stripeCustomerId         String?                 @unique @map("stripe_customer_id")
+  customerRequestStartedAt DateTime                @default(now()) @map("customer_request_started_at")
+  user                     User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checkoutAttempts         StripeCheckoutAttempt[]
+
+  @@map("billing_accounts")
+}
+
+model StripeCheckoutAttempt {
+  id                      String         @id @default(uuid()) @db.Uuid
+  userId                  String         @map("user_id") @db.Uuid
+  stripeCheckoutSessionId String?        @unique @map("stripe_checkout_session_id")
+  priceId                 String         @map("price_id")
+  planId                  String         @map("plan_id")
+  successUrl              String         @map("success_url")
+  cancelUrl               String         @map("cancel_url")
+  automaticTax            Boolean        @map("automatic_tax")
+  createdAt               DateTime       @default(now()) @map("created_at")
+  account                 BillingAccount @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("stripe_checkout_attempts")
+}
+
+model StripeWebhookEvent {
+  eventId         String   @id @map("event_id")
+  type            String
+  stripeCreatedAt DateTime @map("stripe_created_at")
+  processedAt     DateTime @default(now()) @map("processed_at")
+
+  @@map("stripe_webhook_events")
 }
 
 model JobApplication {

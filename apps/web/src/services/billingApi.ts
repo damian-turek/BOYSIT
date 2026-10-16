@@ -20,6 +20,23 @@ export type Invoice = {
   invoicePdf: string | null
 }
 
+export type BillingStatus = {
+  customerExists: boolean
+  subscription: {
+    status:
+      | 'incomplete'
+      | 'incomplete_expired'
+      | 'trialing'
+      | 'active'
+      | 'past_due'
+      | 'canceled'
+      | 'unpaid'
+      | 'paused'
+    currentPeriodEnd: string | null
+    cancelAtPeriodEnd: boolean
+  } | null
+}
+
 export const createCheckoutSession = async (
   planId: string,
   returnPath: string,
@@ -33,12 +50,19 @@ export const createCheckoutSession = async (
   return (await response.json()) as CheckoutSessionResponse
 }
 
-export const createPortalSession = async (): Promise<PortalSessionResponse> => {
+export const createPortalSession = async (returnPath: string): Promise<PortalSessionResponse> => {
   const response = await requestAuthenticatedApi('/api/v1/stripe/portal-session', {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ returnPath }),
   })
 
   return (await response.json()) as PortalSessionResponse
+}
+
+export const getBillingStatus = async (): Promise<BillingStatus> => {
+  const response = await requestAuthenticatedApi('/api/v1/stripe/subscription')
+  return (await response.json()) as BillingStatus
 }
 
 export const getInvoices = async (): Promise<Invoice[]> => {
