@@ -48,6 +48,7 @@ export const BillingSection = ({ locale, plan, proUntil }: BillingSectionProps) 
 
   useEffect(() => {
     let isMounted = true
+    setIsLoadingInvoices(true)
 
     Promise.all([getInvoices(), getBillingStatus()])
       .then(([invoiceData, status]) => {
@@ -66,7 +67,7 @@ export const BillingSection = ({ locale, plan, proUntil }: BillingSectionProps) 
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [plan, proUntil])
 
   const handleManageSubscription = async () => {
     setIsOpeningPortal(true)

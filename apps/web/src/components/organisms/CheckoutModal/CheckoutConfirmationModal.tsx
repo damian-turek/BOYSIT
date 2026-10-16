@@ -4,10 +4,13 @@ import { useEffect, useId, useState } from 'react'
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
+import { fetchCurrentUser } from '@/services/authApi'
 import { getBillingStatus } from '@/services/billingApi'
-import { CheckCircle2, Loader2, X } from 'lucide-react'
+import { CheckCircle2, CircleAlert, Loader2, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
+
+import { useAuthSessionStore } from '@/store/useAuthSessionStore'
 
 import { Button } from '@/components/atoms/Button'
 
@@ -32,6 +35,7 @@ export const CheckoutConfirmationModal = () => {
   const isCheckoutReturn = searchParams.get('checkout') === 'success'
   const [state, setState] = useState<ConfirmationState>('checking')
   const [retryCount, setRetryCount] = useState(0)
+  const setProfile = useAuthSessionStore((state) => state.setProfile)
 
   useEffect(() => {
     if (!isCheckoutReturn) return
@@ -47,8 +51,14 @@ export const CheckoutConfirmationModal = () => {
         if (!isCurrent) return
 
         if (billingStatus.subscription?.status === 'active') {
-          setState('confirmed')
-          return
+          const profile = await fetchCurrentUser()
+          if (!isCurrent) return
+          setProfile(profile)
+          if (profile.plan === 'pro' || profile.plan === 'admin') {
+            setState('confirmed')
+            router.refresh()
+            return
+          }
         }
         if (
           billingStatus.subscription?.status &&
@@ -77,7 +87,7 @@ export const CheckoutConfirmationModal = () => {
       isCurrent = false
       if (retryTimeout) window.clearTimeout(retryTimeout)
     }
-  }, [isCheckoutReturn, retryCount])
+  }, [isCheckoutReturn, retryCount, router, setProfile])
 
   useEffect(() => {
     if (!isCheckoutReturn) return
@@ -119,7 +129,7 @@ export const CheckoutConfirmationModal = () => {
               aria-modal="true"
               aria-labelledby={titleId}
               aria-describedby={descriptionId}
-              aria-busy={!isConfirmed}
+              aria-busy={isChecking || state === 'processing'}
               initial={{ opacity: 0, y: 12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
@@ -137,6 +147,8 @@ export const CheckoutConfirmationModal = () => {
                   >
                     {isConfirmed ? (
                       <CheckCircle2 size={22} aria-hidden="true" />
+                    ) : isPending || isFailed ? (
+                      <CircleAlert size={22} aria-hidden="true" />
                     ) : (
                       <Loader2 size={21} className="animate-spin" aria-hidden="true" />
                     )}

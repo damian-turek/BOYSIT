@@ -7,6 +7,17 @@ not automatically reconcile every existing user.
 
 ## Webhooks
 
+For local development, run `pnpm --filter api dev` to start both Nest and webhook forwarding.
+The Stripe CLI is an API development dependency. The listener loads `apps/api/.env`, uses its
+test API key, and checks that `STRIPE_WEBHOOK_SECRET` matches the CLI signing secret before
+forwarding the six supported Checkout/subscription events. A listener failure stops the dev
+command so payments cannot silently continue without webhook delivery. To run just the listener
+alongside an already running API, use `pnpm --filter api stripe:listen`.
+
+Checkout confirmation owns the post-payment polling and URL flag. Once the API confirms active
+paid access, it refreshes the application profile and server-rendered content. The billing section
+reloads invoices and status when the profile plan or paid period changes.
+
 The existing signature verification remains the entry boundary. For supported subscription events,
 `stripe_webhook_events.event_id` is inserted with conflict handling inside the same transaction as
 subscription and user updates. Failed processing rolls back the receipt, allowing Stripe to retry.
