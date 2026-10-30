@@ -94,10 +94,10 @@ export const JobApplicationCard = ({
   }, [])
 
   return (
-    <article className="flex h-full flex-col rounded-xl border border-[var(--color-gray-10)] bg-gray-05 p-5 transition-colors hover:border-primary/30">
+    <article className="surface-card flex h-full flex-col p-5">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="flex min-w-0 gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-[#BBD3FF] bg-[#E8F0FF] font-mono text-[14px] leading-5 font-bold text-primary">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 font-mono text-[14px] leading-5 font-bold text-primary">
             {getInitials(application.company)}
           </span>
           <div className="min-w-0">
@@ -107,22 +107,22 @@ export const JobApplicationCard = ({
             <p className="body-medium truncate text-gray-60">{application.company}</p>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-3 text-gray-60">
+        <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
-            className="transition-colors hover:text-primary"
+            className="icon-control hover:text-primary"
             aria-label={t('card.editJob')}
             onClick={() => onEdit(application)}
           >
-            <Pencil size={15} />
+            <Pencil size={15} aria-hidden="true" />
           </button>
           <button
             type="button"
-            className="transition-colors hover:text-alert-100"
+            className="icon-control hover:text-alert-50"
             aria-label={t('card.deleteJob')}
             onClick={() => onDelete(application.id)}
           >
-            <Trash2 size={15} />
+            <Trash2 size={15} aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -132,7 +132,7 @@ export const JobApplicationCard = ({
           <button
             type="button"
             className={cn(
-              'inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 font-semibold transition-shadow hover:shadow-xs',
+              'inline-flex min-h-10 items-center gap-1.5 rounded-lg border px-2 py-1 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
               status.className,
             )}
             aria-expanded={isStatusOpen}
@@ -156,7 +156,7 @@ export const JobApplicationCard = ({
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2, ease: 'easeInOut' }}
-                className="absolute left-0 top-full z-20 mt-2 w-44 overflow-hidden rounded-xl border border-[var(--color-gray-10)] bg-white shadow-xl dark:bg-[var(--color-gray-05)]"
+                className="surface-popover absolute left-0 top-full z-20 mt-2 w-44 overflow-hidden"
               >
                 <div className="p-1">
                   {JOB_APPLICATION_STATUSES.map((statusId) => {
@@ -168,7 +168,7 @@ export const JobApplicationCard = ({
                         key={statusId}
                         type="button"
                         className={cn(
-                          'flex w-full items-center gap-2 rounded-lg px-2.5 py-2 body-small font-semibold text-gray-60 transition-colors hover:bg-gray-05 hover:text-gray-100',
+                          'flex min-h-10 w-full items-center gap-2 rounded-lg px-2.5 py-2 body-small font-semibold text-gray-60 transition-colors hover:bg-surface-hover hover:text-gray-100 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary',
                           isSelected ? 'bg-gray-05 text-gray-100' : '',
                         )}
                         onClick={() => {
@@ -249,7 +249,7 @@ export const JobApplicationCard = ({
         </div>
       )}
 
-      <p className="mb-3 min-h-[45px] overflow-hidden rounded-xl border border-[var(--color-gray-10)] bg-gray-05 px-3 py-2 body-medium text-gray-60 line-clamp-2">
+      <p className="surface-inset mb-3 min-h-[45px] overflow-hidden px-3 py-2 body-medium text-gray-60 line-clamp-2">
         {application.note || t('defaults.noNotes')}
       </p>
 

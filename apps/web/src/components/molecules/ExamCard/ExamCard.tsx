@@ -2,7 +2,7 @@
 
 import type { LucideIcon } from 'lucide-react'
 import { Gauge, Layers3, LoaderCircle, LockKeyhole, Play, ShieldCheck } from 'lucide-react'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 
 import { cn } from '@/utils/cn'
 
@@ -30,29 +30,22 @@ export type ExamCardProps = {
   onStart: () => void
 }
 
-const toneClassNames: Record<
-  ExamCardTone,
-  { icon: string; iconBackground: string; border: string }
-> = {
+const toneClassNames: Record<ExamCardTone, { icon: string; iconBackground: string }> = {
   blue: {
     icon: 'text-[#2563EB] dark:text-[#93C5FD]',
     iconBackground: 'bg-[#DBEAFE] dark:bg-[#2563EB]/25',
-    border: 'hover:border-[#93C5FD] dark:hover:border-[#60A5FA]/45',
   },
   purple: {
     icon: 'text-[#7C3AED] dark:text-[#C4B5FD]',
     iconBackground: 'bg-[#EDE9FE] dark:bg-[#7C3AED]/25',
-    border: 'hover:border-[#C4B5FD] dark:hover:border-[#A78BFA]/45',
   },
   amber: {
     icon: 'text-[#D97706] dark:text-[#FDBA74]',
     iconBackground: 'bg-[#FEF3C7] dark:bg-[#F59E0B]/25',
-    border: 'hover:border-[#FDE68A] dark:hover:border-[#FDBA74]/45',
   },
   green: {
     icon: 'text-[#059669] dark:text-[#6EE7B7]',
     iconBackground: 'bg-[#D1FAE5] dark:bg-[#10B981]/25',
-    border: 'hover:border-[#A7F3D0] dark:hover:border-[#6EE7B7]/45',
   },
 }
 
@@ -76,20 +69,16 @@ export const ExamCard = ({
   onStart,
 }: ExamCardProps) => {
   const toneClasses = toneClassNames[tone]
+  const reduceMotion = useReducedMotion()
 
   return (
     <motion.article
-      layout
-      initial={{ opacity: 0, y: 14 }}
+      layout={!reduceMotion}
+      initial={reduceMotion ? false : { opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={isLocked ? undefined : { y: -3 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
       aria-busy={isBusy}
-      className={cn(
-        'relative flex h-full flex-col rounded-xl border border-[var(--color-gray-10)] bg-gray-05 p-5 transition-colors',
-        toneClasses.border,
-        isLocked && 'bg-gray-60/[0.03]',
-      )}
+      className={cn('surface-card relative flex h-full flex-col p-5')}
     >
       <div className="mb-4 flex items-start gap-3">
         <span
@@ -132,7 +121,7 @@ export const ExamCard = ({
             value={selectedCardCount}
             disabled={isBusy}
             onChange={(event) => onCardCountChange(Number(event.target.value))}
-            className="rounded-lg border border-[var(--color-gray-10)] bg-white px-3 py-1.5 body-small text-gray-100 outline-none focus:border-primary dark:bg-white/5"
+            className="field-control min-h-10 px-3 py-1.5 body-small"
           >
             {cardCountOptions.map((count) => (
               <option key={count} value={count}>

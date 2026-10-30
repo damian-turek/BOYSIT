@@ -1,4 +1,13 @@
 {
+  "Loading": {
+    "dashboard": "Wczytywanie panelu…",
+    "questions": "Wczytywanie pytań…",
+    "question": "Wczytywanie pytania…",
+    "profile": "Wczytywanie profilu…",
+    "exams": "Wczytywanie zestawów fiszek…",
+    "examSession": "Wczytywanie fiszek…",
+    "jobTracker": "Wczytywanie aplikacji…"
+  },
   "Header": {
     "login": "Zaloguj się",
     "getStarted": "Rozpocznij"
@@ -51,8 +60,41 @@
     "shortcut": "Skróty"
   },
   "QuestionsPage": {
-    "inputPlaceholder": "Wyszukaj pytania, tematy, firmy...",
-    "filters": "Filtry"
+    "inputPlaceholder": "Wyszukaj pytania, tematy, firmy…",
+    "filters": "Filtry",
+    "title": "Pytania",
+    "questionCount": "{count, plural, one {# pytanie} few {# pytania} many {# pytań} other {# pytania}}",
+    "searchLabel": "Szukaj pytań rekrutacyjnych",
+    "seniority": "Poziom",
+    "allLevels": "Wszystkie poziomy",
+    "junior": "Junior",
+    "middle": "Middle",
+    "senior": "Senior",
+    "domain": "Dziedzina",
+    "technology": "Technologia",
+    "closeFilters": "Zamknij filtry",
+    "saveQuestion": "Zapisz pytanie",
+    "unsaveQuestion": "Usuń zapisane pytanie",
+    "saved": "Zapisano",
+    "showAnswer": "Pokaż odpowiedź",
+    "hideAnswer": "Ukryj odpowiedź",
+    "answer": "Przykładowa odpowiedź",
+    "answerUnavailable": "Odpowiedź na to pytanie nie została jeszcze opublikowana.",
+    "openQuestion": "Otwórz pełne pytanie",
+    "emptyDescription": "Żadne pytanie nie pasuje do filtrów. Zmień kryteria lub wpisz szersze zapytanie.",
+    "backToQuestions": "Wróć do pytań",
+    "interviewQuestion": "Pytanie rekrutacyjne",
+    "copyLink": "Kopiuj link",
+    "linkCopied": "Link skopiowany",
+    "copyError": "Nie udało się skopiować linku. Skopiuj go z paska adresu przeglądarki.",
+    "explanation": "Szczegółowe wyjaśnienie",
+    "codeExample": "Przykład kodu",
+    "questionDetails": "Szczegóły pytania",
+    "questionNavigation": "Nawigacja po pytaniach",
+    "nextQuestion": "Następne pytanie",
+    "lockedTitle": "Ćwicz dalej z Pro",
+    "lockedDescription": "To pytanie należy do biblioteki Pro. Wykup subskrypcję, aby przeczytać pełne pytanie i przykładową odpowiedź.",
+    "unlockPro": "Odblokuj z Pro"
   },
   "JobTracker": {
     "title": "Tracker ofert pracy",

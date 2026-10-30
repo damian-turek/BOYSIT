@@ -1,21 +1,21 @@
-import { ComponentPropsWithoutRef, ComponentType } from 'react'
+import type { ComponentPropsWithoutRef, ComponentType } from 'react'
 
 import Image, { type StaticImageData } from 'next/image'
 import Link from 'next/link'
 
 import { type VariantProps, cva } from 'class-variance-authority'
-import { LucideProps } from 'lucide-react'
+import type { LucideProps } from 'lucide-react'
 
 import { cn } from '@/utils/cn'
 
 const buttonVariants = cva(
-  'w-fit inline-flex gap-2 items-center justify-center rounded-xl transition-all ease-in-out duration-200 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
+  'w-fit min-h-10 inline-flex gap-2 items-center justify-center rounded-xl transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-50 cursor-pointer motion-reduce:transition-none',
   {
     variants: {
       variant: {
-        primary: 'bg-primary text-white hover:bg-primary/90',
+        primary: 'bg-primary text-on-primary hover:bg-primary/90',
         secondary:
-          'border border-gray-100/20 bg-transparent text-gray-100 hover:border-gray-100/40',
+          'border border-gray-10 bg-surface-raised text-gray-100 hover:border-border-strong hover:bg-surface-hover',
         text: 'bg-transparent text-gray-60 hover:text-primary/90',
       },
       size: {
@@ -30,7 +30,6 @@ const buttonVariants = cva(
     compoundVariants: [
       { size: 'md', iconOnly: true, class: 'px-1.5 rounded-[12px]!' },
       { size: 'lg', iconOnly: true, class: 'px-[14px]' },
-      { size: 'lg', iconOnly: false, variant: 'primary', class: 'shadow-lg shadow-primary/50' },
     ],
     defaultVariants: {
       variant: 'primary',
@@ -61,33 +60,47 @@ export const Button = <T extends ButtonAsElement = 'button'>({
   type,
   ...props
 }: ButtonProps<T>) => {
-  const Component = as === 'link' ? Link : 'button'
-
   const componentProps = {
     className: cn(buttonVariants({ variant, size, className, iconOnly }), className),
     'data-slot': 'button',
-    ...(as !== 'link' ? { type: type || 'button' } : {}),
-    ...props,
-  } as any
+  }
 
   const isStaticImage = Icon && typeof Icon === 'object' && 'src' in Icon
   const isStringImage = typeof Icon === 'string'
 
-  return (
-    <Component {...componentProps}>
+  const content = (
+    <>
       {Icon &&
         (isStringImage || isStaticImage ? (
           <Image
             src={Icon as string | StaticImageData}
-            alt="button icon"
+            alt=""
             width={16}
             height={16}
             className={cn(variant === 'primary' && !iconOnly ? 'invert' : '')}
           />
         ) : (
-          <Icon size={16} />
+          <Icon size={16} aria-hidden="true" />
         ))}
       {children}
-    </Component>
+    </>
+  )
+
+  if (as === 'link') {
+    return (
+      <Link {...(props as ComponentPropsWithoutRef<typeof Link>)} {...componentProps}>
+        {content}
+      </Link>
+    )
+  }
+
+  return (
+    <button
+      {...(props as ComponentPropsWithoutRef<'button'>)}
+      {...componentProps}
+      type={(type as ComponentPropsWithoutRef<'button'>['type']) || 'button'}
+    >
+      {content}
+    </button>
   )
 }

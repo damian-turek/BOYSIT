@@ -141,7 +141,7 @@ export const JobApplicationFormModal = ({
       {isOpen && (
         <>
           <motion.div
-            className="fixed inset-0 z-50 bg-black/40"
+            className="fixed inset-0 z-50 bg-overlay backdrop-blur-xs"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -158,7 +158,7 @@ export const JobApplicationFormModal = ({
               aria-modal="true"
               aria-labelledby={titleId}
               aria-describedby={descriptionId}
-              className="my-auto w-full max-w-2xl rounded-xl border border-[var(--color-gray-10)] bg-white p-5 shadow-2xl dark:bg-[var(--color-gray-05)]"
+              className="surface-dialog my-auto w-full max-w-2xl p-5 sm:p-6"
             >
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div>
@@ -239,7 +239,7 @@ export const JobApplicationFormModal = ({
                     onChange={(event) =>
                       setForm({ ...form, status: event.target.value as JobApplicationStatus })
                     }
-                    className="h-11 w-full rounded-xl border border-gray-60/20 bg-gray-65/5 px-4 body-medium text-gray-100 focus:border-primary/60 focus:outline-hidden dark:bg-gray-10/20"
+                    className="field-control h-11 w-full px-4 body-medium"
                   >
                     {JOB_APPLICATION_STATUSES.map((status) => (
                       <option key={status} value={status}>
@@ -268,7 +268,7 @@ export const JobApplicationFormModal = ({
                   <span className="label-font text-gray-60 select-none">
                     {t('modal.technologies')}
                   </span>
-                  <div className="mt-1.5 grid max-h-36 grid-cols-2 gap-2 overflow-y-auto rounded-xl border border-gray-60/20 bg-gray-65/5 p-3 sm:grid-cols-3 dark:bg-gray-10/20">
+                  <div className="surface-inset mt-1.5 grid max-h-36 grid-cols-2 gap-2 overflow-y-auto p-3 sm:grid-cols-3">
                     {technologyOptions.length ? (
                       technologyOptions.map((technology) => (
                         <label
@@ -321,7 +321,7 @@ export const JobApplicationFormModal = ({
                     onChange={(event) => setForm({ ...form, note: event.target.value })}
                     placeholder={t('modal.notesPlaceholder')}
                     rows={4}
-                    className="min-h-28 w-full resize-y rounded-xl border border-gray-60/20 bg-gray-65/5 px-4 py-3 body-medium text-gray-100 placeholder:text-gray-60/50 focus:border-primary/60 focus:outline-hidden dark:bg-gray-10/20"
+                    className="field-control min-h-28 w-full resize-y px-4 py-3 body-medium"
                   />
                 </div>
               </fieldset>

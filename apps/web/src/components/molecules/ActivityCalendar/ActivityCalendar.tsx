@@ -68,7 +68,7 @@ export const ActivityCalendar = ({ activities, streak }: ActivityCalendarProps) 
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, delay: 0.1 }}
-      className="w-full rounded-2xl bg-gray-60/5 border border-gray-60/30 p-6"
+      className="surface-card w-full p-5"
     >
       <div className="flex flex-col gap-4 md:flex-row md:items-center sm:justify-between mb-6">
         <div className="flex items-center gap-2">

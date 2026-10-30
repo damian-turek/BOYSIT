@@ -29,6 +29,8 @@ import { cn } from '@/utils/cn'
 import { Button } from '@/components/atoms/Button'
 import type { ExamCardTone } from '@/components/molecules/ExamCard'
 import { ExamCard } from '@/components/molecules/ExamCard'
+import { LoadingState } from '@/components/molecules/LoadingState'
+import { ExamCardsSkeleton } from '@/components/organisms/PageLoading/PageSkeletons'
 
 type ExamFilterCategory = 'all' | ExamCategory
 
@@ -227,15 +229,9 @@ export const ExamHub = () => {
         </div>
 
         {catalogLoading ? (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3" aria-live="polite">
-            {Array.from({ length: 6 }, (_, index) => (
-              <div
-                key={index}
-                className="h-[320px] animate-pulse rounded-xl border border-[var(--color-gray-10)] bg-gray-05"
-              />
-            ))}
-            <span className="sr-only">{t('library.loading')}</span>
-          </div>
+          <LoadingState label={t('library.loading')}>
+            <ExamCardsSkeleton />
+          </LoadingState>
         ) : (
           <motion.div layout className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
             <AnimatePresence mode="popLayout">

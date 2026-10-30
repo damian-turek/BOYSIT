@@ -4,16 +4,15 @@ import { useEffect, useRef, useState } from 'react'
 
 import Link from 'next/link'
 
+import { LEVEL_COLOR_MAP } from '@/config/questions'
+import { SearchQuestionResult, searchQuestions } from '@/services/searchApi'
+import { Level } from '@/types/question'
 import { Flame, Lock, Search } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
-import { LEVEL_COLOR_MAP } from '@/config/questions'
-import { searchQuestions, SearchQuestionResult } from '@/services/searchApi'
-import { Level } from '@/types/question'
-
-import { Input } from '@/components/atoms/inputs/Input'
 import { Tag } from '@/components/atoms/Tag'
+import { Input } from '@/components/atoms/inputs/Input'
 
 export type WelcomeSectionProps = {
   title: string
@@ -129,7 +128,7 @@ export const WelcomeSection = ({ title, text, streak }: WelcomeSectionProps) => 
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -8, scale: 0.98 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="absolute top-full left-0 mt-2 w-full rounded-xl border border-gray-60/30 bg-white dark:bg-[var(--color-gray-05)] shadow-xl overflow-hidden z-20"
+              className="surface-popover absolute top-full left-0 mt-2 w-full overflow-hidden z-20"
             >
               {isLoading ? (
                 <div className="flex flex-col gap-2 p-4">

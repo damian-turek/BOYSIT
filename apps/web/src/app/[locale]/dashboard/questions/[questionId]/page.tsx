@@ -21,8 +21,8 @@ export const generateMetadata = async ({ params }: PageProps): Promise<Metadata>
     const { SINGLE_QUESTION_DATA } = await getQuestionsSinglePageData(questionId)
 
     return {
-      title: `${SINGLE_QUESTION_DATA.question} | Questions`,
-      description: SINGLE_QUESTION_DATA.category + `interview question.`,
+      title: `${SINGLE_QUESTION_DATA.title || SINGLE_QUESTION_DATA.question} | Questions`,
+      description: `${SINGLE_QUESTION_DATA.category.name} interview question.`,
     }
   } catch {
     return { title: 'Question not found' }
@@ -35,7 +35,7 @@ export default async function QuestionPage({ params }: PageProps) {
   try {
     const { SINGLE_QUESTION_DATA } = await getQuestionsSinglePageData(questionId)
 
-    if (!SINGLE_QUESTION_DATA.question) {
+    if (!SINGLE_QUESTION_DATA.question && !SINGLE_QUESTION_DATA.title) {
       notFound()
     }
 

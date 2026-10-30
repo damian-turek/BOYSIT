@@ -159,7 +159,7 @@ export const AuthModal = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeModal}
-            className="absolute inset-0 bg-white/90 backdrop-blur-xs"
+            className="absolute inset-0 bg-overlay backdrop-blur-xs"
           />
 
           <motion.div
@@ -167,7 +167,7 @@ export const AuthModal = () => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ type: 'spring', duration: 0.4, bounce: 0 }}
-            className="relative z-10 flex w-full max-w-md flex-col items-center rounded-2xl border border-gray-60/20 bg-white p-6 shadow-2xl md:p-8 dark:border-gray-10/30 dark:bg-white"
+            className="surface-dialog relative z-10 flex w-full max-w-md flex-col items-center p-6 md:p-8"
           >
             <Button
               onClick={closeModal}
@@ -177,7 +177,7 @@ export const AuthModal = () => {
               aria-label="Close modal"
             />
 
-            <div className="absolute -top-15 flex items-center gap-2 font-bold tracking-[-0.6px] text-gray-100 body-font">
+            <div className="mb-6 flex items-center gap-2 font-bold tracking-[-0.6px] text-gray-100 body-font">
               <Button icon={Logo} iconOnly className="h-10 w-10" />
               PrepCode
             </div>
@@ -213,8 +213,8 @@ export const AuthModal = () => {
             </div>
 
             <div className="relative my-5 flex w-full items-center justify-center">
-              <div className="h-px w-full bg-gray-60/20" />
-              <span className="absolute bg-white px-3 body-small text-gray-60 dark:bg-white">
+              <div className="h-px w-full bg-gray-10" />
+              <span className="absolute bg-surface-raised px-3 body-small text-gray-60">
                 {t('label')}
               </span>
             </div>

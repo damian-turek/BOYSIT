@@ -42,7 +42,7 @@ export const CookieNotice = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 24 }}
           transition={{ duration: 0.2 }}
-          className="fixed bottom-4 left-4 right-4 z-40 mx-auto flex max-w-xl flex-col gap-3 rounded-xl border border-[var(--color-gray-10)] bg-white p-4 shadow-xl sm:flex-row sm:items-center dark:bg-[var(--color-gray-05)]"
+          className="surface-popover fixed bottom-4 left-4 right-4 z-40 mx-auto flex max-w-xl flex-col gap-3 p-4 sm:flex-row sm:items-center"
           role="region"
           aria-label="Cookie notice"
         >

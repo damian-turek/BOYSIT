@@ -20,12 +20,13 @@ export const Pagination = ({
   }
 
   return (
-    <div className="flex gap-2 mt-8 justify-center">
+    <div className="flex flex-wrap gap-2 mt-8 justify-center">
       {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
         <Link
           key={page}
           href={createPageURL(page)}
-          className={`px-3 transform duration-150 ease-in-out py-1 rounded-lg ${currentPage === page ? 'bg-primary text-white' : 'text-gray-100 border border-gray-60/30 hover:bg-gray-60/20'}`}
+          aria-current={currentPage === page ? 'page' : undefined}
+          className={`inline-flex min-h-10 min-w-10 items-center justify-center rounded-xl border px-3 py-1 tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none ${currentPage === page ? 'border-primary bg-primary text-on-primary' : 'border-gray-10 bg-surface text-gray-100 hover:border-border-strong hover:bg-surface-hover'}`}
         >
           {page}
         </Link>

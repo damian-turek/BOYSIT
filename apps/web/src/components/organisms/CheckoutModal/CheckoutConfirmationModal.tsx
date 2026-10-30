@@ -117,7 +117,7 @@ export const CheckoutConfirmationModal = () => {
       {isCheckoutReturn && (
         <>
           <motion.div
-            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs"
+            className="fixed inset-0 z-50 bg-overlay backdrop-blur-xs"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -134,7 +134,7 @@ export const CheckoutConfirmationModal = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="pointer-events-auto w-full max-w-md rounded-xl border border-[var(--color-gray-10)] bg-white p-6 shadow-2xl dark:bg-[var(--color-gray-05)]"
+              className="surface-dialog pointer-events-auto w-full max-w-md p-6"
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex min-w-0 items-start gap-3">

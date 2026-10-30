@@ -201,7 +201,7 @@ export const DeleteAccountSection = ({ email }: DeleteAccountSectionProps) => {
         {isDialogOpen && (
           <>
             <motion.div
-              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs"
+              className="fixed inset-0 z-50 bg-overlay backdrop-blur-xs"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -218,7 +218,7 @@ export const DeleteAccountSection = ({ email }: DeleteAccountSectionProps) => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 12, scale: 0.98 }}
                 transition={{ duration: 0.18, ease: 'easeOut' }}
-                className="pointer-events-auto w-full max-w-md rounded-xl border border-[var(--color-gray-10)] bg-white p-5 shadow-2xl"
+                className="surface-dialog pointer-events-auto w-full max-w-md p-5 sm:p-6"
                 onSubmit={(event) => void handleDelete(event)}
               >
                 <div className="mb-5 flex gap-3">

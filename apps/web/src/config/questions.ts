@@ -1,6 +1,6 @@
-import { Level } from '@/types/question'
+import type { Level } from '@/types/question'
 import {
-  Infinity,
+  Infinity as InfinityIcon,
   ChartColumn,
   CircleCheck,
   CodeXml,
@@ -8,7 +8,6 @@ import {
   Cpu,
   Database,
   Globe,
-  HelpCircle,
   Layers,
   type LucideIcon,
   Server,
@@ -39,14 +38,14 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   Databases: Database,
   Testing: CircleCheck,
   Concurrency: ChartColumn,
-  DevOps: Infinity,
+  DevOps: InfinityIcon,
   Architecture: Server,
 }
 
 export const LEVEL_COLOR_MAP: Record<Level, string> = {
-  Junior: 'bg-success-50/15 text-success-50 border-success-50/30',
-  Middle: 'bg-warning-50/15 text-warning-50 border-warning-50/30',
-  Senior: 'bg-alert-50/15 text-alert-50 border-alert-50/30',
+  Junior: 'bg-success-50/10 text-success-100 border-success-50/20 dark:text-emerald-300',
+  Middle: 'bg-warning-50/10 text-warning-100 border-warning-50/20 dark:text-amber-300',
+  Senior: 'bg-alert-50/10 text-alert-100 border-alert-50/20 dark:text-rose-300',
 }
 
 export const CATEGORY_THEMES: Record<string, string> = {

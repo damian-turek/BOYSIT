@@ -50,15 +50,10 @@ export const Input = ({
         <input
           id={inputId}
           className={cn(
-            'w-full h-11 px-4 rounded-xl transition-colors duration-200',
-            'bg-gray-65/5 dark:bg-gray-10/20',
-            'text-gray-100 placeholder:body-medium placeholder:text-gray-60/50',
-            'border focus:outline-hidden',
+            'field-control w-full h-11 px-4 body-medium',
             LeftIcon ? 'pl-10' : '',
             endAdornment ? 'pr-11' : '',
-            error
-              ? 'border-alert-50 focus:border-alert-50'
-              : 'border-gray-60/20 focus:border-primary/60',
+            error && 'border-alert-50 focus-visible:border-alert-50 focus-visible:outline-alert-50',
             className,
           )}
           {...props}

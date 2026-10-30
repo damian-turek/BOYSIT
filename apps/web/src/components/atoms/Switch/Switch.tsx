@@ -39,8 +39,8 @@ export const Switch = ({
         disabled={disabled}
         {...props}
       />
-      <span className="block h-6 w-10 rounded-full bg-gray-10 transition-colors peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40" />
-      <span className="absolute top-1 left-1 size-4 rounded-full bg-white shadow-sm transition-transform peer-checked:translate-x-4" />
+      <span className="block h-6 w-10 rounded-full bg-border-strong transition-colors peer-checked:bg-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-primary motion-reduce:transition-none" />
+      <span className="absolute top-1 left-1 size-4 rounded-full bg-[#ffffff] shadow-sm transition-transform peer-checked:translate-x-4 motion-reduce:transition-none" />
     </label>
   )
 }

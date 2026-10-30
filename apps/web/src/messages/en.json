@@ -1,4 +1,13 @@
 {
+  "Loading": {
+    "dashboard": "Loading your dashboard…",
+    "questions": "Loading questions…",
+    "question": "Loading question…",
+    "profile": "Loading your profile…",
+    "exams": "Loading flashcard decks…",
+    "examSession": "Loading your flashcards…",
+    "jobTracker": "Loading your applications…"
+  },
   "Header": {
     "login": "Log in",
     "getStarted": "Get Started"
@@ -51,8 +60,41 @@
     "shortcut": "Shortcuts"
   },
   "QuestionsPage": {
-    "inputPlaceholder": "Search questions, topics, companies...",
-    "filters": "Filters"
+    "inputPlaceholder": "Search questions, topics, companies…",
+    "filters": "Filters",
+    "title": "Questions",
+    "questionCount": "{count, plural, one {# question} other {# questions}}",
+    "searchLabel": "Search interview questions",
+    "seniority": "Seniority",
+    "allLevels": "All levels",
+    "junior": "Junior",
+    "middle": "Middle",
+    "senior": "Senior",
+    "domain": "Domain",
+    "technology": "Technology",
+    "closeFilters": "Close filters",
+    "saveQuestion": "Save question",
+    "unsaveQuestion": "Remove saved question",
+    "saved": "Saved",
+    "showAnswer": "Show answer",
+    "hideAnswer": "Hide answer",
+    "answer": "Reference answer",
+    "answerUnavailable": "An answer has not been published for this question yet.",
+    "openQuestion": "Open full question",
+    "emptyDescription": "No questions match your filters. Try a broader search or change your filters.",
+    "backToQuestions": "Back to questions",
+    "interviewQuestion": "Interview question",
+    "copyLink": "Copy link",
+    "linkCopied": "Link copied",
+    "copyError": "Could not copy the link. You can copy it from your browser’s address bar.",
+    "explanation": "A closer look",
+    "codeExample": "Code example",
+    "questionDetails": "Question details",
+    "questionNavigation": "Question navigation",
+    "nextQuestion": "Up next",
+    "lockedTitle": "Continue your practice with Pro",
+    "lockedDescription": "This question is part of the Pro library. Upgrade to read the full question and reference answer.",
+    "unlockPro": "Unlock with Pro"
   },
   "JobTracker": {
     "title": "Job Tracker",

@@ -35,7 +35,7 @@ export const PracticeTools = ({ name, tools }: PracticeToolsProps) => {
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className="flex flex-col border border-gray-60/40 bg-gray-60/5 rounded-xl overflow-hidden"
+      className="surface-card flex flex-col overflow-hidden"
     >
       <h3 className="body-large mb-3 text-gray-100 px-5 pt-5">{name}</h3>
       {tools.map((tool, index) => {
@@ -53,7 +53,7 @@ export const PracticeTools = ({ name, tools }: PracticeToolsProps) => {
             }}
             animate="animate"
             transition={{ duration: 0.35, delay: index * 0.05, ease: 'easeOut' }}
-            className="border-b gap-4 group flex justify-between items-center border-gray-60/40 last:border-none p-5 transition-colors ease-in-out duration-150 hover:bg-gray-60/5"
+            className="border-b gap-4 group flex justify-between items-center border-gray-10 last:border-none p-5 transition-colors duration-150 hover:bg-surface-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none"
           >
             <motion.div
               variants={{

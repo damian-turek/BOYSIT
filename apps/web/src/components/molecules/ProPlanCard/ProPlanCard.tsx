@@ -26,7 +26,7 @@ export const ProPlanCard = ({ name, text, list, button, badge, planId }: ProPlan
     // interactive <Button> below - nesting a button inside a button (or a
     // list inside a button) is invalid HTML and React 19 will throw a
     // DOM-nesting console error for it.
-    <div className="flex flex-col rounded-xl bg-primary border border-primary p-6 transition-all ease-in-out duration-300 hover:shadow-lg hover:shadow-primary/50">
+    <div className="flex flex-col rounded-2xl bg-primary border border-primary p-5">
       <div className="flex gap-2 items-center mb-2">
         <Crown size={16} className="text-white" />
         <h3 className="label-font uppercase text-white/80">{name}</h3>
@@ -41,7 +41,7 @@ export const ProPlanCard = ({ name, text, list, button, badge, planId }: ProPlan
       </ul>
       <Button
         onClick={() => openCheckout(planId, name)}
-        className="w-full bg-white text-primary hover:bg-white hover:scale-103 transition-all ease-in-out duration-300 mb-2"
+        className="w-full bg-white text-primary hover:bg-white/90 mb-2"
       >
         {button.label}
       </Button>

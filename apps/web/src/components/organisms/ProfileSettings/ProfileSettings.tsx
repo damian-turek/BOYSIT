@@ -9,7 +9,9 @@ import { useTranslations } from 'next-intl'
 
 import { useAuthSessionStore } from '@/store/useAuthSessionStore'
 
+import { LoadingState } from '@/components/molecules/LoadingState'
 import { ProfileSettingsTabs } from '@/components/molecules/ProfileSettingsTabs'
+import { ProfileSkeleton } from '@/components/organisms/PageLoading/PageSkeletons'
 
 import { profileSettingsSections } from './constants'
 import { BillingSection } from './sections/BillingSection'
@@ -29,6 +31,8 @@ export const ProfileSettings = ({ locale }: ProfileSettingsProps) => {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const t = useTranslations('ProfileSettings')
+  const loadingLabel = useTranslations('Loading')
+  const initialized = useAuthSessionStore((state) => state.initialized)
   const profile = useAuthSessionStore((state) => state.profile)
   const session = useAuthSessionStore((state) => state.session)
 
@@ -51,6 +55,14 @@ export const ProfileSettings = ({ locale }: ProfileSettingsProps) => {
     ...section,
     label: t(section.labelKey),
   }))
+
+  if (!initialized) {
+    return (
+      <LoadingState label={loadingLabel('profile')}>
+        <ProfileSkeleton />
+      </LoadingState>
+    )
+  }
 
   return (
     <motion.div

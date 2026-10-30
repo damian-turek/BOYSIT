@@ -48,6 +48,11 @@ import { Button } from '@/components/atoms/Button'
 import { Input } from '@/components/atoms/inputs/Input'
 import { JobApplicationCard } from '@/components/molecules/JobApplicationCard'
 import { JobTrackerStatCard } from '@/components/molecules/JobTrackerStatCard'
+import { LoadingState } from '@/components/molecules/LoadingState'
+import {
+  JobCardsSkeleton,
+  JobStatsSkeleton,
+} from '@/components/organisms/PageLoading/PageSkeletons'
 
 import { JobApplicationFormModal } from './JobApplicationFormModal'
 import { JobStatusHistoryDialog } from './JobStatusHistoryDialog'
@@ -333,7 +338,13 @@ export const JobTracker = () => {
   return (
     <>
       <JobTrackerHeader onAddJob={openCreateForm} />
-      <JobTrackerStats stats={stats} />
+      {isLoading && applications.length === 0 ? (
+        <div className="mb-6" aria-hidden="true">
+          <JobStatsSkeleton />
+        </div>
+      ) : (
+        <JobTrackerStats stats={stats} />
+      )}
       <JobTrackerFilters
         search={searchInput}
         statusFilter={statusFilter}
@@ -509,7 +520,7 @@ const JobTrackerFilters = ({
             event.target.value === 'all' ? undefined : (event.target.value as JobApplicationStatus),
           )
         }
-        className="h-11 rounded-xl border border-gray-60/20 bg-gray-60/5 px-3 font-mono text-[13px] leading-5 text-gray-100 focus:border-primary/60 focus:outline-hidden"
+        className="field-control h-11 px-3 body-medium"
       >
         <option value="all">{t('allStatuses')}</option>
         {JOB_APPLICATION_STATUSES.map((status) => (
@@ -524,7 +535,7 @@ const JobTrackerFilters = ({
         disabled={disabled}
         aria-label={t('sort.label')}
         onChange={(event) => onSortChange(event.target.value as JobApplicationSort)}
-        className="h-11 rounded-xl border border-gray-60/20 bg-gray-60/5 px-3 font-mono text-[13px] leading-5 text-gray-100 focus:border-primary/60 focus:outline-hidden"
+        className="field-control h-11 px-3 body-medium"
       >
         {JOB_APPLICATION_SORTS.map((sortId) => (
           <option key={sortId} value={sortId}>
@@ -590,7 +601,7 @@ const JobApplicationsGrid = ({
 
   if (applications.length === 0) {
     return (
-      <section className="rounded-xl border border-dashed border-gray-60/30 bg-gray-60/5 px-4 py-12 text-center">
+      <section className="surface-card border-dashed px-4 py-12 text-center">
         <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-gray-60/10 text-gray-60">
           <SearchX size={22} aria-hidden="true" />
         </div>
@@ -631,14 +642,9 @@ const JobApplicationsGrid = ({
 }
 
 const JobApplicationsSkeleton = ({ label }: { label: string }) => (
-  <div className="grid grid-cols-1 gap-5 lg:grid-cols-2" aria-busy="true" aria-label={label}>
-    {Array.from({ length: 4 }, (_, index) => (
-      <div
-        key={index}
-        className="h-72 animate-pulse rounded-xl border border-[var(--color-gray-10)] bg-gray-60/5"
-      />
-    ))}
-  </div>
+  <LoadingState label={label}>
+    <JobCardsSkeleton />
+  </LoadingState>
 )
 
 const JobTrackerError = ({ onRetry }: { onRetry: () => void }) => {
@@ -728,7 +734,7 @@ const DeleteJobDialog = ({
       {application && (
         <>
           <motion.div
-            className="fixed inset-0 z-50 bg-black/40"
+            className="fixed inset-0 z-50 bg-overlay backdrop-blur-xs"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -743,7 +749,7 @@ const DeleteJobDialog = ({
               initial={{ opacity: 0, y: 12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
-              className="w-full max-w-md rounded-xl border border-[var(--color-gray-10)] bg-white p-5 shadow-2xl dark:bg-[var(--color-gray-05)]"
+              className="surface-dialog w-full max-w-md p-5 sm:p-6"
             >
               <div className="mb-4 flex gap-3">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-alert-50/10 text-alert-50">
