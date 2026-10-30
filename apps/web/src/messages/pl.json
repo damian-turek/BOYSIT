@@ -1,4 +1,34 @@
 {
+  "FeatureShowcase": {
+    "scrollHint": "Przewiń, aby odkryć więcej",
+    "navigation": "Przeglądaj funkcje",
+    "previous": "Poprzednia funkcja",
+    "next": "Następna funkcja",
+    "preview": "Interfejs aplikacji · przykładowe dane",
+    "items": {
+      "questions": {
+        "title": "Pytania rekrutacyjne",
+        "description": "Przeglądaj techniczne pytania rekrutacyjne z odpowiedziami, wyjaśnieniami i przykładami kodu."
+      },
+      "exams": {
+        "title": "Trening z fiszkami",
+        "description": "Ćwicz z zestawami fiszek. Odkrywaj odpowiedzi, oceniaj swoją wiedzę i przeglądaj wyniki."
+      },
+      "jobs": {
+        "title": "Job Tracker",
+        "description": "Zbieraj aplikacje, etapy rozmów, notatki i terminy kontaktu w jednym miejscu."
+      },
+      "filters": {
+        "title": "System filtrowania",
+        "description": "Wyszukuj pytania według tematu, technologii i poziomu trudności. Ćwicz umiejętności, których potrzebujesz."
+      },
+      "progress": {
+        "title": "Statystyki postępów",
+        "description": "Przeglądaj wyniki sesji: co już znasz, co rozumiesz częściowo i nad czym warto jeszcze popracować."
+      }
+    }
+  },
+
   "Loading": {
     "dashboard": "Wczytywanie panelu…",
     "questions": "Wczytywanie pytań…",

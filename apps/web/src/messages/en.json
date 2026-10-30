@@ -1,4 +1,34 @@
 {
+  "FeatureShowcase": {
+    "scrollHint": "Scroll to explore",
+    "navigation": "Explore features",
+    "previous": "Previous feature",
+    "next": "Next feature",
+    "preview": "Application interface · example data",
+    "items": {
+      "questions": {
+        "title": "Real Interview Questions",
+        "description": "Explore technical interview questions with reference answers, explanations and code examples."
+      },
+      "exams": {
+        "title": "Exam Training App",
+        "description": "Practise with flashcard decks. Reveal the answer, assess your understanding and review your results."
+      },
+      "jobs": {
+        "title": "Job Tracker",
+        "description": "Keep your applications, interview stages, notes and follow-up dates together."
+      },
+      "filters": {
+        "title": "Filtering System",
+        "description": "Find relevant questions by topic, technology and difficulty. Focus your practice on the skills you need."
+      },
+      "progress": {
+        "title": "Progress Statistics",
+        "description": "Review your exam results: what you know, what you partly understand and what needs more practice."
+      }
+    }
+  },
+
   "Loading": {
     "dashboard": "Loading your dashboard…",
     "questions": "Loading questions…",

@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 
 import { getSupabaseClient } from '@/services/supabaseClient'
-import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 
 import { useAuthSessionStore } from '@/store/useAuthSessionStore'
@@ -29,8 +28,6 @@ export type HeaderProps = {
 
 export const Header = ({ name, nav }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false)
-  const [isVisible, setIsVisible] = useState(true)
-  const [lastScrollY, setLastScrollY] = useState(0)
   const t = useTranslations('Header')
   const openModal = useAuthStore((state) => state.openModal)
   const profile = useAuthSessionStore((state) => state.profile)
@@ -58,29 +55,6 @@ export const Header = ({ name, nav }: HeaderProps) => {
     }
   }, [isOpen])
 
-  useEffect(() => {
-    const controlNavbar = () => {
-      const currentScrollY = window.scrollY
-
-      if (currentScrollY < 10) {
-        setIsVisible(true)
-      } else if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        setIsVisible(false)
-        setIsOpen(false)
-      } else if (currentScrollY < lastScrollY) {
-        setIsVisible(true)
-      }
-
-      setLastScrollY(currentScrollY)
-    }
-
-    window.addEventListener('scroll', controlNavbar)
-
-    return () => {
-      window.removeEventListener('scroll', controlNavbar)
-    }
-  }, [lastScrollY])
-
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, link: string) => {
     if (link.startsWith('#')) {
       e.preventDefault()
@@ -94,7 +68,7 @@ export const Header = ({ name, nav }: HeaderProps) => {
 
         if (element) {
           const elementPosition = element.getBoundingClientRect().top
-          const offsetPosition = elementPosition + window.scrollY
+          const offsetPosition = elementPosition + window.scrollY - 64
 
           window.scrollTo({
             top: offsetPosition,
@@ -108,11 +82,7 @@ export const Header = ({ name, nav }: HeaderProps) => {
   }
 
   return (
-    <motion.header
-      animate={{ y: isVisible ? 0 : '-100%' }}
-      transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="fixed top-0 w-full h-16 bg-white dark:bg-background border-b border-gray-60/20 z-50"
-    >
+    <header className="fixed top-0 z-50 h-16 w-full border-b border-gray-60/20 bg-white/90 backdrop-blur-md dark:bg-background/90">
       <div className="flex justify-between items-center h-full max-w-360 mx-auto px-4">
         <Link
           className="group flex gap-2 items-center body-large cursor-pointer z-50"
@@ -243,6 +213,6 @@ export const Header = ({ name, nav }: HeaderProps) => {
           )}
         </div>
       </div>
-    </motion.header>
+    </header>
   )
 }

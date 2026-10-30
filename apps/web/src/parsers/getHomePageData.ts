@@ -1,3 +1,5 @@
+import { COMPANY_LOGOS } from '@/config/company-logos'
+
 import { ByNumbersProps } from '@/components/organisms/ByNumbers'
 import { FeaturesProps } from '@/components/organisms/Features'
 import { HeroProps } from '@/components/organisms/Hero'
@@ -5,14 +7,11 @@ import { HowItWorksProps } from '@/components/organisms/HowItWorks'
 import { PricingProps } from '@/components/organisms/Pricing'
 
 import BookIcon from '@/assets/icons/book.svg'
-import CommunityIcon from '@/assets/icons/community.svg'
 import CrownIcon from '@/assets/icons/crown.svg'
 import ExpertIcon from '@/assets/icons/expert.svg'
 import FilterIcon from '@/assets/icons/filter.svg'
 import InterviewIcon from '@/assets/icons/interview.svg'
-import PowerIcon from '@/assets/icons/power.svg'
 import StarIcon from '@/assets/icons/star.svg'
-import StatsIcon from '@/assets/icons/stats.svg'
 
 export const getHomePageData = () => {
   const HERO_DATA = {
@@ -25,74 +24,24 @@ export const getHomePageData = () => {
     },
     buttonWorks: {
       label: 'See how it works',
-      link: '#how-it-works-section',
+      link: '#features-section',
     },
-    trusted: 'Trusted by <span>12,000+</span> engineers',
     questionsCategories: {
       label: 'Questions sourced from',
-      categories: [
-        'Google',
-        'Meta',
-        'Amazon',
-        'Microsoft',
-        'Yandex',
-        'JetBrains',
-        'Sber',
-        'Tinkoff',
-        'Wildberries',
-        'Avito',
-        'Ozon',
-        'VK',
-        'Kaspersky',
-        '2GIS',
-      ],
+      companies: COMPANY_LOGOS,
     },
   } satisfies HeroProps
 
   const FEATURES_DATA = {
     label: 'Features',
-    title: 'Everything you need to succeed',
-    description:
-      'PrepCode combines real interview questions, expert knowledge, and smart tools to give you an edge in your job search.',
+    title: 'Explore PrepCode',
+    description: 'Interview preparation and job search tools in one place.',
     tiles: [
-      {
-        icon: InterviewIcon,
-        title: 'Real Interview Questions',
-        description:
-          "Every question sourced from actual technical interviews at Europe's top companies",
-        text: 'Our community of engineers share their interview experiences within 48 hours, keeping the question bank current and relevant.',
-      },
-      {
-        icon: ExpertIcon,
-        title: 'Expert-Reviewed Answers',
-        description:
-          'Detailed explanations written and reviewed by Senior engineers and tech leads',
-        text: 'Each answer goes through a peer review process to ensure accuracy, clarity, and industry best practices.',
-      },
-      {
-        icon: FilterIcon,
-        title: 'Smart Filtering System',
-        description: 'Filter by technology stack, seniority level, domain, and target company',
-        text: "Practice exactly what matters for your target role. Junior frontend? Senior backend? We've got you covered.",
-      },
-      {
-        icon: StatsIcon,
-        title: 'Track Your Progress',
-        description: 'Monitor your preparation with detailed analytics and learning insights',
-        text: "See which domains you've mastered and where you need more practice. Set goals and track completion.",
-      },
-      {
-        icon: CommunityIcon,
-        title: 'Active Community',
-        description: 'Join thousands of developers in private Discord and Telegram channels',
-        text: "Discuss questions, share interview experiences, and get advice from those who've been there.",
-      },
-      {
-        icon: PowerIcon,
-        title: 'Always Current',
-        description: 'Weekly updates with fresh questions and emerging technology trends',
-        text: 'React 19? New AWS services? TypeScript 5.x? We add questions as the industry evolves.',
-      },
+      { preview: 'questions' },
+      { preview: 'exams' },
+      { preview: 'jobs' },
+      { preview: 'filters' },
+      { preview: 'progress' },
     ],
   } satisfies FeaturesProps
 

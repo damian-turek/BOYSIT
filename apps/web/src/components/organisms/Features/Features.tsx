@@ -1,114 +1,150 @@
 'use client'
 
-import { StaticImageData } from 'next/image'
+import { useEffect, useId, useRef, useState } from 'react'
 
-import { Variants, motion } from 'motion/react'
-import { ReactSVG } from 'react-svg'
+import { ArrowDown } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+
+import { FeaturePreview } from './FeaturePreview'
+import styles from './Features.module.css'
+import type { FeaturePreviewKind } from './feature-preview-data'
 
 export type FeaturesProps = {
   label: string
   title: string
   description: string
-  tiles: {
-    icon: StaticImageData
-    title: string
-    description: string
-    text: string
-  }[]
+  tiles: { preview: FeaturePreviewKind }[]
 }
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-}
+const PINNED_QUERY =
+  '(min-width: 1024px) and (min-height: 750px) and (prefers-reduced-motion: no-preference)'
 
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' },
-  },
-}
+export const Features = ({ label, title, tiles }: FeaturesProps) => {
+  const t = useTranslations('FeatureShowcase')
+  const headingId = useId()
+  const trackRef = useRef<HTMLElement>(null)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const count = tiles.length
+  const currentIndex = Math.min(activeIndex, Math.max(0, count - 1))
+  const active = tiles[currentIndex]
 
-export const Features = ({ label, tiles, description, title }: FeaturesProps) => {
+  useEffect(() => {
+    const track = trackRef.current
+    const stage = stageRef.current
+    if (!track || !stage || count === 0) return
+
+    const media = window.matchMedia(PINNED_QUERY)
+    let frame: number | null = null
+    const update = () => {
+      frame = null
+      if (!media.matches) return
+      const travel = track.offsetHeight - stage.offsetHeight
+      const stickyTop = Number.parseFloat(getComputedStyle(stage).top) || 64
+      const progress = Math.max(
+        0,
+        Math.min(1, (stickyTop - track.getBoundingClientRect().top) / travel),
+      )
+      setActiveIndex(Math.min(count - 1, Math.floor(progress * count)))
+    }
+    const schedule = () => {
+      if (frame === null) frame = requestAnimationFrame(update)
+    }
+    const resize = new ResizeObserver(schedule)
+    resize.observe(track)
+    resize.observe(stage)
+    window.addEventListener('scroll', schedule, { passive: true })
+    media.addEventListener('change', schedule)
+    schedule()
+    return () => {
+      if (frame !== null) cancelAnimationFrame(frame)
+      resize.disconnect()
+      window.removeEventListener('scroll', schedule)
+      media.removeEventListener('change', schedule)
+    }
+  }, [count])
+
+  const selectFeature = (index: number) => {
+    const track = trackRef.current
+    const stage = stageRef.current
+    if (track && stage && window.matchMedia(PINNED_QUERY).matches) {
+      const travel = track.offsetHeight - stage.offsetHeight
+      const stickyTop = Number.parseFloat(getComputedStyle(stage).top) || 64
+      window.scrollTo({
+        top:
+          window.scrollY +
+          track.getBoundingClientRect().top -
+          stickyTop +
+          (index / count) * travel +
+          1,
+        behavior: 'instant',
+      })
+    }
+    setActiveIndex(index)
+  }
+
+  if (!active) return null
+
   return (
-    <section id="features-section" className="bg-background/30">
-      <div className="section-container flex flex-col items-center">
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.4 }}
-          className="label-font-spaced uppercase text-gray-60 mb-4"
-          dangerouslySetInnerHTML={{ __html: label }}
-        />
-        <motion.h2
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="title-font text-gray-100 mb-4 text-center"
-          dangerouslySetInnerHTML={{ __html: title }}
-        />
-        <motion.p
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="body-font text-gray-60 mb-12 md:mb-16 text-center max-w-xl"
-          dangerouslySetInnerHTML={{ __html: description }}
-        />
+    <section
+      id="features-section"
+      ref={trackRef}
+      aria-label={title}
+      className={styles.track}
+      style={{ '--feature-count': count } as React.CSSProperties}
+    >
+      <div ref={stageRef} className={styles.stage}>
+        <div className={styles.inner}>
+          <div className="flex items-center justify-between gap-4 border-b border-gray-10 pb-5">
+            <span className="text-sm font-medium text-gray-60">{label}</span>
+            <span className="font-mono text-xs text-gray-60 tabular-nums">
+              {String(currentIndex + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
+            </span>
+          </div>
 
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-50px' }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
-        >
-          {tiles.map((tile) => (
-            <motion.div
-              key={tile.title}
-              variants={itemVariants}
-              whileHover={{
-                y: -6,
-                boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-              }}
-              className="flex flex-col bg-background group p-6 md:p-8 bg-gray/8 border transition-colors ease-in-out duration-300 border-gray-60/30 hover:border-primary/60 rounded-xl max-w-384px cursor-pointer"
-            >
-              <div className="flex justify-center items-center bg-primary/10 ease-in-out transition duration-200 group-hover:bg-primary/20 w-12 h-12 rounded-xl mb-5">
-                <ReactSVG
-                  src={tile.icon.src}
-                  beforeInjection={(svg) => {
-                    svg.setAttribute(
-                      'class',
-                      'w-6 h-6 transition-colors duration-200 [&_path]:stroke-primary',
-                    )
-                  }}
+          <div className={styles.body}>
+            <nav aria-label={t('navigation')} className={styles.navigation}>
+              <div className={styles.stepList}>
+                {tiles.map((tile, index) => (
+                  <button
+                    key={tile.preview}
+                    type="button"
+                    onClick={() => selectFeature(index)}
+                    aria-label={t(`items.${tile.preview}.title`)}
+                    title={t(`items.${tile.preview}.title`)}
+                    aria-current={index === currentIndex ? 'step' : undefined}
+                    className={styles.step}
+                  >
+                    <span className={styles.dot} aria-hidden="true" />
+                  </button>
+                ))}
+                <span
+                  aria-hidden="true"
+                  className={styles.activeDot}
+                  style={{ transform: `translateY(${currentIndex * 44}px)` }}
                 />
               </div>
-              <p
-                className="text-gray-100 body-font font-bold mb-2"
-                dangerouslySetInnerHTML={{ __html: tile.title }}
-              />
-              <p
-                className="text-gray-60 body-medium"
-                dangerouslySetInnerHTML={{ __html: tile.description }}
-              />
-              <div className="w-full my-3 bg-gray-60/70 h-px" />
-              <p
-                className="text-gray-60 body-small"
-                dangerouslySetInnerHTML={{ __html: tile.text }}
-              />
-            </motion.div>
-          ))}
-        </motion.div>
+            </nav>
+            <div key={currentIndex} className={styles.slide} aria-labelledby={headingId}>
+              <div className={styles.copy}>
+                <p className="mb-5 font-mono text-sm text-primary" aria-hidden="true">
+                  / {String(currentIndex + 1).padStart(2, '0')}
+                </p>
+                <h2 id={headingId} className={styles.heading}>
+                  {t(`items.${active.preview}.title`)}
+                </h2>
+                <p className="mt-6 max-w-[38ch] text-base leading-7 text-gray-60 md:text-lg">
+                  {t(`items.${active.preview}.description`)}
+                </p>
+                <p className={`${styles.scrollHint} mt-10 items-center gap-2 text-xs text-gray-60`}>
+                  <ArrowDown size={14} aria-hidden="true" />
+                  {t('scrollHint')}
+                </p>
+              </div>
+              <FeaturePreview kind={active.preview} title={t(`items.${active.preview}.title`)} />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   )

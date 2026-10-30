@@ -1,10 +1,16 @@
 'use client'
 
+import { useRef } from 'react'
+
+import type { CompanyLogo } from '@/config/company-logos'
 import { Variants, motion } from 'motion/react'
 
 import { useAuthStore } from '@/store/useAuthStore'
 
 import { Button } from '@/components/atoms/Button'
+
+import { CompanyMarquee } from './CompanyMarquee'
+import { HeroGrid } from './HeroGrid'
 
 export type HeroProps = {
   title: string
@@ -12,8 +18,7 @@ export type HeroProps = {
   label: string
   buttonStart: { label: string }
   buttonWorks: { label: string; link: string }
-  trusted: string
-  questionsCategories: { label: string; categories: string[] }
+  questionsCategories: { label: string; companies: CompanyLogo[] }
 }
 
 const containerVariants: Variants = {
@@ -46,11 +51,11 @@ export const Hero = ({
   description,
   buttonStart,
   buttonWorks,
-  trusted,
   questionsCategories,
   label,
 }: HeroProps) => {
   const openModal = useAuthStore((state) => state.openModal)
+  const heroRef = useRef<HTMLElement>(null)
   const handleScroll = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (buttonWorks.link.startsWith('#')) {
       e.preventDefault()
@@ -75,14 +80,17 @@ export const Hero = ({
   }
 
   return (
-    <section className="mt-16 relative overflow-hidden w-full bg-white dark:bg-background bg-[linear-gradient(to_right,#80808018_1px,transparent_1px),linear-gradient(to_bottom,#80808018_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff0c_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0c_1px,transparent_1px)] bg-size-[40px_40px]">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-150 h-75 bg-primary/10 blur-[120px] pointer-events-none rounded-full" />
+    <section ref={heroRef} className="mt-16 relative isolate w-full">
+      <HeroGrid containerRef={heroRef} />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-150 h-75 bg-primary/10 blur-[120px] rounded-full" />
+      </div>
 
       <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative section-container flex flex-col items-center"
+        className="relative mx-auto flex max-w-360 flex-col items-center px-4 pt-12 pb-6 lg:px-8 lg:pt-24 lg:pb-8"
       >
         <motion.div
           variants={itemVariants}
@@ -119,37 +127,11 @@ export const Hero = ({
           </Button>
         </motion.div>
 
-        <motion.div
-          variants={itemVariants}
-          className="flex gap-2 items-center px-4 py-2 mb-8 md:mb-10 border border-gray-60/30 bg-gray-60/8 rounded-full backdrop-blur-xs"
-        >
-          <div className="flex items-center">
-            <div className="w-7 h-7 bg-primary/30 rounded-full border-2 border-white" />
-            <div className="w-7 h-7 bg-primary/30 rounded-full border-2 border-white -ml-2" />
-            <div className="w-7 h-7 bg-primary/30 rounded-full border-2 border-white -ml-2" />
-            <div className="w-7 h-7 bg-primary/30 rounded-full border-2 border-white -ml-2" />
-          </div>
-          <p
-            className="body-small md:body-medium text-gray-60 [&_span]:font-semibold [&_span]:text-gray-100"
-            dangerouslySetInnerHTML={{ __html: trusted }}
+        <motion.div variants={itemVariants} className="mt-4 w-full">
+          <CompanyMarquee
+            label={questionsCategories.label}
+            companies={questionsCategories.companies}
           />
-        </motion.div>
-
-        <motion.div variants={itemVariants} className="flex flex-col gap-4 items-center px-2">
-          <p
-            className="label-font-spaced uppercase text-gray-60 "
-            dangerouslySetInnerHTML={{ __html: questionsCategories.label }}
-          />
-          <div className="flex flex-wrap gap-2 md:gap-3 justify-center max-w-270">
-            {questionsCategories.categories.map((category) => (
-              <div
-                key={category}
-                className="label-font px-3 py-2 rounded-lg border border-gray-60/20 bg-gray-60/5 backdrop-blur-sm text-gray-100"
-              >
-                {category}
-              </div>
-            ))}
-          </div>
         </motion.div>
       </motion.div>
     </section>
