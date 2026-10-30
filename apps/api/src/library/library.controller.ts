@@ -19,6 +19,6 @@ export class LibraryController {
     @Req() request: AuthenticatedRequest,
     @Param('questionId', new ParseUUIDPipe({ version: '4' })) questionId: string,
   ) {
-    return this.libraryService.toggleBookmark(request.user.id, questionId)
+    return this.libraryService.toggleBookmark(request.user.id, questionId, request.user.plan)
   }
 }

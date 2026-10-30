@@ -5,9 +5,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
-import { AccessLevel, Assessment, ExamSessionStatus, Prisma, type User, UserPlan } from 'database'
+import { AccessLevel, Assessment, ExamSessionStatus, Prisma, type User } from 'database'
 
 import { PrismaService } from '../prisma/prisma.service'
+import { hasFullQuestionAccess } from '../questions/question-access'
 import type { StartExamSessionDto } from './dto/start-exam-session.dto'
 import type { SubmitExamAssessmentDto } from './dto/submit-exam-assessment.dto'
 import {
@@ -24,6 +25,8 @@ const sessionInclude = {
       question: {
         select: {
           id: true,
+          accessLevel: true,
+          isActive: true,
           title: true,
           questionText: true,
           answerText: true,
@@ -424,6 +427,17 @@ export class ExamsService {
     const preset = this.requirePreset(session.examSlug)
     this.ensurePresetAccess(user, preset)
 
+    // Content may have been unpublished or moved to Pro after this session was created.
+    if (
+      session.questions.some(
+        ({ question }) =>
+          !question.isActive ||
+          (!hasFullQuestionAccess(user.plan) && question.accessLevel !== AccessLevel.free),
+      )
+    ) {
+      throw this.sessionNotFound()
+    }
+
     return session
   }
 
@@ -502,7 +516,7 @@ export class ExamsService {
   }
 
   private hasProAccess(user: ExamUser): boolean {
-    return user.plan === UserPlan.pro || user.plan === UserPlan.admin
+    return hasFullQuestionAccess(user.plan)
   }
 
   private ensurePresetAccess(user: ExamUser, preset: ExamPreset): void {
