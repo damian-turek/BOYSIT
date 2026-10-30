@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { JobApplicationStatus } from 'database'
+import { JobApplicationStatus, type UserPlan } from 'database'
 
 import { PrismaService } from '../prisma/prisma.service'
+import { getVisibleQuestionWhere } from '../questions/question-access'
 
 const TOP_CATEGORIES_LIMIT = 8
 const TOP_TECHNOLOGIES_LIMIT = 5
@@ -10,7 +11,8 @@ const TOP_TECHNOLOGIES_LIMIT = 5
 export class DashboardService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async getOverview(userId: string) {
+  async getOverview(userId: string, plan: UserPlan) {
+    const visibleQuestions = getVisibleQuestionWhere(plan)
     const [
       categoryGroups,
       totalQuestions,
@@ -22,10 +24,10 @@ export class DashboardService {
     ] = await Promise.all([
       this.prismaService.client.question.groupBy({
         by: ['categoryId'],
-        where: { isActive: true, categoryId: { not: null } },
+        where: { ...visibleQuestions, categoryId: { not: null } },
         _count: { _all: true },
       }),
-      this.prismaService.client.question.count({ where: { isActive: true } }),
+      this.prismaService.client.question.count({ where: visibleQuestions }),
       this.prismaService.client.category.count({ where: { isActive: true } }),
       this.prismaService.client.user.count(),
       this.prismaService.client.technology.count({ where: { isActive: true } }),
@@ -37,7 +39,7 @@ export class DashboardService {
       }),
       this.prismaService.client.question.groupBy({
         by: ['technologyId'],
-        where: { isActive: true, technologyId: { not: null } },
+        where: { ...visibleQuestions, technologyId: { not: null } },
         _count: { _all: true },
         orderBy: { _count: { technologyId: 'desc' } },
         take: TOP_TECHNOLOGIES_LIMIT,
@@ -75,12 +77,17 @@ export class DashboardService {
           questionCount: group._count._all,
         }
       })
-      .filter((category): category is { name: string; slug: string; questionCount: number } => category !== null)
+      .filter(
+        (category): category is { name: string; slug: string; questionCount: number } =>
+          category !== null,
+      )
       .sort((a, b) => b.questionCount - a.questionCount)
       .slice(0, TOP_CATEGORIES_LIMIT)
 
     const topTechnologyTags = technologyGroups
-      .map((group) => (group.technologyId ? technologyById.get(group.technologyId)?.name : undefined))
+      .map((group) =>
+        group.technologyId ? technologyById.get(group.technologyId)?.name : undefined,
+      )
       .filter((name): name is string => !!name)
 
     return {

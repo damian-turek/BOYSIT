@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common'
-import { AccessLevel, Difficulty, UserPlan } from 'database'
+import { Injectable, NotFoundException } from '@nestjs/common'
+import type { Difficulty, UserPlan } from 'database'
 
 import { PrismaService } from '../prisma/prisma.service'
+import { getVisibleQuestionWhere } from '../questions/question-access'
 
 export type LibraryItem = {
   id: string
@@ -43,8 +44,8 @@ export class LibraryService {
 
   async getLibrary(userId: string, plan: UserPlan) {
     const [savedItems, lastSeenItems] = await Promise.all([
-      this.getSavedItems(userId),
-      this.getLastSeenItems(userId),
+      this.getSavedItems(userId, plan),
+      this.getLastSeenItems(userId, plan),
     ])
 
     const excludeIds = new Set<string>([
@@ -57,7 +58,11 @@ export class LibraryService {
     return { data: { savedItems, lastSeenItems, forYouItems } }
   }
 
-  async toggleBookmark(userId: string, questionId: string): Promise<{ bookmarked: boolean }> {
+  async toggleBookmark(
+    userId: string,
+    questionId: string,
+    plan: UserPlan,
+  ): Promise<{ bookmarked: boolean }> {
     const existing = await this.prismaService.client.bookmark.findUnique({
       where: { userId_questionId: { userId, questionId } },
     })
@@ -69,13 +74,23 @@ export class LibraryService {
       return { bookmarked: false }
     }
 
+    const question = await this.prismaService.client.question.findFirst({
+      where: { ...getVisibleQuestionWhere(plan), id: questionId },
+      select: { id: true },
+    })
+    if (!question) {
+      throw new NotFoundException({
+        error: { code: 'QUESTION_NOT_FOUND', message: 'Question not found' },
+      })
+    }
+
     await this.prismaService.client.bookmark.create({ data: { userId, questionId } })
     return { bookmarked: true }
   }
 
-  private async getSavedItems(userId: string): Promise<LibraryItem[]> {
+  private async getSavedItems(userId: string, plan: UserPlan): Promise<LibraryItem[]> {
     const bookmarks = await this.prismaService.client.bookmark.findMany({
-      where: { userId },
+      where: { userId, question: getVisibleQuestionWhere(plan) },
       orderBy: { createdAt: 'desc' },
       take: SAVED_LIMIT,
       include: {
@@ -95,10 +110,10 @@ export class LibraryService {
    * unused) Attempt table as a lightweight view log: opening a question
    * detail page records a view-only Attempt row (see QuestionsService).
    */
-  private async getLastSeenItems(userId: string): Promise<LibraryItem[]> {
+  private async getLastSeenItems(userId: string, plan: UserPlan): Promise<LibraryItem[]> {
     const grouped = await this.prismaService.client.attempt.groupBy({
       by: ['questionId'],
-      where: { userId },
+      where: { userId, question: getVisibleQuestionWhere(plan) },
       _max: { createdAt: true },
       orderBy: { _max: { createdAt: 'desc' } },
       take: LAST_SEEN_LIMIT,
@@ -107,7 +122,10 @@ export class LibraryService {
     if (!grouped.length) return []
 
     const questions = await this.prismaService.client.question.findMany({
-      where: { id: { in: grouped.map((group) => group.questionId) } },
+      where: {
+        ...getVisibleQuestionWhere(plan),
+        id: { in: grouped.map((group) => group.questionId) },
+      },
       select: { id: true, title: true, difficulty: true, category: { select: { name: true } } },
     })
     const questionById = new Map(questions.map((question) => [question.id, question]))
@@ -131,10 +149,8 @@ export class LibraryService {
     plan: UserPlan,
     excludeIds: Set<string>,
   ): Promise<LibraryItem[]> {
-    const accessLevels: AccessLevel[] = plan === 'free' ? ['free'] : ['free', 'pro']
-
     const recentInteractions = await this.prismaService.client.attempt.findMany({
-      where: { userId },
+      where: { userId, question: getVisibleQuestionWhere(plan) },
       select: { question: { select: { categoryId: true } } },
       orderBy: { createdAt: 'desc' },
       take: 50,
@@ -149,8 +165,7 @@ export class LibraryService {
     const topCategoryId = [...categoryCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0]
 
     const baseWhere = {
-      isActive: true,
-      accessLevel: { in: accessLevels },
+      ...getVisibleQuestionWhere(plan),
       ...(excludeIds.size ? { id: { notIn: [...excludeIds] } } : {}),
     }
 

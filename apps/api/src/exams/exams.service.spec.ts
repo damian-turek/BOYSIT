@@ -47,6 +47,8 @@ const createSession = (
       attempt: null as { id: string; assessment: Assessment | null } | null,
       question: {
         id: questionId,
+        accessLevel: AccessLevel.free,
+        isActive: true,
         title: 'Explain closures',
         questionText: 'What is a closure?',
         answerText: 'A function with access to its lexical scope.',
@@ -295,6 +297,19 @@ describe('ExamsService', () => {
     await expect(
       service.getSession({ id: otherUserId, plan: UserPlan.free }, sessionId),
     ).rejects.toBeInstanceOf(NotFoundException)
+  })
+
+  it('does not reveal a previously Free session card after it becomes Pro', async () => {
+    const session = createSession()
+    findFirstSession.mockResolvedValueOnce({
+      ...session,
+      questions: session.questions.map((item) => ({
+        ...item,
+        question: { ...item.question, accessLevel: AccessLevel.pro },
+      })),
+    })
+
+    await expect(service.getSession(freeUser, sessionId)).rejects.toBeInstanceOf(NotFoundException)
   })
 
   it('creates an assessment Attempt without a typed answer and links it to the card', async () => {

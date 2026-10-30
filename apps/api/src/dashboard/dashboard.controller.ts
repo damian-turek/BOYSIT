@@ -11,6 +11,6 @@ export class DashboardController {
 
   @Get('overview')
   getOverview(@Req() request: AuthenticatedRequest) {
-    return this.dashboardService.getOverview(request.user.id)
+    return this.dashboardService.getOverview(request.user.id, request.user.plan)
   }
 }

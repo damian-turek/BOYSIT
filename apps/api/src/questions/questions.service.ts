@@ -1,18 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { QuestionWhereInput, UserPlan } from 'database'
+import type { UserPlan } from 'database'
 
 import { PrismaService } from '../prisma/prisma.service'
 import { GetQuestionsDto } from './dto/questions.dto'
-
-const PLANS_WITH_FULL_ACCESS: UserPlan[] = ['pro', 'admin']
-
-type LockableQuestion = {
-  accessLevel: string
-  questionText: string
-  answerText: string | null
-  explanation: string | null
-  codeSnippet: string | null
-}
+import { getVisibleQuestionWhere } from './question-access'
 
 @Injectable()
 export class QuestionsService {
@@ -21,9 +12,7 @@ export class QuestionsService {
   async findAll(query: GetQuestionsDto, viewerPlan: UserPlan) {
     const { search, accessLevel, categories, technologies, difficulty, type, page, limit } = query
 
-    const where: QuestionWhereInput = {
-      isActive: true,
-    }
+    const where = getVisibleQuestionWhere(viewerPlan)
 
     if (search) {
       where.OR = [
@@ -46,7 +35,8 @@ export class QuestionsService {
     }
     if (difficulty) where.difficulty = difficulty
     if (type) where.questionType = type
-    if (accessLevel) where.accessLevel = accessLevel
+    // A client filter can narrow visibility, never replace the entitlement constraint.
+    if (accessLevel) where.AND = [{ accessLevel }]
 
     const pageNumber = page ? Number(page) : 1
     const limitNumber = limit ? Number(limit) : 10
@@ -73,7 +63,7 @@ export class QuestionsService {
     ])
 
     return {
-      data: data.map((question) => this.redactIfLocked(question, viewerPlan)),
+      data: data.map((question) => ({ ...question, locked: false })),
       meta: {
         total,
         page: pageNumber,
@@ -85,7 +75,7 @@ export class QuestionsService {
 
   async findSingle(id: string, viewerPlan: UserPlan, viewerUserId?: string) {
     const data = await this.prisma.client.question.findFirst({
-      where: { id, isActive: true },
+      where: { ...getVisibleQuestionWhere(viewerPlan), id },
       include: {
         category: { select: { id: true, name: true, slug: true } },
         technology: { select: { id: true, name: true, slug: true } },
@@ -104,7 +94,7 @@ export class QuestionsService {
 
     const [[nextQuestion]] = await Promise.all([
       this.prisma.client.question.findMany({
-        where: { isActive: true },
+        where: getVisibleQuestionWhere(viewerPlan),
         cursor: { id },
         skip: 1,
         take: 1,
@@ -115,39 +105,8 @@ export class QuestionsService {
     ])
 
     return {
-      data: this.redactIfLocked(data, viewerPlan),
+      data: { ...data, locked: false },
       nextQuestion: nextQuestion ?? null,
-    }
-  }
-
-  /**
-   * `accessLevel: 'pro'` means the FULL question (not just the answer) is
-   * only visible to paying users - see the comment on the schema field.
-   * Free-plan viewers still get the question back (so it renders as a
-   * locked teaser card instead of a 404) but with every content field
-   * stripped, plus a `locked: true` flag the frontend can key off of.
-   *
-   * This used to not exist at all: any authenticated user (including free
-   * plan) could read the full text/answer of Pro-only questions straight
-   * from the API, bypassing the paywall entirely.
-   */
-  private redactIfLocked<T extends LockableQuestion>(
-    question: T,
-    viewerPlan: UserPlan,
-  ): T & { locked: boolean } {
-    const hasAccess = question.accessLevel !== 'pro' || PLANS_WITH_FULL_ACCESS.includes(viewerPlan)
-
-    if (hasAccess) {
-      return { ...question, locked: false }
-    }
-
-    return {
-      ...question,
-      questionText: '',
-      answerText: null,
-      explanation: null,
-      codeSnippet: null,
-      locked: true,
     }
   }
 
