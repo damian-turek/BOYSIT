@@ -25,7 +25,7 @@ export const PlatformStats = ({ name, tiles }: PlatformStatsProps) => {
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, delay: 0.2 }}
-      className="flex flex-col p-5 border border-gray-60/40 bg-gray-60/5 rounded-xl"
+      className="surface-card flex flex-col p-5"
     >
       <div className="flex gap-3 items-center mb-4">
         <Users size={16} className="text-primary" />
@@ -35,17 +35,11 @@ export const PlatformStats = ({ name, tiles }: PlatformStatsProps) => {
         {tiles.map((tile) => {
           const IconComponent = iconMap[tile.icon as keyof typeof iconMap] || Code
           return (
-            <motion.div
-              whileHover={{ scale: 1.03, translateY: -2 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-              className="p-3 flex flex-col border border-gray-60/40 rounded-xl items-center bg-white dark:bg-transparent cursor-pointer select-none"
-              key={tile.name}
-            >
+            <div className="surface-inset p-3 flex flex-col items-center" key={tile.name}>
               <IconComponent size={14} className="text-primary mb-0.75" />
-              <p className="body-medium font-mono text-gray-100">{tile.name}</p>
+              <p className="body-medium font-mono text-gray-100 tabular-nums">{tile.name}</p>
               <p className="body-small text-gray-60">{tile.text}</p>
-            </motion.div>
+            </div>
           )
         })}
       </div>

@@ -106,7 +106,7 @@ export const ExamRunner = ({ session, onCompleted }: ExamRunnerProps) => {
 
   return (
     <div className="mx-auto max-w-4xl space-y-5">
-      <header className="rounded-xl border border-[var(--color-gray-10)] bg-gray-05 p-5">
+      <header className="surface-card p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="body-small font-semibold text-primary">{t('runner.eyebrow')}</p>
@@ -163,7 +163,7 @@ export const ExamRunner = ({ session, onCompleted }: ExamRunnerProps) => {
             animate={{ opacity: 1, rotateY: 0, y: 0 }}
             exit={{ opacity: 0, rotateY: isRevealed ? 10 : -10, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="flex min-h-[430px] flex-col rounded-2xl border border-[var(--color-gray-10)] bg-gray-05 p-6 shadow-sm sm:p-8"
+            className="surface-panel flex min-h-[430px] flex-col p-6 sm:p-8"
           >
             <div className="mb-6 flex flex-wrap items-center gap-2">
               <Tag
@@ -204,7 +204,7 @@ export const ExamRunner = ({ session, onCompleted }: ExamRunnerProps) => {
                   {currentQuestion.answerText || t('runner.noReferenceAnswer')}
                 </p>
                 {currentQuestion.explanation && (
-                  <div className="mt-6 rounded-xl border border-[var(--color-gray-10)] bg-white/60 p-4 dark:bg-white/5">
+                  <div className="surface-inset mt-6 p-4">
                     <h3 className="body-small font-semibold text-primary">
                       {t('runner.explanation')}
                     </h3>
@@ -214,7 +214,7 @@ export const ExamRunner = ({ session, onCompleted }: ExamRunnerProps) => {
                   </div>
                 )}
                 {currentQuestion.codeSnippet && (
-                  <pre className="mt-5 overflow-x-auto rounded-xl bg-gray-100 p-4 text-sm text-white dark:bg-black/40">
+                  <pre className="surface-inset mt-5 overflow-x-auto p-4 font-mono text-sm text-gray-100">
                     <code>{currentQuestion.codeSnippet}</code>
                   </pre>
                 )}

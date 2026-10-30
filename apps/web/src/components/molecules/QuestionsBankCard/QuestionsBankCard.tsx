@@ -33,7 +33,7 @@ export const QuestionsBankCard = ({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="flex flex-col p-6.5 border border-primary/40 bg-primary/3 rounded-xl"
+      className="surface-card flex flex-col p-5"
     >
       <div className="flex justify-between items-start">
         <div className="flex gap-3 items-center">

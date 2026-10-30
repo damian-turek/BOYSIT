@@ -4,10 +4,9 @@ import { useEffect, useId, useState } from 'react'
 
 import { usePathname } from 'next/navigation'
 
+import { createCheckoutSession } from '@/services/billingApi'
 import { CreditCard, Loader2, ShieldCheck, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-
-import { createCheckoutSession } from '@/services/billingApi'
 
 import { useAuthSessionStore } from '@/store/useAuthSessionStore'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -77,9 +76,7 @@ export const CheckoutModal = () => {
 
       window.location.href = url
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Something went wrong while starting checkout',
-      )
+      setError(err instanceof Error ? err.message : 'Something went wrong while starting checkout')
       setIsSubmitting(false)
     }
   }
@@ -89,7 +86,7 @@ export const CheckoutModal = () => {
       {isOpen && (
         <>
           <motion.div
-            className="fixed inset-0 z-50 bg-black/40"
+            className="fixed inset-0 z-50 bg-overlay backdrop-blur-xs"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -105,7 +102,7 @@ export const CheckoutModal = () => {
               aria-modal="true"
               aria-labelledby={titleId}
               aria-describedby={descriptionId}
-              className="my-auto w-full max-w-md rounded-xl border border-[var(--color-gray-10)] bg-white p-6 shadow-2xl dark:bg-[var(--color-gray-05)]"
+              className="surface-dialog my-auto w-full max-w-md p-6"
             >
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -133,7 +130,7 @@ export const CheckoutModal = () => {
               </div>
 
               {!session && (
-                <p className="mb-4 rounded-lg bg-gray-60/5 p-3 body-small text-gray-60">
+                <p className="surface-inset mb-4 p-3 body-small text-gray-60">
                   You&apos;ll need an account first - we&apos;ll open sign up for you.
                 </p>
               )}

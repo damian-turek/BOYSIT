@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useId, useState } from 'react'
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
-import { CATEGORY_THEMES, FilterItem, ICON_MAP, SENIORITY_OPTIONS } from '@/config/questions'
+import { FilterItem, ICON_MAP, SENIORITY_OPTIONS } from '@/config/questions'
 import { ChevronDown, HelpCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { cn } from '@/utils/cn'
 
@@ -23,8 +24,16 @@ export const FiltersContent = ({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const t = useTranslations('QuestionsPage')
+  const seniorityLabels = {
+    'All levels': t('allLevels'),
+    Junior: t('junior'),
+    Middle: t('middle'),
+    Senior: t('senior'),
+  }
 
   const [isTechOpen, setIsTechOpen] = useState(true)
+  const technologyId = useId()
 
   const activeDifficulty = searchParams.get('difficulty') || 'All levels'
   const activeCategory = searchParams.get('category') || ''
@@ -46,11 +55,11 @@ export const FiltersContent = ({
   }
 
   return (
-    <div className="flex flex-col gap-8 w-full max-w-65 text-gray-100 select-none py-15">
+    <div className="flex w-full flex-col gap-6 py-6 text-gray-100 lg:py-15">
       <div>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-gray-60/80 mb-3">
-          Seniority
-        </h3>
+        <h2 className="mb-3 text-xs font-semibold tracking-wider text-gray-60 uppercase">
+          {t('seniority')}
+        </h2>
         <div className="flex flex-col gap-1">
           {SENIORITY_OPTIONS.map((level) => {
             const isActive =
@@ -59,48 +68,52 @@ export const FiltersContent = ({
             return (
               <button
                 key={level}
+                type="button"
+                aria-pressed={isActive}
                 onClick={() =>
                   updateFilter('difficulty', level === 'All levels' ? null : level.toLowerCase())
                 }
                 className={cn(
-                  'w-full text-left px-4 py-2 rounded-xl text-sm font-medium transition-all cursor-pointer',
+                  'w-full cursor-pointer rounded-xl border px-4 py-2.5 text-left text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
                   isActive
-                    ? 'bg-primary/10 text-primary font-semibold'
-                    : 'text-gray-60 hover:bg-gray-60/5 hover:text-gray-100',
+                    ? 'border-primary/20 bg-primary/8 text-primary font-semibold'
+                    : 'border-transparent text-gray-60 hover:bg-gray-60/5 hover:text-gray-100',
                 )}
               >
-                {level}
+                {seniorityLabels[level]}
               </button>
             )
           })}
         </div>
       </div>
 
-      <hr className="border-gray-60/10" />
+      <hr className="border-[var(--color-gray-10)]" />
 
       <div>
         <div className="flex justify-between items-center mb-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-60/80">Domain</h3>
-          <ChevronDown size={14} className="text-gray-60" />
+          <h2 className="text-xs font-semibold tracking-wider text-gray-60 uppercase">
+            {t('domain')}
+          </h2>
         </div>
         <div className="flex flex-col gap-1">
           {categories.map((domain) => {
             const ValidIcon = ICON_MAP[domain.name] || HelpCircle
             const isActive = activeCategory === domain.slug
-            const iconColor = CATEGORY_THEMES[domain.name] || '#808080'
 
             return (
               <button
                 key={domain.id}
+                type="button"
+                aria-pressed={isActive}
                 onClick={() => updateFilter('category', isActive ? null : domain.slug)}
                 className={cn(
-                  'flex items-center gap-2.5 w-full text-left px-4 py-2 rounded-xl text-sm transition-all cursor-pointer',
+                  'flex w-full cursor-pointer items-center gap-2.5 rounded-xl border px-4 py-2.5 text-left text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
                   isActive
-                    ? 'bg-gray-60/10 text-gray-100 font-semibold'
-                    : 'text-gray-60 hover:bg-gray-60/5 hover:text-gray-100',
+                    ? 'border-primary/20 bg-primary/8 text-primary font-semibold'
+                    : 'border-transparent text-gray-60 hover:bg-gray-60/5 hover:text-gray-100',
                 )}
               >
-                <ValidIcon size={16} style={{ color: iconColor }} />
+                <ValidIcon size={16} aria-hidden="true" className="shrink-0" />
                 <span>{domain.name}</span>
               </button>
             )
@@ -108,33 +121,44 @@ export const FiltersContent = ({
         </div>
       </div>
 
-      <hr className="border-gray-60/10" />
+      <hr className="border-[var(--color-gray-10)]" />
 
       <div>
         <button
+          type="button"
+          aria-expanded={isTechOpen}
+          aria-controls={technologyId}
           onClick={() => setIsTechOpen(!isTechOpen)}
-          className="flex justify-between items-center w-full mb-3 cursor-pointer"
+          className="mb-3 flex w-full cursor-pointer items-center justify-between rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
         >
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-60/80">Technology</h3>
+          <span className="text-xs font-semibold tracking-wider text-gray-60 uppercase">
+            {t('technology')}
+          </span>
           <ChevronDown
             size={14}
-            className={cn('text-gray-60 transition-transform', isTechOpen && 'rotate-180')}
+            aria-hidden="true"
+            className={cn(
+              'text-gray-60 transition-transform motion-reduce:transition-none',
+              isTechOpen && 'rotate-180',
+            )}
           />
         </button>
 
         {isTechOpen && (
-          <div className="flex flex-wrap gap-1.5 pt-1 animate-in fade-in duration-200">
+          <div id={technologyId} className="flex flex-wrap gap-1.5 pt-1">
             {technologies.map((tech) => {
               const isActive = activeTech === tech.slug
               return (
                 <button
                   key={tech.id}
+                  type="button"
+                  aria-pressed={isActive}
                   onClick={() => updateFilter('technology', isActive ? null : tech.slug)}
                   className={cn(
-                    'px-3 py-1.5 text-xs border rounded-lg font-medium transition-all cursor-pointer',
+                    'cursor-pointer rounded-lg border px-3 py-2 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
                     isActive
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-gray-60/20 text-gray-60 bg-gray-60/5 hover:border-gray-60/40 hover:text-gray-100',
+                      ? 'border-primary/30 bg-primary/8 text-primary'
+                      : 'border-[var(--color-gray-10)] bg-white text-gray-60 hover:border-gray-60/40 hover:text-gray-100',
                   )}
                 >
                   {tech.name}

@@ -1,17 +1,28 @@
 import { Suspense } from 'react'
 
 import { Metadata } from 'next'
+import { useTranslations } from 'next-intl'
 
+import { LoadingState } from '@/components/molecules/LoadingState'
 import { JobTracker } from '@/components/organisms/JobTracker'
+import { JobTrackerSkeleton } from '@/components/organisms/PageLoading/PageSkeletons'
 
 export const metadata: Metadata = {
   title: 'Job tracker',
 }
 
 export default function JobTrackerPage() {
+  const t = useTranslations('Loading')
+
   return (
     <main className="dashboard-container max-w-[1040px]">
-      <Suspense fallback={<div className="h-96 animate-pulse rounded-xl bg-gray-60/5" />}>
+      <Suspense
+        fallback={
+          <LoadingState label={t('jobTracker')}>
+            <JobTrackerSkeleton />
+          </LoadingState>
+        }
+      >
         <JobTracker />
       </Suspense>
     </main>

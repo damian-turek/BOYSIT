@@ -12,6 +12,8 @@ import { useLocale, useTranslations } from 'next-intl'
 import { cn } from '@/utils/cn'
 
 import { Button } from '@/components/atoms/Button'
+import { LoadingState } from '@/components/molecules/LoadingState'
+import { ExamResultsSkeleton } from '@/components/organisms/PageLoading/PageSkeletons'
 
 type ExamReviewProps = {
   sessionId: string
@@ -54,11 +56,9 @@ export const ExamReview = ({ sessionId }: ExamReviewProps) => {
 
   if (loading) {
     return (
-      <div className="space-y-5" aria-live="polite">
-        <div className="h-36 animate-pulse rounded-xl bg-gray-05" />
-        <div className="h-80 animate-pulse rounded-xl bg-gray-05" />
-        <span className="sr-only">{t('review.loading')}</span>
-      </div>
+      <LoadingState label={t('review.loading')}>
+        <ExamResultsSkeleton />
+      </LoadingState>
     )
   }
 
@@ -77,7 +77,7 @@ export const ExamReview = ({ sessionId }: ExamReviewProps) => {
 
   return (
     <div className="space-y-6">
-      <header className="rounded-xl border border-[var(--color-gray-10)] bg-gray-05 p-6">
+      <header className="surface-card p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-4">
             <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
@@ -133,7 +133,7 @@ export const ExamReview = ({ sessionId }: ExamReviewProps) => {
         {result.questions.map((question) => (
           <details
             key={question.id}
-            className="group rounded-xl border border-[var(--color-gray-10)] bg-gray-05 open:border-primary/25"
+            className="surface-card group open:border-primary/35 open:bg-surface-raised"
           >
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 p-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
               <div>
@@ -164,7 +164,7 @@ export const ExamReview = ({ sessionId }: ExamReviewProps) => {
                   <h4 className="body-medium mb-2 font-semibold text-gray-100">
                     {t('review.codeSnippet')}
                   </h4>
-                  <pre className="overflow-x-auto rounded-xl bg-gray-100 p-4 text-sm text-white dark:bg-black/40">
+                  <pre className="surface-inset overflow-x-auto p-4 font-mono text-sm text-gray-100">
                     <code>{question.codeSnippet}</code>
                   </pre>
                 </div>
@@ -188,13 +188,13 @@ const SummaryCard = ({
 }) => (
   <div
     className={cn(
-      'rounded-xl border border-[var(--color-gray-10)] bg-gray-05 p-4',
+      'surface-card p-4',
       tone === 'success' && 'border-success-50/25 bg-success-50/5',
       tone === 'warning' && 'border-warning-50/25 bg-warning-50/5',
       tone === 'alert' && 'border-alert-50/25 bg-alert-50/5',
     )}
   >
-    <p className="text-2xl font-bold text-gray-100">{value}</p>
+    <p className="text-2xl font-bold text-gray-100 tabular-nums">{value}</p>
     <p className="body-small text-gray-60">{label}</p>
   </div>
 )
@@ -212,7 +212,7 @@ const ReviewBlock = ({
     <h4 className="body-medium mb-2 font-semibold text-gray-100">{title}</h4>
     <p
       className={cn(
-        'whitespace-pre-wrap rounded-xl border border-[var(--color-gray-10)] bg-white/60 p-4 body-medium text-gray-100 dark:bg-white/5',
+        'surface-inset whitespace-pre-wrap p-4 body-medium text-gray-100',
         muted && 'italic text-gray-60',
       )}
     >

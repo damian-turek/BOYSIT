@@ -48,7 +48,7 @@ export const TopCategories = ({ name, categories }: TopCategoriesProps) => {
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, delay: 0.1 }}
-      className="flex flex-col p-6.5 border border-gray-60/40 bg-gray-60/5 rounded-xl"
+      className="surface-card flex flex-col p-5"
     >
       <div className="flex justify-between gap-3 items-center mb-4">
         <div className="flex gap-3 items-center">
@@ -70,7 +70,7 @@ export const TopCategories = ({ name, categories }: TopCategoriesProps) => {
               key={category.name}
               whileHover={{ x: 4 }}
               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-              className="flex w-full gap-3 p-2 transition-all ease-in-out duration-200 hover:bg-gray-60/10 rounded-xl"
+              className="flex w-full gap-3 p-2 transition-colors duration-150 hover:bg-surface-hover rounded-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none"
             >
               <div
                 className="p-2 rounded-xl border flex items-center justify-center shrink-0"

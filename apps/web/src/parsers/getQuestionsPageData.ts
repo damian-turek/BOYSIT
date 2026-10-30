@@ -1,7 +1,7 @@
 import { createApiUrl } from '@/config/api'
 import { FilterItem } from '@/config/questions'
 import { createSupabaseServerClient } from '@/services/supabaseServer'
-import { Question } from '@/types/question'
+import type { Question, QuestionApiItem } from '@/types/question'
 
 interface QuestionsPageData {
   QUESTIONS_DATA: {
@@ -21,7 +21,10 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   return session?.access_token ? { authorization: `Bearer ${session.access_token}` } : {}
 }
 
-async function fetchFilterItems(path: string, headers: Record<string, string>): Promise<FilterItem[]> {
+async function fetchFilterItems(
+  path: string,
+  headers: Record<string, string>,
+): Promise<FilterItem[]> {
   try {
     const res = await fetch(createApiUrl(path), { cache: 'no-store', headers })
 
@@ -94,13 +97,16 @@ export async function getQuestionsPageData(
     }
   }
 
-  const questions: Question[] = (questionsResult.data || []).map((q: any) => ({
+  const levels = { junior: 'Junior', middle: 'Middle', senior: 'Senior' } as const
+  const questions: Question[] = (questionsResult.data || []).map((q: QuestionApiItem) => ({
     index: q.id,
-    level: q.difficulty ? q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1) : 'Unknown',
+    level: levels[q.difficulty] ?? 'Junior',
+    title: q.title,
+    locked: q.locked,
     question: q.questionText,
-    answer: q.answerText || q.explanation,
-    company: q.company || null,
-    category: q.category ? { name: q.category.name, theme: q.category.theme || '#808080' } : null,
+    answer: q.answerText || q.explanation || '',
+    company: q.company || undefined,
+    category: { name: q.category?.name ?? '' },
     technologies: q.technology ? [q.technology.name] : [],
   }))
 

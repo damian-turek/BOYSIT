@@ -8,6 +8,8 @@ import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/atoms/Button'
+import { LoadingState } from '@/components/molecules/LoadingState'
+import { ExamSessionSkeleton } from '@/components/organisms/PageLoading/PageSkeletons'
 
 import { ExamReview } from './ExamReview'
 import { ExamRunner } from './ExamRunner'
@@ -44,11 +46,9 @@ export const ExamSession = ({ sessionId }: ExamSessionProps) => {
 
   if (loading) {
     return (
-      <div className="space-y-5" aria-live="polite">
-        <div className="h-20 animate-pulse rounded-xl bg-gray-05" />
-        <div className="h-[480px] animate-pulse rounded-xl bg-gray-05" />
-        <span className="sr-only">{t('session.loading')}</span>
-      </div>
+      <LoadingState label={t('session.loading')}>
+        <ExamSessionSkeleton />
+      </LoadingState>
     )
   }
 

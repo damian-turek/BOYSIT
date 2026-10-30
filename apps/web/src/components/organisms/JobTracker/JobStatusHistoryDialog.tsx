@@ -79,7 +79,7 @@ export const JobStatusHistoryDialog = ({ application, onClose }: JobStatusHistor
       {application && (
         <>
           <motion.div
-            className="fixed inset-0 z-50 bg-black/40"
+            className="fixed inset-0 z-50 bg-overlay backdrop-blur-xs"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -93,7 +93,7 @@ export const JobStatusHistoryDialog = ({ application, onClose }: JobStatusHistor
               initial={{ opacity: 0, y: 12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.98 }}
-              className="w-full max-w-lg rounded-xl border border-[var(--color-gray-10)] bg-white p-5 shadow-2xl dark:bg-[var(--color-gray-05)]"
+              className="surface-dialog w-full max-w-lg p-5 sm:p-6"
             >
               <div className="mb-5 flex items-start justify-between gap-4">
                 <div className="flex gap-3">

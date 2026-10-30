@@ -11,7 +11,7 @@ export const Tag = ({ text, className, style }: TagProps) => {
     <span
       style={style}
       className={cn(
-        'px-3 py-1 rounded-full bg-primary/15 text-primary border border-primary/30 label-font visual-style',
+        'px-2.5 py-0.5 rounded-md bg-surface-raised text-gray-60 border border-gray-10 label-font',
         className,
       )}
     >

@@ -48,18 +48,29 @@ export async function getQuestionsSinglePageData(searchParams?: string) {
 
   const SINGLE_QUESTION_DATA = {
     index: question?.id,
+    title: question?.title ?? '',
+    locked: question?.locked ?? false,
     level: normalizeLevel(question?.difficulty),
-    technologies:
-      question?.questionTags?.map((item: QuestionTag) => item.tag?.name).filter(Boolean) ?? [],
+    technologies: Array.from(
+      new Set<string>([
+        ...(question?.technology?.name ? [question.technology.name] : []),
+        ...(question?.questionTags?.map((item: QuestionTag) => item.tag?.name).filter(Boolean) ??
+          []),
+      ]),
+    ),
     category: {
       name: question?.category?.name ?? 'Unknown',
     },
     question: question?.questionText ?? '',
     answer: question?.answerText ?? '',
-    nextQuestion: {
-      id: result?.nextQuestion?.id ?? '',
-      name: result?.nextQuestion?.title ?? '',
-    },
+    explanation: question?.explanation ?? null,
+    codeSnippet: question?.codeSnippet ?? null,
+    nextQuestion: result?.nextQuestion?.id
+      ? {
+          id: result?.nextQuestion?.id ?? '',
+          name: result?.nextQuestion?.title ?? '',
+        }
+      : null,
   } satisfies SingleQuestionProps
 
   return {
